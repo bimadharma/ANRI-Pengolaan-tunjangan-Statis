@@ -1,0 +1,18 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "user1",
+      "password": "userpass",
+      "role": "user",
+      "name": "Bima User"
+    },
+    {
+      "id": 2,
+      "username": "admin1",
+      "password": "adminpass",
+      "role": "admin",
+      "name": "Bima Admin"
+    }
+  ]
+}

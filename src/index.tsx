@@ -1,13 +1,18 @@
 import React from "react";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom/client";
+import AppRoutes from "./routes/AppRoutes";
+import { BrowserRouter } from "react-router-dom";
+import Navbar from "./components/NavBar";
+import { AuthProvider } from "./providers/AuthProvider";
+import "./index.css";
 
-import App from "./App";
-
-const container = document.getElementById("root") as HTMLElement;
-const root = createRoot(container);
-
-root.render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
+    <AuthProvider>
+      <BrowserRouter>
+        <Navbar />
+        <AppRoutes />
+      </BrowserRouter>
+    </AuthProvider>
   </React.StrictMode>
 );
