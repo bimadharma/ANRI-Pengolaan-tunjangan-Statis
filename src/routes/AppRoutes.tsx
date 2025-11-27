@@ -1,17 +1,39 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import UserDashboard from "../pages/UserDashboard";
-import AdminDashboard from "../pages/AdminDashboard";
+import AdminDashboard from "../pages/admin/AdminDashboard";
 import ProtectedRoute from "../components/ProtectedRoute";
+import { useAuth } from "../hooks/useAuth";
 
 export default function AppRoutes() {
+  const { user } = useAuth();
+
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      {/* Home Page */}
+      <Route
+        path="/"
+        element={
+          user ? (
+            <Navigate to={user.role === "admin" ? "/admin" : "/user"} />
+          ) : (
+            <Home />
+          )
+        }
+      />
 
-      <Route path="/login" element={<Login />} />
+      {/* Login Page */}
+      <Route
+        path="/login"
+        element={user ? (
+          <Navigate to={user.role === "admin" ? "/admin" : "/user"} />
+        ) : (
+          <Login />
+        )}
+      />
 
+      {/* User Dashboard */}
       <Route
         path="/user"
         element={
@@ -21,6 +43,7 @@ export default function AppRoutes() {
         }
       />
 
+      {/* Admin Dashboard */}
       <Route
         path="/admin"
         element={

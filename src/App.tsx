@@ -2,23 +2,24 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import LoginUser from "./pages/LoginUser";
-import LoginAdmin from "./pages/LoginAdmin";
 import UserDashboard from "./pages/UserDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import NavBar from "./components/NavBar";
-import ProtectedRoute from "./routes/ProtectedRoute";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import NavBar from "./components/Navbar";
+import ProtectedRoute from "./routes/AppRoutes";
 
 const App: React.FC = () => {
   return (
     <div className="min-h-screen">
       <NavBar />
+
       <main className="container mx-auto p-4">
         <Routes>
           <Route path="/" element={<Home />} />
+
+          {/* LOGIN UNIVERSAL */}
           <Route path="/login" element={<Login />} />
-          <Route path="/login/user" element={<LoginUser />} />
-          <Route path="/login/admin" element={<LoginAdmin />} />
+
+          {/* USER DASHBOARD */}
           <Route
             path="/user"
             element={
@@ -27,6 +28,8 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
+
+          {/* ADMIN DASHBOARD */}
           <Route
             path="/admin"
             element={
@@ -35,6 +38,8 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
+
+          {/* FALLBACK */}
           <Route path="*" element={<Home />} />
         </Routes>
       </main>
