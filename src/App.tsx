@@ -1,11 +1,13 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import NavBar from "./components/Navbar";
-import ProtectedRoute from "./routes/AppRoutes";
+
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 const App: React.FC = () => {
   return (
@@ -16,7 +18,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
 
-          {/* LOGIN UNIVERSAL */}
+          {/* LOGIN */}
           <Route path="/login" element={<Login />} />
 
           {/* USER DASHBOARD */}
@@ -39,7 +41,7 @@ const App: React.FC = () => {
             }
           />
 
-          {/* FALLBACK */}
+          {/* 404 → Home */}
           <Route path="*" element={<Home />} />
         </Routes>
       </main>

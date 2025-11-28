@@ -41,11 +41,11 @@ export default function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-slate-100 p-4">
+    <div className="flex justify-center items-center h-screen bg-slate-100 p-4 mt-5">
 
       {/* 🌟 ERROR POPUP */}
       {error && (
-        <div className="fixed top-6 right-6 bg-red-500 text-white px-4 py-2 rounded shadow-lg animate-fadeIn">
+        <div className="fixed top-19 right-6 bg-red-500 text-white px-4 py-2 rounded shadow-lg animate-fadeIn">
           {error}
         </div>
       )}

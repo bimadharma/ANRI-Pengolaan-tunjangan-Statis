@@ -1,4 +1,3 @@
-import { HiBars3, HiXMark, HiChartPie, HiUser, HiArrowRightOnRectangle } from "react-icons/hi2"; 
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate, NavLink, Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -36,6 +35,7 @@ export default function AdminSidebar({ externalOpen, setExternalOpen }: AdminSid
   const navItems = [
     { label: "Home", to: "/admin", icon: <HiOutlineHome /> },
     { label: "Users", to: "/admin/users", icon: <HiOutlineUsers /> },
+    { label: "Jabatan Master", to: "/admin/jabatan", icon: <HiOutlineUsers /> },
     { label: "Settings", to: "/admin/settings", icon: <HiOutlineCog /> },
   ];
 
