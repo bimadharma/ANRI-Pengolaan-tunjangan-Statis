@@ -1,8 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
-import { HiBars3, HiEllipsisVertical } from "react-icons/hi2";
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { HiBars3, HiBell } from "react-icons/hi2";
 import AdminSidebar from "./AdminSidebar";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -10,6 +10,18 @@ export default function Navbar() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    // Ambil jumlah notifikasi belum dibaca dari JSON
+    fetch("/data/notifications.json")
+      .then((r) => r.json())
+      .then((data: Array<{ read?: boolean }>) => {
+        setUnreadCount(data.filter((n) => !n.read).length);
+      })
+      .catch(() => setUnreadCount(0));
+  }, []);
+
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   const isAdminPage = location.pathname.startsWith("/admin");
@@ -56,6 +68,21 @@ export default function Navbar() {
         </div>
 
         <div className="flex gap-4 items-center">
+          {/* Ikon Lonceng Notifikasi */}
+          <Link
+            to="/notifications"
+            className="relative p-2 rounded hover:bg-gray-100 transition-colors"
+            aria-label="Notifications"
+            title="Notifications"
+          >
+            <HiBell size={22} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] leading-4 w-4 h-4 rounded-full flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}
+          </Link>
+
           {!user && (
             <Link
               to="/login"

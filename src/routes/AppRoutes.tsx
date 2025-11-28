@@ -6,6 +6,9 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { useAuth } from "../hooks/useAuth";
 import EmployeeTablePage from "../pages/admin/jabatan";
+import UnitKerjaTablePage from "../pages/admin/UnitKerja";
+import NotificationDetailPage from "../pages/notifications/Detail";
+import NotificationsPage from "../pages/notifications";
 
 export default function AppRoutes() {
   const { user } = useAuth();
@@ -46,6 +49,16 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin/UnitKerja"
+        element={
+          <ProtectedRoute role="admin">
+            <UnitKerjaTablePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/notifications" element={<NotificationsPage />} />
+                <Route path="/notifications/:id" element={<NotificationDetailPage />} />
     </Routes>
   );
 }

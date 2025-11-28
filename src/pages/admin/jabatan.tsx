@@ -148,7 +148,7 @@ export default function EmployeeTablePage() {
                 </p>
               </Card>
               <Card className="bg-blue-100 rounded-2xl shadow p-4 text-center">
-                <p className="text-sm text-gray-600">Jabatan Berbeda</p>
+                <p className="text-sm text-gray-600">Total Jabatan</p>
                 <p className="text-2xl font-bold text-blue-700">
                   {new Set(employees.map((e) => e.position)).size}
                 </p>

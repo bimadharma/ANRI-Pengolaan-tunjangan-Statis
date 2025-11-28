@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "title": "Pengumuman Cuti Bersama",
+    "summary": "Cuti bersama nasional ditetapkan tanggal 24-25...",
+    "content": "Berdasarkan keputusan bersama, cuti bersama nasional ditetapkan pada tanggal 24-25. Mohon menyesuaikan jadwal kerja masing-masing dan perhatikan SLA layanan.",
+    "date": "2025-11-20T08:30:00Z",
+    "read": false
+  },
+  {
+    "id": 2,
+    "title": "Maintenance Sistem",
+    "summary": "Sistem akan mengalami maintenance pada Sabtu malam...",
+    "content": "Sistem akan mengalami maintenance pada Sabtu malam pukul 23:00-02:00. Beberapa layanan mungkin tidak tersedia. Terima kasih atas pengertiannya.",
+    "date": "2025-11-18T10:00:00Z",
+    "read": false
+  },
+  {
+    "id": 3,
+    "title": "Update Kebijakan Keamanan",
+    "summary": "Harap lakukan reset password berkala...",
+    "content": "Demi meningkatkan keamanan, dimohon seluruh pegawai melakukan reset password secara berkala setiap 90 hari. Panduan tersedia di halaman kebijakan.",
+    "date": "2025-11-12T14:15:00Z",
+    "read": true
+  },
+  {
+    "id": 4,
+    "title": "Pelatihan Aplikasi Baru",
+    "summary": "Pelatihan penggunaan modul tunjangan...",
+    "content": "Pelatihan penggunaan modul tunjangan akan diadakan pada hari Rabu pukul 09:00 di ruang rapat utama. Silakan registrasi pada link yang disediakan.",
+    "date": "2025-11-05T09:00:00Z",
+    "read": true
+  }
+]
