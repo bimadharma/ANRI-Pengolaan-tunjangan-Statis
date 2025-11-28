@@ -50,21 +50,17 @@ export default function Navbar() {
           )}
 
           <div className="font-bold text-xl text-slate-800">
-            {!isAdminPage ? (
-              <Link to="/">MyApp</Link>
-            ) : (
-              <Link to="/admin" className="hidden md:inline">
-                Admin Panel
-              </Link>
-            )}
+            <Link to="/">MyApp</Link>
           </div>
         </div>
 
         <div className="flex gap-4 items-center">
-          <Link to="/notifications" className="relative p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Notifications" title="Notifications">
-            <HiBell className="w-7 h-8 text-yellow-400" /> {/* Ukuran & warna kuning */}
-            {unreadCount > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] leading-4 w-4 h-4 rounded-full flex items-center justify-center">{unreadCount}</span>}
-          </Link>
+          {user && (
+            <Link to="/notifications" className="relative p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Notifications" title="Notifications">
+              <HiBell className="w-7 h-8 text-yellow-400" />
+              {unreadCount > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] leading-4 w-4 h-4 rounded-full flex items-center justify-center">{unreadCount}</span>}
+            </Link>
+          )}
           {!user && (
             <Link to="/login" className="text-slate-600 hover:text-slate-800">
               Login
@@ -90,10 +86,10 @@ export default function Navbar() {
 
                   {/* Menu Items */}
                   <div className="py-2">
-                    <Link to="/admin" className="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-100 transition-colors" onClick={() => setProfileMenuOpen(false)}>
+                    <Link to="/" className="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-100 transition-colors" onClick={() => setProfileMenuOpen(false)}>
                       Dashboard
                     </Link>
-                    <Link to="/admin/settings" className="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-100 transition-colors" onClick={() => setProfileMenuOpen(false)}>
+                    <Link to="/settings" className="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-100 transition-colors" onClick={() => setProfileMenuOpen(false)}>
                       Settings
                     </Link>
                   </div>
