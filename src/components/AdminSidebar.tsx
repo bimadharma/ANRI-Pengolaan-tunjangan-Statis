@@ -47,6 +47,8 @@ export default function AdminSidebar({
     { label: "Jabatan Master", to: "/admin/jabatan", icon: <HiOutlineUsers /> },
     { label: "Unit Kerja Master", to: "/admin/UnitKerja", icon: <HiOutlineUsers /> },
     { label: "Daftar Pegawai", to: "/admin/DaftarPegawai", icon: <HiOutlineUsers /> },
+    { label: "Perhitungan Tunjangan PAS", to: "/admin/PerhitunganTunjanganPAS", icon: <HiOutlineUsers /> },
+
     { label: "Settings", to: "/admin/settings", icon: <HiOutlineCog /> },
   ];
 

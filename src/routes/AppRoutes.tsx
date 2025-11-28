@@ -9,6 +9,10 @@ import EmployeeTablePage from "../pages/admin/jabatan";
 import MasterData from "../pages/admin/MenuMasterData";
 import UnitKerjaPage from "../pages/admin/UnitKerja";
 import DaftarPegawai from "../pages/admin/DaftarPegawai";
+import PerhitunganTunjanganPAS from "../pages/admin/PerhitunganTunjanganPAS";
+
+
+
 import NotificationDetailPage from "../pages/notifications/Detail";
 import NotificationsPage from "../pages/notifications";
 export default function AppRoutes() {
@@ -84,6 +88,16 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin/PerhitunganTunjanganPAS"
+        element={
+          <ProtectedRoute role="admin">
+            <PerhitunganTunjanganPAS />
+          </ProtectedRoute>
+        }
+      />
+
+
       <Route
         path="/admin/MenuMasterData"
         element={
