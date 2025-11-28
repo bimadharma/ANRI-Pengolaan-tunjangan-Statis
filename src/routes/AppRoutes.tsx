@@ -6,9 +6,9 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { useAuth } from "../hooks/useAuth";
 import EmployeeTablePage from "../pages/admin/jabatan";
-import UnitKerjaTablePage from "../pages/admin/UnitKerja";
-import NotificationDetailPage from "../pages/notifications/Detail";
-import NotificationsPage from "../pages/notifications";
+import MasterData from "../pages/admin/MenuMasterData";
+
+import DaftarPegawai from "../pages/admin/DaftarPegawai";
 
 export default function AppRoutes() {
   const { user } = useAuth();
@@ -16,10 +16,28 @@ export default function AppRoutes() {
   return (
     <Routes>
       {/* Home Page */}
-      <Route path="/" element={user ? <Navigate to={user.role === "admin" ? "/admin" : "/user"} /> : <Home />} />
+      <Route
+        path="/"
+        element={
+          user ? (
+            <Navigate to={user.role === "admin" ? "/admin" : "/user"} />
+          ) : (
+            <Home />
+          )
+        }
+      />
 
       {/* Login Page */}
-      <Route path="/login" element={user ? <Navigate to={user.role === "admin" ? "/admin" : "/user"} /> : <Login />} />
+      <Route
+        path="/login"
+        element={
+          user ? (
+            <Navigate to={user.role === "admin" ? "/admin" : "/user"} />
+          ) : (
+            <Login />
+          )
+        }
+      />
 
       {/* User Dashboard */}
       <Route
@@ -50,15 +68,21 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="/admin/UnitKerja"
+        path="/admin/DaftarPegawai"
         element={
           <ProtectedRoute role="admin">
-            <UnitKerjaTablePage />
+            <DaftarPegawai />
           </ProtectedRoute>
         }
       />
-      <Route path="/notifications" element={<NotificationsPage />} />
-                <Route path="/notifications/:id" element={<NotificationDetailPage />} />
+      <Route
+        path="/admin/MenuMasterData"
+        element={
+          <ProtectedRoute role="admin">
+            <MasterData />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
