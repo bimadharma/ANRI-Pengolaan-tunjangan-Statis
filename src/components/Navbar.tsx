@@ -29,10 +29,7 @@ export default function Navbar() {
   // Tutup menu profile saat klik di luar
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        profileMenuRef.current &&
-        !profileMenuRef.current.contains(event.target as Node)
-      ) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
         setProfileMenuOpen(false);
       }
     }
@@ -47,11 +44,7 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {/* Tombol buka sidebar di mobile */}
           {isAdminPage && (
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded hover:bg-gray-100 transition-colors md:hidden"
-              aria-label="Open sidebar"
-            >
+            <button onClick={() => setSidebarOpen(true)} className="p-2 rounded hover:bg-gray-100 transition-colors md:hidden" aria-label="Open sidebar">
               <HiBars3 size={24} />
             </button>
           )}
@@ -68,26 +61,12 @@ export default function Navbar() {
         </div>
 
         <div className="flex gap-4 items-center">
-          {/* Ikon Lonceng Notifikasi */}
-          <Link
-            to="/notifications"
-            className="relative p-2 rounded hover:bg-gray-100 transition-colors"
-            aria-label="Notifications"
-            title="Notifications"
-          >
-            <HiBell size={22} />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] leading-4 w-4 h-4 rounded-full flex items-center justify-center">
-                {unreadCount}
-              </span>
-            )}
+          <Link to="/notifications" className="relative p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Notifications" title="Notifications">
+            <HiBell className="w-7 h-8 text-yellow-400" /> {/* Ukuran & warna kuning */}
+            {unreadCount > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] leading-4 w-4 h-4 rounded-full flex items-center justify-center">{unreadCount}</span>}
           </Link>
-
           {!user && (
-            <Link
-              to="/login"
-              className="text-slate-600 hover:text-slate-800"
-            >
+            <Link to="/login" className="text-slate-600 hover:text-slate-800">
               Login
             </Link>
           )}
@@ -95,19 +74,9 @@ export default function Navbar() {
           {user && (
             <div className="relative" ref={profileMenuRef}>
               {/* Profile Icon Button */}
-              <button
-                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                aria-label="Profile menu"
-                aria-expanded={profileMenuOpen}
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-sm font-bold text-white">
-                  {user.name?.charAt(0).toUpperCase()}
-                </div>
-                <span className="hidden sm:inline text-sm text-slate-700">
-                  {user.name}
-                </span>
-                
+              <button onClick={() => setProfileMenuOpen(!profileMenuOpen)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Profile menu" aria-expanded={profileMenuOpen}>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-sm font-bold text-white">{user.name?.charAt(0).toUpperCase()}</div>
+                <span className="hidden sm:inline text-sm text-slate-700">{user.name}</span>
               </button>
 
               {/* Dropdown Menu */}
@@ -115,26 +84,16 @@ export default function Navbar() {
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl overflow-hidden z-50 animate-in fade-in duration-200 border border-gray-200">
                   {/* User Info */}
                   <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-                    <p className="text-sm font-semibold text-slate-800">
-                      {user.name}
-                    </p>
+                    <p className="text-sm font-semibold text-slate-800">{user.name}</p>
                     <p className="text-xs text-slate-500">{user.email}</p>
                   </div>
 
                   {/* Menu Items */}
                   <div className="py-2">
-                    <Link
-                      to="/admin"
-                      className="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-100 transition-colors"
-                      onClick={() => setProfileMenuOpen(false)}
-                    >
+                    <Link to="/admin" className="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-100 transition-colors" onClick={() => setProfileMenuOpen(false)}>
                       Dashboard
                     </Link>
-                    <Link
-                      to="/admin/settings"
-                      className="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-100 transition-colors"
-                      onClick={() => setProfileMenuOpen(false)}
-                    >
+                    <Link to="/admin/settings" className="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-100 transition-colors" onClick={() => setProfileMenuOpen(false)}>
                       Settings
                     </Link>
                   </div>
@@ -159,12 +118,7 @@ export default function Navbar() {
       </nav>
 
       {/* Sidebar untuk admin: desktop selalu tampil, mobile buka/tutup */}
-      {isAdminPage && (
-        <AdminSidebar
-          externalOpen={sidebarOpen}
-          setExternalOpen={setSidebarOpen}
-        />
-      )}
+      {isAdminPage && <AdminSidebar externalOpen={sidebarOpen} setExternalOpen={setSidebarOpen} />}
     </>
   );
 }

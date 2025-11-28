@@ -31,31 +31,50 @@ export default function NotificationDetailPage() {
     <MainLayout isAdmin={false}>
       <div className="p-6 max-w-3xl mx-auto">
         {loading ? (
-          <p className="text-gray-500">Memuat...</p>
+          <p className="text-gray-500 text-center">Memuat...</p>
         ) : !item ? (
-          <div className="space-y-4">
-            <p className="text-gray-500">Notifikasi tidak ditemukan.</p>
+          <div className="space-y-6 text-center bg-white p-6 rounded-2xl shadow">
+            <p className="text-gray-500 text-lg">Notifikasi tidak ditemukan.</p>
             <Link to="/notifications">
-              <Button color="light" className="rounded-xl">Kembali</Button>
+              <Button color="blue" className="rounded-xl px-6">
+                Kembali
+              </Button>
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="bg-white rounded-2xl shadow p-8 space-y-6 border border-gray-100">
+            {/* Header */}
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-slate-800">{item.title}</h1>
-                <p className="text-xs text-gray-500 mt-1">
-                  {new Date(item.date).toLocaleString()}
-                </p>
+                <h1 className="text-3xl font-bold text-slate-900 leading-snug">{item.title}</h1>
+                <p className="text-xs text-gray-500 mt-1">{new Date(item.date).toLocaleString()}</p>
               </div>
-              {!item.read && <Badge color="failure">Baru</Badge>}
+
+              {!item.read && (
+                <Badge color="failure" className="px-3 py-1 text-[11px]">
+                  Baru
+                </Badge>
+              )}
             </div>
 
-            <p className="text-slate-700 whitespace-pre-line">{item.content}</p>
+            {/* Divider */}
+            <div className="border-t border-gray-200" />
 
-            <Link to="/notifications">
-              <Button color="light" className="rounded-xl">Kembali ke daftar</Button>
-            </Link>
+            {/* Content */}
+            <p className="text-slate-700 text-base leading-relaxed whitespace-pre-line">{item.content}</p>
+
+            {/* Back Button */}
+            <div className="pt-2">
+              <Link to="/notifications">
+                <Button
+                  color="light"
+                  className="rounded-xl px-6 shadow-sm hover:shadow-md transition 
+             text-gray-700 border border-gray-200"
+                >
+                  Kembali
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
       </div>

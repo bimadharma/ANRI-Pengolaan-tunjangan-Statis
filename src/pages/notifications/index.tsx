@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Card, Badge, Button } from "flowbite-react";
-import { Link } from "react-router-dom";
+import { Card, Badge } from "flowbite-react";
+import { useNavigate } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 
 type Notification = {
@@ -15,6 +15,8 @@ type Notification = {
 export default function NotificationsPage() {
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("/data/notifications.json")
@@ -33,28 +35,37 @@ export default function NotificationsPage() {
         ) : items.length === 0 ? (
           <p className="text-gray-500">Tidak ada notifikasi.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {items.map((n) => (
-              <Card key={n.id} className="rounded-2xl border border-gray-200">
-                <div className="flex items-start justify-between gap-3">
+              <Card
+                key={n.id}
+                className="
+                  rounded-2xl border border-gray-200 cursor-pointer 
+                  hover:shadow-xl hover:scale-[1.01] transition-all duration-200
+                  bg-white select-none
+                "
+                onClick={() => navigate(`/notifications/${n.id}`)}
+              >
+                <div className="flex items-start justify-between gap-3 mb-2">
                   <div>
-                    <h2 className="text-lg font-semibold text-slate-800">{n.title}</h2>
+                    <h2 className="text-lg font-semibold text-slate-800">
+                      {n.title}
+                    </h2>
                     <p className="text-xs text-gray-500 mt-1">
                       {new Date(n.date).toLocaleString()}
                     </p>
                   </div>
-                  {!n.read && <Badge color="failure">Baru</Badge>}
+
+                  {!n.read && (
+                    <Badge color="failure" className="text-[10px] px-2 py-1">
+                      Baru
+                    </Badge>
+                  )}
                 </div>
 
-                <p className="text-sm text-slate-700 line-clamp-3">{n.summary}</p>
-
-                <div className="flex justify-end">
-                  <Link to={`/notifications/${n.id}`}>
-                    <Button color="blue" size="sm" className="rounded-xl">
-                      Buka
-                    </Button>
-                  </Link>
-                </div>
+                <p className="text-sm text-slate-700 line-clamp-3">
+                  {n.summary}
+                </p>
               </Card>
             ))}
           </div>
