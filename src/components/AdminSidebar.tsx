@@ -5,8 +5,13 @@ import {
   HiOutlineHome,
   HiOutlineUsers,
   HiOutlineCog,
+  HiOutlineClipboardList,
+  HiOutlineBriefcase,
+  HiOutlineOfficeBuilding,
+  HiOutlineIdentification,
   HiX,
 } from "react-icons/hi";
+
 
 interface AdminSidebarProps {
   externalOpen?: boolean;
@@ -41,14 +46,15 @@ export default function AdminSidebar({
   };
 
   const navItems = [
-    { label: "Home", to: "/admin", icon: <HiOutlineHome /> },
-    { label: "Users", to: "/admin/users", icon: <HiOutlineUsers /> },
-    { label: "Menu Master Data", to: "/admin/MenuMasterData", icon: <HiOutlineUsers /> },
-    { label: "Jabatan Master", to: "/admin/jabatan", icon: <HiOutlineUsers /> },
-    { label: "Unit Kerja Master", to: "/admin/UnitKerja", icon: <HiOutlineUsers /> },
-    { label: "Daftar Pegawai", to: "/admin/DaftarPegawai", icon: <HiOutlineUsers /> },
-    { label: "Settings", to: "/admin/settings", icon: <HiOutlineCog /> },
-  ];
+  { label: "Home", to: "/admin", icon: <HiOutlineHome /> },
+  { label: "Users", to: "/admin/users", icon: <HiOutlineUsers /> },
+  { label: "Menu Master Data", to: "/admin/MenuMasterData", icon: <HiOutlineClipboardList /> },
+  { label: "Jabatan Master", to: "/admin/jabatan", icon: <HiOutlineBriefcase /> },
+  { label: "Unit Kerja Master", to: "/admin/UnitKerja", icon: <HiOutlineOfficeBuilding /> },
+  { label: "Daftar Pegawai", to: "/admin/DaftarPegawai", icon: <HiOutlineIdentification /> },
+  { label: "Settings", to: "/admin/settings", icon: <HiOutlineCog /> },
+];
+
 
   return (
     <>
@@ -65,14 +71,14 @@ export default function AdminSidebar({
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white text-slate:800 z-40 transform transition-transform duration-300 
+        className={`fixed top-0 left-0 h-full w-64 bg-white text-slate:800 z-40 md:z-30 transform transition-transform duration-300 
           md:translate-x-0
           ${externalOpen ? "translate-x-0" : "-translate-x-full"}`}
         aria-hidden={false}
       >
-        <div className="flex items-center justify-between p-4 border-slate-700">
+        <div className="flex items-center justify-between p-4 border-slate-700 pt-13">
           <Link to="/admin" className="font-bold text-lg">
-            Admin
+            MyApp
           </Link>
 
           {/* Close button only visible on mobile */}
@@ -108,7 +114,7 @@ export default function AdminSidebar({
           })}
         </nav>
 
-        <div className="mt-auto p-4 border-slate-700">
+        <div className="mt-auto px-4 border-slate-700">
           <small className="text-slate-400">v1.0</small>
         </div>
       </aside>
