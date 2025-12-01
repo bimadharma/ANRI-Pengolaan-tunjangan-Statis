@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { Button, Card } from "flowbite-react";
-import { motion } from "framer-motion";
-import "flowbite";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Search,
+  Plus,
+  Eye,
+  Edit2,
+  Trash2,
+  X,
+  TrendingUp,
+  CheckCircle,
+} from "lucide-react";
 import MainLayout from "../../components/layout/MainLayout";
 
-// Interface untuk Tunjangan PAS
 interface TunjanganPAS {
   id?: number;
   nama: string;
@@ -27,9 +34,6 @@ interface PopupState {
   data: TunjanganPAS | null;
 }
 
-type SortField = "nama" | "nip" | "golongan" | "totalTunjangan" | "bulan" | null;
-type SortOrder = "asc" | "desc";
-
 export default function PerhitunganTunjanganPAS() {
   const [data, setData] = useState<TunjanganPAS[]>([
     {
@@ -41,7 +45,7 @@ export default function PerhitunganTunjanganPAS() {
       gajiPokok: 5000000,
       tunjangan: 1500000,
       potongan: 250000,
-      totalTunjangan: 6250000,
+      totalTunjangan: 5000000 + 1500000 - 250000,
       status: "Aktif",
       bulan: "01",
       tahun: "2024",
@@ -56,38 +60,16 @@ export default function PerhitunganTunjanganPAS() {
       gajiPokok: 3500000,
       tunjangan: 1000000,
       potongan: 150000,
-      totalTunjangan: 4350000,
+      totalTunjangan: 3500000 + 1000000 - 150000,
       status: "Aktif",
       bulan: "01",
       tahun: "2024",
       createdAt: "2024-01-16",
     },
-    {
-      id: 3,
-      nama: "Ahmad Riyadi",
-      nip: "19900510199501003",
-      jabatan: "Teknisi",
-      golongan: "II/b",
-      gajiPokok: 3000000,
-      tunjangan: 800000,
-      potongan: 120000,
-      totalTunjangan: 3680000,
-      status: "Aktif",
-      bulan: "01",
-      tahun: "2024",
-      createdAt: "2024-01-17",
-    },
   ]);
 
-  const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<string>("");
-  const [sortField, setSortField] = useState<SortField>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-  const [popup, setPopup] = useState<PopupState>({
-    open: false,
-    mode: "",
-    data: null,
-  });
+  const [popup, setPopup] = useState<PopupState>({ open: false, mode: "", data: null });
   const [formData, setFormData] = useState<TunjanganPAS>({
     nama: "",
     nip: "",
@@ -102,72 +84,16 @@ export default function PerhitunganTunjanganPAS() {
     tahun: new Date().getFullYear().toString(),
   });
 
-  // Filter data berdasarkan search
+  const formatCurrency = (v: number) =>
+    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(v);
+
   const filteredData = data.filter(
-    (item) =>
-      item.nama.toLowerCase().includes(filter.toLowerCase()) ||
-      item.nip.includes(filter) ||
-      item.jabatan.toLowerCase().includes(filter.toLowerCase())
+    (d) =>
+      d.nama.toLowerCase().includes(filter.toLowerCase()) ||
+      d.nip.includes(filter) ||
+      d.jabatan.toLowerCase().includes(filter.toLowerCase())
   );
 
-  // Sort data
-  const sortedData = [...filteredData].sort((a, b) => {
-    if (!sortField) return 0;
-
-    let aValue: any = a[sortField];
-    let bValue: any = b[sortField];
-
-    // Handle numeric sorting
-    if (sortField === "totalTunjangan") {
-      aValue = Number(aValue) || 0;
-      bValue = Number(bValue) || 0;
-      return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
-    }
-
-    // Handle string sorting
-    const aStr = String(aValue).toLowerCase();
-    const bStr = String(bValue).toLowerCase();
-
-    if (sortOrder === "asc") {
-      return aStr.localeCompare(bStr, "id-ID");
-    } else {
-      return bStr.localeCompare(aStr, "id-ID");
-    }
-  });
-
-  // Handle column header click for sorting
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
-    }
-  };
-
-  // Render sort indicator
-  const renderSortIndicator = (field: SortField) => {
-    if (sortField !== field) {
-      return <span className="text-gray-400 ml-1">⇅</span>;
-    }
-    return <span className="text-blue-600 ml-1">{sortOrder === "asc" ? "↑" : "↓"}</span>;
-  };
-
-  // Format currency
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(value);
-  };
-
-  // Calculate total tunjangan
-  const calculateTotal = () => {
-    return formData.gajiPokok + formData.tunjangan - formData.potongan;
-  };
-
-  // Open Popup
   const openPopup = (mode: string, item: TunjanganPAS | null = null) => {
     setFormData(
       item || {
@@ -187,7 +113,6 @@ export default function PerhitunganTunjanganPAS() {
     setPopup({ open: true, mode, data: item });
   };
 
-  // Close Popup
   const closePopup = () => {
     setPopup({ open: false, mode: "", data: null });
     setFormData({
@@ -205,644 +130,283 @@ export default function PerhitunganTunjanganPAS() {
     });
   };
 
-  // Handle Submit (Add/Edit)
+  const handleInputChange = (field: keyof TunjanganPAS, value: any) => {
+    const updated = { ...formData, [field]: value };
+    if (field === "gajiPokok" || field === "tunjangan" || field === "potongan") {
+      const g = Number(updated.gajiPokok || 0);
+      const t = Number(updated.tunjangan || 0);
+      const p = Number(updated.potongan || 0);
+      updated.totalTunjangan = g + t - p;
+    }
+    setFormData(updated);
+  };
+
   const handleSubmit = () => {
     if (!formData.nama.trim() || !formData.nip.trim()) {
       alert("Nama dan NIP wajib diisi!");
       return;
     }
-
-    const totalTunjangan = calculateTotal();
-    const newData = { ...formData, totalTunjangan };
-
-    try {
-      if (popup.mode === "add") {
-        setData([
-          ...data,
-          {
-            id: Date.now(),
-            ...newData,
-            createdAt: new Date().toISOString().split("T")[0],
-          },
-        ]);
-      } else if (popup.mode === "edit" && popup.data) {
-        setData(
-          data.map((item) =>
-            item.id === popup.data?.id ? { ...item, ...newData } : item
-          )
-        );
-      }
-      closePopup();
-    } catch (err: any) {
-      console.error("Gagal menyimpan data", err);
-      alert("Gagal menyimpan data");
+    if (popup.mode === "add") {
+      setData([
+        {
+          ...formData,
+          id: Date.now(),
+          createdAt: new Date().toISOString().split("T")[0],
+        },
+        ...data,
+      ]);
+    } else if (popup.mode === "edit" && popup.data) {
+      setData(data.map((d) => (d.id === popup.data!.id ? { ...d, ...formData } : d)));
     }
+    closePopup();
   };
 
-  // Handle Delete
-  const handleDelete = (id: number) => {
-    try {
-      setData(data.filter((item) => item.id !== id));
-      closePopup();
-    } catch (err: any) {
-      console.error("Gagal menghapus data", err);
-      alert("Gagal menghapus data");
-    }
+  const handleDelete = (id?: number) => {
+    if (!id) return;
+    setData(data.filter((d) => d.id !== id));
+    closePopup();
   };
 
-  // Handle Input Change
-  const handleInputChange = (field: keyof TunjanganPAS, value: any) => {
-    setFormData({ ...formData, [field]: value });
-  };
-
-  // Calculate Statistics
-  const totalGajiPokok = data.reduce((sum, item) => sum + item.gajiPokok, 0);
-  const totalTunjangan = data.reduce((sum, item) => sum + item.tunjangan, 0);
-  const totalPotongan = data.reduce((sum, item) => sum + item.potongan, 0);
-  const grandTotal = data.reduce((sum, item) => sum + item.totalTunjangan, 0);
+  const totalGaji = data.reduce((s, it) => s + (it.gajiPokok || 0), 0);
+  const totalTunjangan = data.reduce((s, it) => s + (it.tunjangan || 0), 0);
+  const totalPotongan = data.reduce((s, it) => s + (it.potongan || 0), 0);
 
   return (
     <MainLayout isAdmin={true}>
-      <div className="p-3 sm:p-4 md:p-6 lg:p-8 w-full">
-        {/* Header */}
-        <div className="mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-blue-600">
-            💰 Perhitungan Tunjangan PAS
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-600 mt-1">
-            Kelola data tunjangan pegawai dengan mudah
-          </p>
-        </div>
-
-        <Card className="shadow-lg rounded-2xl">
-          <div className="w-full">
-            {/* Search Bar & Button */}
-            <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <input
-                type="text"
-                placeholder="Cari data..."
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="border border-gray-300 rounded-xl px-3 sm:px-4 py-2 w-full sm:flex-1 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              />
-              <Button
-                onClick={() => openPopup("add")}
-                className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl px-4 py-2 text-sm sm:text-base font-semibold w-full sm:w-auto"
-              >
-                + Tambah
-              </Button>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
+                <TrendingUp className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Perhitungan Tunjangan PAS
+                </h1>
+                <p className="text-gray-600 text-sm mt-1">Kelola perhitungan dan riwayat tunjangan PAS</p>
+              </div>
             </div>
+          </motion.div>
 
-            {/* Statistics Cards - Responsive Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-4 sm:mb-6">
-              <Card className="bg-blue-100 rounded-xl sm:rounded-2xl shadow p-2 sm:p-4 text-center">
-                <p className="text-xs sm:text-sm text-gray-600 font-semibold">Total Data</p>
-                <p className="text-lg sm:text-2xl font-bold text-blue-700 mt-1">{data.length}</p>
-              </Card>
-              <Card className="bg-green-100 rounded-xl sm:rounded-2xl shadow p-2 sm:p-4 text-center">
-                <p className="text-xs sm:text-sm text-gray-600 font-semibold">Gaji Pokok</p>
-                <p className="text-xs sm:text-sm font-bold text-green-700 mt-1">{formatCurrency(totalGajiPokok)}</p>
-              </Card>
-              <Card className="bg-yellow-100 rounded-xl sm:rounded-2xl shadow p-2 sm:p-4 text-center">
-                <p className="text-xs sm:text-sm text-gray-600 font-semibold">Tunjangan</p>
-                <p className="text-xs sm:text-sm font-bold text-yellow-700 mt-1">{formatCurrency(totalTunjangan)}</p>
-              </Card>
-              <Card className="bg-red-100 rounded-xl sm:rounded-2xl shadow p-2 sm:p-4 text-center">
-                <p className="text-xs sm:text-sm text-gray-600 font-semibold">Potongan</p>
-                <p className="text-xs sm:text-sm font-bold text-red-700 mt-1">{formatCurrency(totalPotongan)}</p>
-              </Card>
-              <Card className="bg-purple-100 rounded-xl sm:rounded-2xl shadow p-2 sm:p-4 text-center col-span-2 sm:col-span-1 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-xs sm:text-sm text-gray-600 font-semibold mb-1">Grand Total</p>
-                  <p className="text-xs sm:text-sm font-bold text-purple-700">{formatCurrency(grandTotal)}</p>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-600 text-sm font-medium mb-1">Total Data</p>
+                  <p className="text-4xl font-bold text-blue-600">{data.length}</p>
                 </div>
-              </Card>
+                <div className="p-4 bg-blue-100 rounded-2xl">
+                  <TrendingUp className="w-8 h-8 text-blue-600" />
+                </div>
+              </div>
             </div>
 
-            {/* Sort Info */}
-            {sortField && (
-              <div className="mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 bg-blue-50 px-3 sm:px-4 py-2 rounded-lg flex-wrap">
-                <span className="font-semibold">Urutkan: <strong>{sortField}</strong></span>
-                <span className="text-blue-600 font-semibold">{sortOrder === "asc" ? "↑" : "↓"}</span>
-                <Button
-                  onClick={() => setSortField(null)}
-                  size="xs"
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg text-xs ml-auto"
-                >
-                  Reset
-                </Button>
+            <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-600 text-sm font-medium mb-1">Total Gaji Pokok</p>
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(totalGaji)}</p>
+                </div>
+                <div className="p-4 bg-green-100 rounded-2xl">
+                  <CheckCircle className="w-8 h-8 text-green-600" />
+                </div>
               </div>
-            )}
+            </div>
 
-            {/* Loading State */}
-            {loading && (
-              <div className="text-center py-8">
-                <p className="text-gray-500 text-sm">Memuat data...</p>
+            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 cursor-pointer" onClick={() => openPopup("add")}>
+              <div className="flex items-center justify-between h-full">
+                <div>
+                  <p className="text-blue-100 text-sm font-medium mb-1">Tambah Perhitungan</p>
+                  <p className="text-white text-lg font-semibold">Klik untuk menambah</p>
+                </div>
+                <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
+                  <Plus className="w-8 h-8 text-white" />
+                </div>
               </div>
-            )}
+            </div>
+          </motion.div>
 
-            {/* Desktop Table View (lg and up) */}
-            {!loading && sortedData.length > 0 && (
-              <div className="hidden lg:block overflow-x-auto rounded-lg border border-gray-200">
-                <table className="w-full text-left text-xs sm:text-sm">
-                  <thead className="bg-gray-100 border-b">
-                    <tr>
-                      <th className="p-2 sm:p-3 font-semibold">No</th>
-                      <th 
-                        className="p-2 sm:p-3 cursor-pointer hover:bg-gray-200 transition select-none font-semibold"
-                        onClick={() => handleSort("nama")}
-                      >
-                        Nama {renderSortIndicator("nama")}
-                      </th>
-                      <th className="p-2 sm:p-3 font-semibold">NIP</th>
-                      <th className="p-2 sm:p-3 font-semibold">Jabatan</th>
-                      <th 
-                        className="p-2 sm:p-3 cursor-pointer hover:bg-gray-200 transition select-none font-semibold"
-                        onClick={() => handleSort("golongan")}
-                      >
-                        Golongan {renderSortIndicator("golongan")}
-                      </th>
-                      <th className="p-2 sm:p-3 font-semibold">Gaji</th>
-                      <th className="p-2 sm:p-3 font-semibold">Tunj.</th>
-                      <th className="p-2 sm:p-3 font-semibold">Pot.</th>
-                      <th 
-                        className="p-2 sm:p-3 cursor-pointer hover:bg-gray-200 transition select-none font-semibold"
-                        onClick={() => handleSort("totalTunjangan")}
-                      >
-                        Total {renderSortIndicator("totalTunjangan")}
-                      </th>
-                      <th className="p-2 sm:p-3 font-semibold">Status</th>
-                      <th className="p-2 sm:p-3 font-semibold text-center">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedData.map((item, idx) => (
-                      <tr key={item.id} className="border-b hover:bg-gray-50 transition">
-                        <td className="p-2 sm:p-3 text-gray-700 text-xs">{idx + 1}</td>
-                        <td className="p-2 sm:p-3 font-semibold text-gray-800 text-xs">{item.nama}</td>
-                        <td className="p-2 sm:p-3 text-gray-700 text-xs">{item.nip}</td>
-                        <td className="p-2 sm:p-3 text-gray-700 text-xs">{item.jabatan}</td>
-                        <td className="p-2 sm:p-3 text-gray-700 font-semibold text-xs">{item.golongan}</td>
-                        <td className="p-2 sm:p-3 text-gray-700 text-xs">{formatCurrency(item.gajiPokok)}</td>
-                        <td className="p-2 sm:p-3 text-gray-700 text-xs">{formatCurrency(item.tunjangan)}</td>
-                        <td className="p-2 sm:p-3 text-gray-700 text-xs">{formatCurrency(item.potongan)}</td>
-                        <td className="p-2 sm:p-3 text-gray-800 font-bold text-green-600 text-xs">
-                          {formatCurrency(item.totalTunjangan)}
-                        </td>
-                        <td className="p-2 sm:p-3">
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 inline-block">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+            <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input type="text" placeholder="Cari nama, NIP atau jabatan..." value={filter} onChange={(e) => setFilter(e.target.value)} className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all" />
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[1100px]">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
+                  <tr>
+                    <th className="p-4 text-left text-sm font-semibold text-gray-700">Nama</th>
+                    <th className="p-4 text-left text-sm font-semibold text-gray-700">NIP</th>
+                    <th className="p-4 text-left text-sm font-semibold text-gray-700">Jabatan</th>
+                    <th className="p-4 text-left text-sm font-semibold text-gray-700">Golongan</th>
+                    <th className="p-4 text-left text-sm font-semibold text-gray-700">Gaji Pokok</th>
+                    <th className="p-4 text-left text-sm font-semibold text-gray-700">Tunjangan</th>
+                    <th className="p-4 text-left text-sm font-semibold text-gray-700">Potongan</th>
+                    <th className="p-4 text-left text-sm font-semibold text-gray-700">Total</th>
+                    <th className="p-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                    <th className="p-4 text-left text-sm font-semibold text-gray-700">Bulan/Tahun</th>
+                    <th className="p-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredData.length > 0 ? (
+                    filteredData.map((item, idx) => (
+                      <motion.tr key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ delay: idx * 0.03 }} className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors">
+                        <td className="p-4 font-medium text-gray-800">{item.nama}</td>
+                        <td className="p-4 text-sm text-gray-700">{item.nip}</td>
+                        <td className="p-4 text-sm text-gray-700">{item.jabatan}</td>
+                        <td className="p-4 text-sm text-gray-700">{item.golongan}</td>
+                        <td className="p-4 text-sm text-gray-700">{formatCurrency(item.gajiPokok)}</td>
+                        <td className="p-4 text-sm text-gray-700">{formatCurrency(item.tunjangan)}</td>
+                        <td className="p-4 text-sm text-gray-700">{formatCurrency(item.potongan)}</td>
+                        <td className="p-4 text-sm font-bold text-green-600">{formatCurrency(item.totalTunjangan)}</td>
+                        <td className="p-4">
+                          <span className={`px-4 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1 ${item.status === "Aktif" ? "bg-green-100 text-green-700 border border-green-200" : "bg-yellow-100 text-yellow-700 border border-yellow-200"}`}>
+                            {item.status === "Aktif" && <CheckCircle className="w-3 h-3" />}
                             {item.status}
                           </span>
                         </td>
-                        <td className="p-2 sm:p-3">
-                          <div className="flex gap-1 sm:gap-2 justify-center flex-wrap">
-                            <button
-                              onClick={() => openPopup("view", item)}
-                              className="px-2 sm:px-3 py-1 bg-blue-400 hover:bg-blue-500 text-white font-semibold rounded-full text-xs transition duration-200 transform hover:scale-105"
-                            >
-                              View
-                            </button>
-                            <button
-                              onClick={() => openPopup("edit", item)}
-                              className="px-2 sm:px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white font-semibold rounded-full text-xs transition duration-200 transform hover:scale-105"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => openPopup("delete", item)}
-                              className="px-2 sm:px-3 py-1 bg-red-400 hover:bg-red-500 text-white font-semibold rounded-full text-xs transition duration-200 transform hover:scale-105"
-                            >
-                              Del
-                            </button>
+                        <td className="p-4 text-sm text-gray-600">{item.bulan}/{item.tahun}</td>
+                        <td className="p-4">
+                          <div className="flex gap-2">
+                            <button onClick={() => openPopup("view", item)} className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-xl transition-all hover:scale-110" title="View"><Eye className="w-4 h-4" /></button>
+                            <button onClick={() => openPopup("edit", item)} className="p-2 bg-amber-100 hover:bg-amber-200 text-amber-600 rounded-xl transition-all hover:scale-110" title="Edit"><Edit2 className="w-4 h-4" /></button>
+                            <button onClick={() => openPopup("delete", item)} className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-xl transition-all hover:scale-110" title="Delete"><Trash2 className="w-4 h-4" /></button>
                           </div>
                         </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* Tablet View (md and sm) */}
-            {!loading && sortedData.length > 0 && (
-              <div className="hidden md:block lg:hidden overflow-x-auto rounded-lg border border-gray-200">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-gray-100 border-b">
+                      </motion.tr>
+                    ))
+                  ) : (
                     <tr>
-                      <th className="p-2 font-semibold">No</th>
-                      <th className="p-2 font-semibold">Nama</th>
-                      <th className="p-2 font-semibold">NIP</th>
-                      <th className="p-2 font-semibold">Golongan</th>
-                      <th className="p-2 font-semibold">Total</th>
-                      <th className="p-2 font-semibold text-center">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedData.map((item, idx) => (
-                      <tr key={item.id} className="border-b hover:bg-gray-50 transition">
-                        <td className="p-2 text-gray-700">{idx + 1}</td>
-                        <td className="p-2 font-semibold text-gray-800">{item.nama}</td>
-                        <td className="p-2 text-gray-700">{item.nip}</td>
-                        <td className="p-2 text-gray-700 font-semibold">{item.golongan}</td>
-                        <td className="p-2 text-green-600 font-bold">{formatCurrency(item.totalTunjangan)}</td>
-                        <td className="p-2">
-                          <div className="flex gap-1 justify-center">
-                            <button
-                              onClick={() => openPopup("view", item)}
-                              className="px-2 py-1 bg-blue-400 hover:bg-blue-500 text-white font-semibold rounded-full text-xs transition"
-                            >
-                              V
-                            </button>
-                            <button
-                              onClick={() => openPopup("edit", item)}
-                              className="px-2 py-1 bg-yellow-400 hover:bg-yellow-500 text-white font-semibold rounded-full text-xs transition"
-                            >
-                              E
-                            </button>
-                            <button
-                              onClick={() => openPopup("delete", item)}
-                              className="px-2 py-1 bg-red-400 hover:bg-red-500 text-white font-semibold rounded-full text-xs transition"
-                            >
-                              D
-                            </button>
+                      <td colSpan={11} className="p-12 text-center">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="p-4 bg-gray-100 rounded-full">
+                            <TrendingUp className="w-12 h-12 text-gray-400" />
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                          <p className="text-gray-500 font-medium">Tidak ada perhitungan tunjangan</p>
+                          <p className="text-gray-400 text-sm">Coba ubah kata kunci pencarian</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
 
-            {/* Mobile Card View (sm and below) */}
-            {!loading && sortedData.length > 0 && (
-              <div className="md:hidden space-y-2 sm:space-y-3">
-                {sortedData.map((item, idx) => (
-                  <Card key={item.id} className="p-3 sm:p-4 border border-gray-200 rounded-xl">
-                    <div className="flex justify-between items-start mb-2 sm:mb-3">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs sm:text-sm font-bold text-gray-800">#{idx + 1}</p>
-                        <p className="text-sm sm:text-base font-bold text-gray-800 mt-1 truncate">{item.nama}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">NIP: {item.nip}</p>
-                        <p className="text-xs text-gray-500">Gol: {item.golongan}</p>
+          <AnimatePresence>
+            {popup.open && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closePopup}>
+                <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} transition={{ type: "spring", duration: 0.45 }} className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                  {popup.mode === "view" && popup.data && (
+                    <>
+                      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                              <Eye className="w-6 h-6" />
+                            </div>
+                            <h2 className="text-2xl font-bold">Detail Perhitungan</h2>
+                          </div>
+                          <button onClick={closePopup} className="p-2 hover:bg-white/20 rounded-xl transition-colors"><X className="w-6 h-6" /></button>
+                        </div>
                       </div>
-                      <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 whitespace-nowrap ml-2 flex-shrink-0">
-                        {item.status}
-                      </span>
-                    </div>
+                      <div className="p-6 space-y-4">
+                        <div className="bg-gray-50 rounded-2xl p-4"><p className="text-xs text-gray-500 mb-1">Nama</p><p className="text-lg font-semibold text-gray-800">{popup.data.nama}</p></div>
+                        <div className="bg-gray-50 rounded-2xl p-4"><p className="text-xs text-gray-500 mb-1">NIP</p><p className="text-lg font-semibold text-gray-800">{popup.data.nip}</p></div>
+                        <div className="bg-gray-50 rounded-2xl p-4"><p className="text-xs text-gray-500 mb-1">Jabatan</p><p className="text-lg font-semibold text-gray-800">{popup.data.jabatan}</p></div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-gray-50 rounded-2xl p-4"><p className="text-xs text-gray-500 mb-1">Gaji Pokok</p><p className="font-semibold">{formatCurrency(popup.data.gajiPokok)}</p></div>
+                          <div className="bg-gray-50 rounded-2xl p-4"><p className="text-xs text-gray-500 mb-1">Tunjangan</p><p className="font-semibold">{formatCurrency(popup.data.tunjangan)}</p></div>
+                        </div>
+                        <button onClick={closePopup} className="w-full py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-2xl font-medium transition-colors mt-2">Tutup</button>
+                      </div>
+                    </>
+                  )}
 
-                    <div className="space-y-1 sm:space-y-2 text-xs mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-200">
-                      <div className="grid grid-cols-2 gap-1 sm:gap-2">
+                  {(popup.mode === "add" || popup.mode === "edit") && (
+                    <>
+                      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">{popup.mode === "add" ? <Plus className="w-6 h-6" /> : <Edit2 className="w-6 h-6" />}</div>
+                            <h2 className="text-2xl font-bold">{popup.mode === "add" ? "Tambah Perhitungan" : "Edit Perhitungan"}</h2>
+                          </div>
+                          <button onClick={closePopup} className="p-2 hover:bg-white/20 rounded-xl transition-colors"><X className="w-6 h-6" /></button>
+                        </div>
+                      </div>
+                      <div className="p-6 space-y-4">
                         <div>
-                          <p className="font-semibold text-gray-600">Jabatan:</p>
-                          <p className="text-gray-700 text-xs">{item.jabatan}</p>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Nama</label>
+                          <input type="text" className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-400" value={formData.nama} onChange={(e) => handleInputChange("nama", e.target.value)} />
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-600">Gaji Pokok:</p>
-                          <p className="text-gray-700 text-xs">{formatCurrency(item.gajiPokok)}</p>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">NIP</label>
+                          <input type="text" className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-400" value={formData.nip} onChange={(e) => handleInputChange("nip", e.target.value)} />
                         </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-1 sm:gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <input type="text" className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl" placeholder="Jabatan" value={formData.jabatan} onChange={(e) => handleInputChange("jabatan", e.target.value)} />
+                          <input type="text" className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl" placeholder="Golongan" value={formData.golongan} onChange={(e) => handleInputChange("golongan", e.target.value)} />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <input type="number" className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl" placeholder="Gaji Pokok" value={formData.gajiPokok} onChange={(e) => handleInputChange("gajiPokok", Number(e.target.value))} />
+                          <input type="number" className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl" placeholder="Tunjangan" value={formData.tunjangan} onChange={(e) => handleInputChange("tunjangan", Number(e.target.value))} />
+                          <input type="number" className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl" placeholder="Potongan" value={formData.potongan} onChange={(e) => handleInputChange("potongan", Number(e.target.value))} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <select value={formData.bulan} onChange={(e) => handleInputChange("bulan", e.target.value)} className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl">
+                            {Array.from({ length: 12 }).map((_, i) => <option key={i} value={String(i + 1).padStart(2, "0")}>{new Date(0, i).toLocaleString("id-ID", { month: "short" })}</option>)}
+                          </select>
+                          <input className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl" value={formData.tahun} onChange={(e) => handleInputChange("tahun", e.target.value)} />
+                        </div>
                         <div>
-                          <p className="font-semibold text-gray-600">Tunjangan:</p>
-                          <p className="text-gray-700 text-xs">{formatCurrency(item.tunjangan)}</p>
+                          <select value={formData.status} onChange={(e) => handleInputChange("status", e.target.value)} className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl">
+                            <option value="Aktif">Aktif</option>
+                            <option value="Non-Aktif">Non-Aktif</option>
+                            <option value="Cuti">Cuti</option>
+                          </select>
                         </div>
-                        <div>
-                          <p className="font-semibold text-gray-600">Potongan:</p>
-                          <p className="text-gray-700 text-xs">{formatCurrency(item.potongan)}</p>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-green-600">Total Tunjangan:</p>
-                        <p className="text-green-700 font-bold text-sm">{formatCurrency(item.totalTunjangan)}</p>
-                      </div>
-                    </div>
 
-                    <div className="flex gap-2 sm:gap-1">
-                      <button
-                        onClick={() => openPopup("view", item)}
-                        className="flex-1 px-2 py-2 bg-blue-400 hover:bg-blue-500 text-white font-semibold rounded-full text-xs transition"
-                      >
-                        👁️ V
-                      </button>
-                      <button
-                        onClick={() => openPopup("edit", item)}
-                        className="flex-1 px-2 py-2 bg-yellow-400 hover:bg-yellow-500 text-white font-semibold rounded-full text-xs transition"
-                      >
-                        ✏️ E
-                      </button>
-                      <button
-                        onClick={() => openPopup("delete", item)}
-                        className="flex-1 px-2 py-2 bg-red-400 hover:bg-red-500 text-white font-semibold rounded-full text-xs transition"
-                      >
-                        🗑️ D
-                      </button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
-
-            {/* Empty State */}
-            {!loading && sortedData.length === 0 && data.length > 0 && (
-              <div className="text-center py-8 sm:py-12">
-                <p className="text-gray-500 text-sm sm:text-lg">
-                  📭 Tidak ada hasil pencarian
-                </p>
-              </div>
-            )}
-
-            {!loading && data.length === 0 && (
-              <div className="text-center py-8 sm:py-12">
-                <p className="text-gray-500 text-sm sm:text-lg font-semibold">
-                  📭 Belum ada data
-                </p>
-                <p className="text-gray-400 text-xs sm:text-sm mt-2">
-                  Klik tombol "Tambah Data" untuk memulai
-                </p>
-              </div>
-            )}
-          </div>
-        </Card>
-
-        {/* Modal Popup */}
-        {popup.open && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
-            <motion.div
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl w-full max-w-2xl shadow-2xl border border-gray-100 my-4 sm:my-8"
-            >
-              {/* VIEW MODE */}
-              {popup.mode === "view" && popup.data && (
-                <>
-                  <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-800">
-                    Detail Tunjangan
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 text-gray-700 mb-4 sm:mb-6 max-h-96 overflow-y-auto">
-                    <div className="bg-gray-50 p-2 sm:p-3 rounded-lg">
-                      <p className="text-xs text-gray-500 font-semibold">Nama</p>
-                      <p className="text-sm sm:text-base font-bold text-gray-800 mt-1">{popup.data.nama}</p>
-                    </div>
-                    <div className="bg-gray-50 p-2 sm:p-3 rounded-lg">
-                      <p className="text-xs text-gray-500 font-semibold">NIP</p>
-                      <p className="text-sm sm:text-base font-bold text-gray-800 mt-1">{popup.data.nip}</p>
-                    </div>
-                    <div className="bg-gray-50 p-2 sm:p-3 rounded-lg">
-                      <p className="text-xs text-gray-500 font-semibold">Jabatan</p>
-                      <p className="text-sm sm:text-base font-bold text-gray-800 mt-1">{popup.data.jabatan}</p>
-                    </div>
-                    <div className="bg-gray-50 p-2 sm:p-3 rounded-lg">
-                      <p className="text-xs text-gray-500 font-semibold">Golongan</p>
-                      <p className="text-sm sm:text-base font-bold text-gray-800 mt-1">{popup.data.golongan}</p>
-                    </div>
-                    <div className="bg-blue-50 p-2 sm:p-3 rounded-lg">
-                      <p className="text-xs text-blue-600 font-semibold">Gaji Pokok</p>
-                      <p className="text-sm sm:text-base font-bold text-blue-700 mt-1">{formatCurrency(popup.data.gajiPokok)}</p>
-                    </div>
-                    <div className="bg-yellow-50 p-2 sm:p-3 rounded-lg">
-                      <p className="text-xs text-yellow-600 font-semibold">Tunjangan</p>
-                      <p className="text-sm sm:text-base font-bold text-yellow-700 mt-1">{formatCurrency(popup.data.tunjangan)}</p>
-                    </div>
-                    <div className="bg-red-50 p-2 sm:p-3 rounded-lg">
-                      <p className="text-xs text-red-600 font-semibold">Potongan</p>
-                      <p className="text-sm sm:text-base font-bold text-red-700 mt-1">{formatCurrency(popup.data.potongan)}</p>
-                    </div>
-                    <div className="bg-green-50 p-2 sm:p-3 rounded-lg">
-                      <p className="text-xs text-green-600 font-semibold">Total</p>
-                      <p className="text-sm sm:text-base font-bold text-green-700 mt-1">{formatCurrency(popup.data.totalTunjangan)}</p>
-                    </div>
-                    <div className="bg-gray-50 p-2 sm:p-3 rounded-lg">
-                      <p className="text-xs text-gray-500 font-semibold">Bulan/Tahun</p>
-                      <p className="text-sm sm:text-base font-bold text-gray-800 mt-1">
-                        {popup.data.bulan}/{popup.data.tahun}
-                      </p>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={closePopup}
-                    className="w-full bg-gray-800 hover:bg-gray-900 text-white rounded-xl py-2 text-sm sm:text-base"
-                  >
-                    Tutup
-                  </Button>
-                </>
-              )}
-
-              {/* ADD & EDIT MODE */}
-              {(popup.mode === "add" || popup.mode === "edit") && (
-                <>
-                  <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-800">
-                    {popup.mode === "add" ? "Tambah Data" : "Edit Data"}
-                  </h2>
-
-                  <div className="space-y-2 sm:space-y-3 max-h-96 overflow-y-auto mb-4">
-                    <div>
-                      <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-                        Nama <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="border border-gray-300 rounded-xl px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                        placeholder="Nama"
-                        value={formData.nama}
-                        onChange={(e) => handleInputChange("nama", e.target.value)}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-                        NIP <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="border border-gray-300 rounded-xl px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                        placeholder="NIP"
-                        value={formData.nip}
-                        onChange={(e) => handleInputChange("nip", e.target.value)}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                      <div>
-                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-                          Jabatan
-                        </label>
-                        <input
-                          type="text"
-                          className="border border-gray-300 rounded-xl px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                          placeholder="Jabatan"
-                          value={formData.jabatan}
-                          onChange={(e) => handleInputChange("jabatan", e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-                          Golongan
-                        </label>
-                        <input
-                          type="text"
-                          className="border border-gray-300 rounded-xl px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                          placeholder="III/c"
-                          value={formData.golongan}
-                          onChange={(e) => handleInputChange("golongan", e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                      <div>
-                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-                          Gaji Pokok
-                        </label>
-                        <input
-                          type="number"
-                          className="border border-gray-300 rounded-xl px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                          placeholder="0"
-                          value={formData.gajiPokok}
-                          onChange={(e) => handleInputChange("gajiPokok", Number(e.target.value))}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-                          Tunjangan
-                        </label>
-                        <input
-                          type="number"
-                          className="border border-gray-300 rounded-xl px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                          placeholder="0"
-                          value={formData.tunjangan}
-                          onChange={(e) => handleInputChange("tunjangan", Number(e.target.value))}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                      <div>
-                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-                          Potongan
-                        </label>
-                        <input
-                          type="number"
-                          className="border border-gray-300 rounded-xl px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                          placeholder="0"
-                          value={formData.potongan}
-                          onChange={(e) => handleInputChange("potongan", Number(e.target.value))}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-                          Total (Auto)
-                        </label>
-                        <div className="border border-gray-300 rounded-xl px-3 py-2 w-full bg-green-50 text-green-700 font-bold text-sm">
-                          {formatCurrency(calculateTotal())}
+                        <div className="flex gap-3 pt-2">
+                          <button onClick={handleSubmit} className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl font-medium transition-all hover:shadow-lg">Simpan</button>
+                          <button onClick={closePopup} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl font-medium transition-colors">Batal</button>
                         </div>
                       </div>
-                    </div>
+                    </>
+                  )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                      <div>
-                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-                          Bulan
-                        </label>
-                        <select
-                          className="border border-gray-300 rounded-xl px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                          value={formData.bulan}
-                          onChange={(e) => handleInputChange("bulan", e.target.value)}
-                        >
-                          {Array.from({ length: 12 }, (_, i) => (
-                            <option key={i + 1} value={String(i + 1).padStart(2, "0")}>
-                              {new Date(2024, i).toLocaleString("id-ID", { month: "short" })}
-                            </option>
-                          ))}
-                        </select>
+                  {popup.mode === "delete" && popup.data && (
+                    <>
+                      <div className="bg-gradient-to-r from-red-500 to-pink-600 p-6 text-white">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm"><Trash2 className="w-6 h-6" /></div>
+                            <h2 className="text-2xl font-bold">Hapus Perhitungan</h2>
+                          </div>
+                          <button onClick={closePopup} className="p-2 hover:bg-white/20 rounded-xl transition-colors"><X className="w-6 h-6" /></button>
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-                          Tahun
-                        </label>
-                        <select
-                          className="border border-gray-300 rounded-xl px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                          value={formData.tahun}
-                          onChange={(e) => handleInputChange("tahun", e.target.value)}
-                        >
-                          {Array.from({ length: 5 }, (_, i) => {
-                            const year = new Date().getFullYear() - 2 + i;
-                            return (
-                              <option key={year} value={String(year)}>
-                                {year}
-                              </option>
-                            );
-                          })}
-                        </select>
+                      <div className="p-6">
+                        <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 mb-6">
+                          <p className="text-gray-700 text-center">Apakah Anda yakin ingin menghapus perhitungan <span className="font-bold text-red-600">{popup.data.nama}</span>?</p>
+                          <p className="text-gray-500 text-sm text-center mt-2">Tindakan ini tidak dapat dibatalkan</p>
+                        </div>
+                        <div className="flex gap-3">
+                          <button onClick={() => handleDelete(popup.data!.id)} className="flex-1 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-2xl font-medium transition-all hover:shadow-lg">Ya, Hapus</button>
+                          <button onClick={closePopup} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl font-medium transition-colors">Batal</button>
+                        </div>
                       </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-                        Status
-                      </label>
-                      <select
-                        className="border border-gray-300 rounded-xl px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                        value={formData.status}
-                        onChange={(e) => handleInputChange("status", e.target.value)}
-                      >
-                        <option value="Aktif">Aktif</option>
-                        <option value="Non-Aktif">Non-Aktif</option>
-                        <option value="Cuti">Cuti</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 sm:gap-3">
-                    <Button
-                      onClick={handleSubmit}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-2 text-sm sm:text-base"
-                    >
-                      Simpan
-                    </Button>
-
-                    <Button
-                      onClick={closePopup}
-                      className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl py-2 text-sm sm:text-base"
-                    >
-                      Batal
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {/* DELETE MODE */}
-              {popup.mode === "delete" && popup.data && (
-                <>
-                  <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-red-600">
-                    Hapus Data
-                  </h2>
-                  <p className="text-gray-700 mb-6 text-sm">
-                    Yakin hapus tunjangan <strong>{popup.data.nama}</strong>?
-                  </p>
-
-                  <div className="flex gap-2 sm:gap-3">
-                    <Button
-                      onClick={() => handleDelete(popup.data!.id!)}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl py-2 text-sm sm:text-base"
-                    >
-                      Hapus
-                    </Button>
-
-                    <Button
-                      onClick={closePopup}
-                      className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl py-2 text-sm sm:text-base"
-                    >
-                      Batal
-                    </Button>
-                  </div>
-                </>
-              )}
-            </motion.div>
-          </div>
-        )}
+                    </>
+                  )}
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </MainLayout>
   );

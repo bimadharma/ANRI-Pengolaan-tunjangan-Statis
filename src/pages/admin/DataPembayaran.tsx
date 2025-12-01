@@ -26,7 +26,7 @@ interface FormData {
 type SortKey = keyof UnitKerja;
 type SortOrder = "asc" | "desc";
 
-export default function UnitKerjaPage() {
+export default function DataPembayaran() {
   const [unitKerja, setUnitKerja] = useState<UnitKerja[]>([
     { id: 1, nama_unit_kerja: "Sekretariat Utama", eselon: "Eselon I", kode_unit: "SU-01" },
     { id: 2, nama_unit_kerja: "Pusat Pengolahan Arsip", eselon: "Eselon II", kode_unit: "PPA-02" },

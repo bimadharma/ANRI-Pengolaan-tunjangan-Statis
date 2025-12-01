@@ -3,12 +3,12 @@ import { useNavigate, NavLink, Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   HiOutlineHome,
-  HiOutlineUsers,
-  HiOutlineCog,
+  HiOutlineDocumentText,
   HiOutlineClipboardList,
-  HiOutlineBriefcase,
-  HiOutlineOfficeBuilding,
-  HiOutlineIdentification,
+  HiOutlineCreditCard,
+  HiOutlineDocumentReport,
+  HiOutlineClock,
+  HiOutlineCog,
   HiX,
 } from "react-icons/hi";
 
@@ -46,16 +46,14 @@ export default function AdminSidebar({
   };
 
   const navItems = [
-    { label: "Home", to: "/admin", icon: <HiOutlineHome /> },
-    { label: "Users", to: "/admin/users", icon: <HiOutlineUsers /> },
-    { label: "Menu Master Data", to: "/admin/MenuMasterData", icon: <HiOutlineUsers /> },
-    { label: "Jabatan Master", to: "/admin/jabatan", icon: <HiOutlineUsers /> },
-    { label: "Unit Kerja Master", to: "/admin/UnitKerja", icon: <HiOutlineUsers /> },
-    { label: "Daftar Pegawai", to: "/admin/DaftarPegawai", icon: <HiOutlineUsers /> },
-    { label: "Perhitungan Tunjangan PAS", to: "/admin/PerhitunganTunjanganPAS", icon: <HiOutlineUsers /> },
-
-    { label: "Settings", to: "/admin/settings", icon: <HiOutlineCog /> },
-  ];
+  { label: "Home", to: "/admin", icon: <HiOutlineHome /> },
+  { label: "Ketentuan", to: "/admin/Ketentuan", icon: <HiOutlineDocumentText /> },
+  { label: "Data Tupas", to: "/admin/DataTupas", icon: <HiOutlineClipboardList /> },
+  { label: "Data Pembayaran", to: "/admin/DataPembayaran", icon: <HiOutlineCreditCard /> },
+  { label: "Log Pembayaran", to: "/admin/LogPembayaran", icon: <HiOutlineDocumentReport /> },
+  { label: "Riwayat Tupas", to: "/admin/PerhitunganTunjanganPAS", icon: <HiOutlineClock /> },
+  { label: "Settings", to: "/admin/settings", icon: <HiOutlineCog /> },
+];
 
   return (
     <>

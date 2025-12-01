@@ -21,7 +21,7 @@ interface PopupState {
 type SortField = "nama" | "nip" | "jabatan" | "departemen" | "email" | null;
 type SortOrder = "asc" | "desc";
 
-export default function DaftarPegawai() {
+export default function RiwayatTupas() {
   const [pegawai, setPegawai] = useState<Pegawai[]>([
     {
       id: 1,

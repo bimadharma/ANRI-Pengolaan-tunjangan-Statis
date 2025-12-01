@@ -3,18 +3,22 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import UserDashboard from "../pages/UserDashboard";
 import AdminDashboard from "../pages/admin/AdminDashboard";
+
 import ProtectedRoute from "../components/ProtectedRoute";
 import { useAuth } from "../hooks/useAuth";
-import EmployeeTablePage from "../pages/admin/jabatan";
-import MasterData from "../pages/admin/MenuMasterData";
-import UnitKerjaPage from "../pages/admin/UnitKerja";
-import DaftarPegawai from "../pages/admin/DaftarPegawai";
+
+// Admin pages (semua ini sudah ada di import)
+import DataPembayaran from "../pages/admin/DataPembayaran";
+import DataTupas from "../pages/admin/DataTupas";
+import Ketentuan from "../pages/admin/Ketentuan";
+import LogPembayaran from "../pages/admin/LogPembayaran";
 import PerhitunganTunjanganPAS from "../pages/admin/PerhitunganTunjanganPAS";
+import RiwayatTupas from "../pages/admin/RiwayatTupas";
 
-
-
-import NotificationDetailPage from "../pages/notifications/Detail";
+// Notifications
 import NotificationsPage from "../pages/notifications";
+import NotificationDetailPage from "../pages/notifications/Detail";
+
 export default function AppRoutes() {
   const { user } = useAuth();
 
@@ -64,30 +68,43 @@ export default function AppRoutes() {
         }
       />
 
+      {/* === ADMIN PAGES SESUAI IMPORT === */}
       <Route
-        path="/admin/jabatan"
+        path="/admin/DataPembayaran"
         element={
           <ProtectedRoute role="admin">
-            <EmployeeTablePage />
+            <DataPembayaran />
           </ProtectedRoute>
         }
       />
+
       <Route
-        path="/admin/UnitKerja"
+        path="/admin/DataTupas"
         element={
           <ProtectedRoute role="admin">
-            <UnitKerjaPage />
+            <DataTupas />
           </ProtectedRoute>
         }
       />
+
       <Route
-        path="/admin/DaftarPegawai"
+        path="/admin/Ketentuan"
         element={
           <ProtectedRoute role="admin">
-            <DaftarPegawai />
+            <Ketentuan />
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/admin/LogPembayaran"
+        element={
+          <ProtectedRoute role="admin">
+            <LogPembayaran />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/admin/PerhitunganTunjanganPAS"
         element={
@@ -97,15 +114,16 @@ export default function AppRoutes() {
         }
       />
 
-
       <Route
-        path="/admin/MenuMasterData"
+        path="/admin/RiwayatTupas"
         element={
           <ProtectedRoute role="admin">
-            <MasterData />
+            <RiwayatTupas />
           </ProtectedRoute>
         }
       />
+
+      {/* Notifications */}
       <Route path="/notifications" element={<NotificationsPage />} />
       <Route path="/notifications/:id" element={<NotificationDetailPage />} />
     </Routes>

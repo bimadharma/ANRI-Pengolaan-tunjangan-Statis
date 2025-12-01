@@ -1,18 +1,31 @@
-// ...existing code...
 import React, { useState } from "react";
 import { Button, Card } from "flowbite-react";
 import { motion } from "framer-motion";
 import "flowbite";
 import MainLayout from "../../components/layout/MainLayout";
 
-/**
- * RiwayatTunjanganPAS.jsx
- * - Tabel riwayat tunjangan PAS dengan fitur CRUD (mock data)
- * - Responsive: desktop table, tablet compact table, mobile cards
- * - Styling mengikuti pola jabatan.tsx (Tailwind + Flowbite)
- */
+type TupasItem = {
+  id: number;
+  nama: string;
+  nip: string;
+  jabatan: string;
+  golongan: string;
+  gajiPokok: number;
+  tunjangan: number;
+  potongan: number;
+  total: number;
+  bulan: string;
+  tahun: string;
+  status: string;
+};
 
-function sampleData() {
+type PopupState = {
+  open: boolean;
+  mode: "add" | "edit" | "view" | "delete" | "";
+  data: TupasItem | null;
+};
+
+function sampleData(): TupasItem[] {
   return [
     {
       id: 1,
@@ -45,12 +58,13 @@ function sampleData() {
   ];
 }
 
-export default function RiwayatTunjanganPAS() {
-  const [items, setItems] = useState(sampleData());
-  const [filter, setFilter] = useState("");
-  const [popup, setPopup] = useState({ open: false, mode: "", data: null });
-  const [form, setForm] = useState({
-    id: null,
+export default function DataTupas() {
+  const [items, setItems] = useState<TupasItem[]>(sampleData());
+  const [filter, setFilter] = useState<string>("");
+  const [popup, setPopup] = useState<PopupState>({ open: false, mode: "", data: null });
+
+  const [form, setForm] = useState<TupasItem>({
+    id: 0,
     nama: "",
     nip: "",
     jabatan: "",
@@ -61,14 +75,19 @@ export default function RiwayatTunjanganPAS() {
     bulan: "01",
     tahun: new Date().getFullYear().toString(),
     status: "Aktif",
+    total: 0,
   });
 
-  const formatCurrency = (v) =>
-    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(v);
+  const formatCurrency = (v: number) =>
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0
+    }).format(v);
 
   const openAdd = () => {
     setForm({
-      id: null,
+      id: 0,
       nama: "",
       nip: "",
       jabatan: "",
@@ -79,21 +98,22 @@ export default function RiwayatTunjanganPAS() {
       bulan: "01",
       tahun: new Date().getFullYear().toString(),
       status: "Aktif",
+      total: 0,
     });
     setPopup({ open: true, mode: "add", data: null });
   };
 
-  const openEdit = (it) => {
+  const openEdit = (it: TupasItem) => {
     setForm({ ...it });
     setPopup({ open: true, mode: "edit", data: it });
   };
 
-  const openView = (it) => {
+  const openView = (it: TupasItem) => {
     setForm({ ...it });
     setPopup({ open: true, mode: "view", data: it });
   };
 
-  const openDelete = (it) => {
+  const openDelete = (it: TupasItem) => {
     setForm({ ...it });
     setPopup({ open: true, mode: "delete", data: it });
   };
@@ -101,19 +121,25 @@ export default function RiwayatTunjanganPAS() {
   const closePopup = () => setPopup({ open: false, mode: "", data: null });
 
   const handleSave = () => {
-    // basic validation
     if (!form.nama || !form.nip) {
       alert("Nama dan NIP wajib diisi");
       return;
     }
-    const total = Number(form.gajiPokok || 0) + Number(form.tunjangan || 0) - Number(form.potongan || 0);
+
+    const total =
+      Number(form.gajiPokok || 0) +
+      Number(form.tunjangan || 0) -
+      Number(form.potongan || 0);
 
     if (popup.mode === "add") {
-      const newItem = { ...form, id: Date.now(), total };
+      const newItem: TupasItem = { ...form, id: Date.now(), total };
       setItems((s) => [newItem, ...s]);
     } else if (popup.mode === "edit") {
-      setItems((s) => s.map((x) => (x.id === form.id ? { ...form, total } : x)));
+      setItems((s) =>
+        s.map((x) => (x.id === form.id ? { ...form, total } : x))
+      );
     }
+
     closePopup();
   };
 
@@ -123,13 +149,13 @@ export default function RiwayatTunjanganPAS() {
     closePopup();
   };
 
-  const filtered = items.filter(
-    (it) =>
-      it.nama.toLowerCase().includes(filter.toLowerCase()) ||
-      it.nip.includes(filter) ||
-      it.jabatan.toLowerCase().includes(filter.toLowerCase())
+  const filtered = items.filter((it: TupasItem) =>
+    it.nama.toLowerCase().includes(filter.toLowerCase()) ||
+    it.nip.includes(filter) ||
+    it.jabatan.toLowerCase().includes(filter.toLowerCase())
   );
 
+  
   return (
     <MainLayout isAdmin={true}>
       <div className="p-6 max-w-6xl mx-auto">
@@ -353,4 +379,3 @@ export default function RiwayatTunjanganPAS() {
     </MainLayout>
   );
 }
-// ...existing code...
