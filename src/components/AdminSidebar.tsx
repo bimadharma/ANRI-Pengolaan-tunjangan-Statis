@@ -51,7 +51,7 @@ export default function AdminSidebar({
   { label: "Data Tupas", to: "/admin/DataTupas", icon: <HiOutlineClipboardList /> },
   { label: "Data Pembayaran", to: "/admin/DataPembayaran", icon: <HiOutlineCreditCard /> },
   { label: "Log Pembayaran", to: "/admin/LogPembayaran", icon: <HiOutlineDocumentReport /> },
-  { label: "Riwayat Tupas", to: "/admin/PerhitunganTunjanganPAS", icon: <HiOutlineClock /> },
+  { label: "Riwayat Tupas", to: "/admin/RiwayatTupas", icon: <HiOutlineClock /> },
   { label: "Settings", to: "/admin/settings", icon: <HiOutlineCog /> },
 ];
 

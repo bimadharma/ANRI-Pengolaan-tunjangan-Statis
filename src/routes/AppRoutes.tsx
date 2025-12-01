@@ -12,7 +12,7 @@ import DataPembayaran from "../pages/admin/DataPembayaran";
 import DataTupas from "../pages/admin/DataTupas";
 import Ketentuan from "../pages/admin/Ketentuan";
 import LogPembayaran from "../pages/admin/LogPembayaran";
-import PerhitunganTunjanganPAS from "../pages/admin/PerhitunganTunjanganPAS";
+import PerhitunganTunjanganPAS from "../pages/admin/RiwayatTupas";
 import RiwayatTupas from "../pages/admin/RiwayatTupas";
 
 // Notifications
