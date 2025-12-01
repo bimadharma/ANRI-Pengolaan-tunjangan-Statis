@@ -172,9 +172,9 @@ export default function LogPembayaran() {
             </div>
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Manajemen Pegawai
+                Log Pembayaran
               </h1>
-              <p className="text-gray-600 text-sm mt-1">Kelola data pegawai dan jabatan</p>
+              <p className="text-gray-600 text-sm mt-1">Kelola Log Pembayaran</p>
             </div>
           </div>
         </motion.div>

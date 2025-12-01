@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Card } from "flowbite-react";
 import { motion } from "framer-motion";
 import "flowbite";
-import MainLayout from "../../components/layout/MainLayout";
+import MainLayout from "../src/components/layout/MainLayout";
 
 // Interface untuk Tunjangan PAS
 interface TunjanganPAS {
