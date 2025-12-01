@@ -200,9 +200,9 @@ export default function RiwayatTupas() {
             </div>
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Daftar Pegawai
+                Riwayat Tupas
               </h1>
-              <p className="text-gray-600 text-sm mt-1">Kelola data pegawai secara lengkap</p>
+              <p className="text-gray-600 text-sm mt-1">Kelola Riwayat secara lengkap</p>
             </div>
           </div>
         </motion.div>
