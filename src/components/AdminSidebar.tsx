@@ -46,7 +46,6 @@ export default function AdminSidebar({
   };
 
   const navItems = [
-<<<<<<< HEAD
     { label: "Home", to: "/admin", icon: <HiOutlineHome /> },
     { label: "Users", to: "/admin/users", icon: <HiOutlineUsers /> },
     { label: "Menu Master Data", to: "/admin/MenuMasterData", icon: <HiOutlineUsers /> },
@@ -57,17 +56,6 @@ export default function AdminSidebar({
 
     { label: "Settings", to: "/admin/settings", icon: <HiOutlineCog /> },
   ];
-=======
-  { label: "Home", to: "/admin", icon: <HiOutlineHome /> },
-  { label: "Users", to: "/admin/users", icon: <HiOutlineUsers /> },
-  { label: "Menu Master Data", to: "/admin/MenuMasterData", icon: <HiOutlineClipboardList /> },
-  { label: "Jabatan Master", to: "/admin/jabatan", icon: <HiOutlineBriefcase /> },
-  { label: "Unit Kerja Master", to: "/admin/UnitKerja", icon: <HiOutlineOfficeBuilding /> },
-  { label: "Daftar Pegawai", to: "/admin/DaftarPegawai", icon: <HiOutlineIdentification /> },
-  { label: "Settings", to: "/admin/settings", icon: <HiOutlineCog /> },
-];
-
->>>>>>> 1e67d61185fd4e08ab911f04c8b40674e79039d3
 
   return (
     <>
