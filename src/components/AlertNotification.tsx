@@ -20,6 +20,9 @@ interface AlertNotificationProps {
   removeToast: (id: number) => void;
 }
 
+// Tambahkan util class spin lebih cepat
+const fastSpin = "animate-[spin_0.6s_linear_infinite]";
+
 export default function AlertNotification({
   toasts,
   removeToast,
@@ -37,7 +40,7 @@ export default function AlertNotification({
     error: <XCircle className="w-5 h-5" />,
     warning: <AlertTriangle className="w-5 h-5" />,
     info: <Info className="w-5 h-5" />,
-    loading: <Loader2 className="w-5 h-5 animate-spin" />,
+    loading: <Loader2 className={`w-5 h-5 ${fastSpin}`} />, // spin lebih cepat
   };
 
   const defaultMessages: Record<Toast["type"], string> = {
@@ -54,10 +57,13 @@ export default function AlertNotification({
         {toasts.map((t) => (
           <motion.div
             key={t.id}
-            initial={{ x: 200, opacity: 0 }}
+            initial={{ x: 150, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 200, opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            exit={{ x: 150, opacity: 0 }}
+            transition={{
+              duration: t.type === "loading" ? 0.15 : 0.25, // loading lebih cepat
+              ease: "easeOut",
+            }}
             className={`border rounded-2xl px-4 py-3 flex items-start gap-3 shadow-md ${styleMap[t.type]}`}
           >
             <div className="mt-0.5">{iconMap[t.type]}</div>

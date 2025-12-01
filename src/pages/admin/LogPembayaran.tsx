@@ -228,37 +228,27 @@ export default function LogPembayaran() {
 
   const handleSubmit = () => {
     if (!formData.name || !formData.position) {
-      pushToast("error");
+      pushToast("warning");
       return;
     }
 
-    pushToast("loading");
-
-    // Simulasi proses async
-    setTimeout(() => {
-      if (popup.mode === "add") {
-        const newId = Math.max(...employees.map((e) => e.id), 0) + 1;
-        setEmployees([...employees, { ...formData, id: newId }]);
-        pushToast("success", "Pegawai berhasil ditambahkan");
-      } else if (popup.mode === "edit" && popup.data) {
-        setEmployees(
-          employees.map((e) => (e.id === popup.data!.id ? { ...formData, id: e.id } : e))
-        );
-        pushToast("success", "Pegawai berhasil diperbarui");
-      }
-      closePopup();
-    }, 1000);
+    if (popup.mode === "add") {
+      const newId = Math.max(...employees.map((e) => e.id), 0) + 1;
+      setEmployees([...employees, { ...formData, id: newId }]);
+      pushToast("success");
+    } else if (popup.mode === "edit" && popup.data) {
+      setEmployees(
+        employees.map((e) => (e.id === popup.data!.id ? { ...formData, id: e.id } : e))
+      );
+      pushToast("success");
+    }
+    closePopup();
   };
 
   const handleDelete = (id: number) => {
-    pushToast("loading");
-    
-    // Simulasi proses async
-    setTimeout(() => {
-      setEmployees(employees.filter((e) => e.id !== id));
-      pushToast("warning", "Pegawai berhasil dihapus");
-      closePopup();
-    }, 800);
+    setEmployees(employees.filter((e) => e.id !== id));
+    pushToast("success");
+    closePopup();
   };
 
   return (
