@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, Plus, Eye, Edit2, Trash2, X, Database, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react"
+import { Search, Plus, Eye, Edit2, Trash2, X, Database, CheckCircle } from "lucide-react"
+import Pagination from "../../components/pagination"
 import MainLayout from "../../components/layout/MainLayout"
 
 interface MasterDataItem {
@@ -167,9 +168,9 @@ export default function Ketentuan() {
               </div>
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Master Data
+                  Ketentuan
                 </h1>
-                <p className="text-gray-600 text-sm mt-1">Kelola data master Anda dengan mudah</p>
+                <p className="text-gray-600 text-sm mt-1">Kelola data Anda dengan mudah</p>
               </div>
             </div>
           </motion.div>
@@ -335,56 +336,16 @@ export default function Ketentuan() {
 
             {/* Pagination */}
             {filteredData.length > 0 && (
-              <div className="p-6 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                  Menampilkan {startIndex + 1} - {Math.min(endIndex, filteredData.length)} dari {filteredData.length}{" "}
-                  data
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={goToPrevious}
-                    disabled={currentPage === 1}
-                    className={`p-2 rounded-xl transition-all ${
-                      currentPage === 1
-                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                    }`}
-                    title="Previous"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-
-                  <div className="flex gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => goToPage(page)}
-                        className={`w-10 h-10 rounded-xl font-medium transition-all ${
-                          currentPage === page
-                            ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={goToNext}
-                    disabled={currentPage === totalPages}
-                    className={`p-2 rounded-xl transition-all ${
-                      currentPage === totalPages
-                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                    }`}
-                    title="Next"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={filteredData.length}
+                startIndex={startIndex}
+                endIndex={endIndex}
+                onPageChange={goToPage}
+                onPrevious={goToPrevious}
+                onNext={goToNext}
+              />
             )}
           </motion.div>
 

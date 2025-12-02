@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, Plus, Eye, Edit2, Trash2, X, TrendingUp, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react"
+import { Search, Plus, Eye, Edit2, Trash2, X, TrendingUp, CheckCircle } from "lucide-react"
 import "flowbite"
+import Pagination from "../../components/pagination"
 import MainLayout from "../../components/layout/MainLayout"
 
 type TupasItem = {
@@ -192,7 +193,7 @@ export default function DataTupas() {
               </div>
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Riwayat Tunjangan PAS
+                  Data Tunjangan PAS
                 </h1>
                 <p className="text-gray-600 text-sm mt-1">Kelola riwayat tunjangan pegawai</p>
               </div>
@@ -235,7 +236,7 @@ export default function DataTupas() {
             >
               <div className="flex items-center justify-between h-full">
                 <div>
-                  <p className="text-blue-100 text-sm font-medium mb-1">Tambah Riwayat</p>
+                  <p className="text-blue-100 text-sm font-medium mb-1">Tambah Data</p>
                   <p className="text-white text-lg font-semibold">Klik untuk menambah</p>
                 </div>
                 <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
@@ -355,55 +356,16 @@ export default function DataTupas() {
             </div>
 
             {filtered.length > 0 && (
-              <div className="p-6 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                  Menampilkan {startIndex + 1} - {Math.min(endIndex, filtered.length)} dari {filtered.length} data
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={goToPrevious}
-                    disabled={currentPage === 1}
-                    className={`p-2 rounded-xl transition-all ${
-                      currentPage === 1
-                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                    }`}
-                    title="Previous"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-
-                  <div className="flex gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => goToPage(page)}
-                        className={`w-10 h-10 rounded-xl font-medium transition-all ${
-                          currentPage === page
-                            ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={goToNext}
-                    disabled={currentPage === totalPages}
-                    className={`p-2 rounded-xl transition-all ${
-                      currentPage === totalPages
-                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                    }`}
-                    title="Next"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={filtered.length}
+                startIndex={startIndex}
+                endIndex={endIndex}
+                onPageChange={goToPage}
+                onPrevious={goToPrevious}
+                onNext={goToNext}
+              />
             )}
           </motion.div>
 
@@ -481,7 +443,7 @@ export default function DataTupas() {
                               {popup.mode === "add" ? <Plus className="w-6 h-6" /> : <Edit2 className="w-6 h-6" />}
                             </div>
                             <h2 className="text-2xl font-bold">
-                              {popup.mode === "add" ? "Tambah Riwayat" : "Edit Riwayat"}
+                              {popup.mode === "add" ? "Tambah Data" : "Edit Riwayat"}
                             </h2>
                           </div>
                           <button onClick={closePopup} className="p-2 hover:bg-white/20 rounded-xl transition-colors">

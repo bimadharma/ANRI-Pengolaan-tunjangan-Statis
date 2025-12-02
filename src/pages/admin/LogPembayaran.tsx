@@ -1,28 +1,49 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, Plus, Eye, Edit2, Trash2, X, Users, Briefcase, DollarSign, Mail, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
-import MainLayout from "../../components/layout/MainLayout";
-import AlertNotification, { type Toast } from "../../components/AlertNotification";
+"use client"
 
-import type { Employee, PopupState, FormData } from "../../types/employee";
-import { Loader2 } from 'lucide-react';
-import { useEmployees } from "../../hooks/useEmployees";
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  Search,
+  Plus,
+  Eye,
+  Edit2,
+  Trash2,
+  X,
+  Users,
+  Briefcase,
+  DollarSign,
+  Mail,
+  TrendingUp,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react"
+import MainLayout from "../../components/layout/MainLayout"
+import AlertNotification, { type Toast } from "../../components/AlertNotification"
+import Pagination from "../../components/pagination"
 
-import { sanitizeMoney, formatSalary } from "../../utils/salary";
+import type { Employee, PopupState, FormData } from "../../types/employee"
+import { Loader2 } from "lucide-react"
+import { useEmployees } from "../../hooks/useEmployees"
 
-type SortColumn = "name" | "position" | "email" | "salary";
+import { sanitizeMoney, formatSalary } from "../../utils/salary"
+
+type SortColumn = "name" | "position" | "email" | "salary"
 
 export default function LogPembayaran() {
-  const { employees, setEmployees, loading, error } = useEmployees();
-  const [filter, setFilter] = useState<string>("");
-  const [sortBy, setSortBy] = useState<SortColumn>("name");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const { employees, setEmployees, loading, error } = useEmployees()
+  const [filter, setFilter] = useState<string>("")
+  const [sortBy, setSortBy] = useState<SortColumn>("name")
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
+  const [toasts, setToasts] = useState<Toast[]>([])
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const itemsPerPage = 5
+
   const [popup, setPopup] = useState<PopupState>({
     open: false,
     mode: "",
     data: null,
-  });
+  })
   const [formData, setFormData] = useState<FormData>({
     name: "",
     position: "",
@@ -30,19 +51,19 @@ export default function LogPembayaran() {
     status: "",
     salary: "",
     startDate: "",
-  });
+  })
 
   const pushToast = (type: Toast["type"], message?: string) => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, type, message }]);
+    const id = Date.now()
+    setToasts((prev) => [...prev, { id, type, message }])
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 5000);
-  };
+      setToasts((prev) => prev.filter((t) => t.id !== id))
+    }, 5000)
+  }
 
   const removeToast = (id: number) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+    setToasts((prev) => prev.filter((t) => t.id !== id))
+  }
 
   const openPopup = (mode: string, data: Employee | null = null) => {
     setFormData(
@@ -53,13 +74,13 @@ export default function LogPembayaran() {
         status: "",
         salary: "",
         startDate: "",
-      }
-    );
-    setPopup({ open: true, mode, data });
-  };
+      },
+    )
+    setPopup({ open: true, mode, data })
+  }
 
   const closePopup = () => {
-    setPopup({ open: false, mode: "", data: null });
+    setPopup({ open: false, mode: "", data: null })
     setFormData({
       name: "",
       position: "",
@@ -67,114 +88,144 @@ export default function LogPembayaran() {
       status: "",
       salary: "",
       startDate: "",
-    });
-  };
+    })
+  }
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData({ ...formData, [field]: value });
-  };
+    setFormData({ ...formData, [field]: value })
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Aktif":
-        return "bg-green-100 text-green-700 border-green-200";
+        return "bg-green-100 text-green-700 border-green-200"
       case "Cuti":
-        return "bg-amber-100 text-amber-700 border-amber-200";
+        return "bg-amber-100 text-amber-700 border-amber-200"
       case "Non-Aktif":
-        return "bg-red-100 text-red-700 border-red-200";
+        return "bg-red-100 text-red-700 border-red-200"
       default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
+        return "bg-gray-100 text-gray-700 border-gray-200"
     }
-  };
+  }
 
   // filter
   const searched = employees.filter((e) => {
-    const q = filter.toLowerCase();
-    return e.name.toLowerCase().includes(q) || e.position.toLowerCase().includes(q) || e.email.toLowerCase().includes(q) || formatSalary(e.salary).toLowerCase().includes(q);
-  });
+    const q = filter.toLowerCase()
+    return (
+      e.name.toLowerCase().includes(q) ||
+      e.position.toLowerCase().includes(q) ||
+      e.email.toLowerCase().includes(q) ||
+      formatSalary(e.salary).toLowerCase().includes(q)
+    )
+  })
 
   // sort
-  const visible = [...searched].sort((a, b) => {
-    let x: number | string = "";
-    let y: number | string = "";
+  const sorted = [...searched].sort((a, b) => {
+    let x: number | string = ""
+    let y: number | string = ""
     switch (sortBy) {
       case "salary":
-        x = sanitizeMoney(a.salary);
-        y = sanitizeMoney(b.salary);
-        break;
+        x = sanitizeMoney(a.salary)
+        y = sanitizeMoney(b.salary)
+        break
       case "name":
-        x = a.name.toLowerCase();
-        y = b.name.toLowerCase();
-        break;
+        x = a.name.toLowerCase()
+        y = b.name.toLowerCase()
+        break
       case "position":
-        x = a.position.toLowerCase();
-        y = b.position.toLowerCase();
-        break;
+        x = a.position.toLowerCase()
+        y = b.position.toLowerCase()
+        break
       case "email":
-        x = a.email.toLowerCase();
-        y = b.email.toLowerCase();
-        break;
+        x = a.email.toLowerCase()
+        y = b.email.toLowerCase()
+        break
     }
-    if (x < y) return sortDir === "asc" ? -1 : 1;
-    if (x > y) return sortDir === "asc" ? 1 : -1;
-    return 0;
-  });
+    if (x < y) return sortDir === "asc" ? -1 : 1
+    if (x > y) return sortDir === "asc" ? 1 : -1
+    return 0
+  })
+
+  const totalPages = Math.ceil(sorted.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const visible = sorted.slice(startIndex, endIndex)
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handlePrevious = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1)
+  }
+
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1)
+  }
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filter])
 
   const toggleSort = (col: SortColumn) => {
     if (sortBy !== col) {
-      setSortBy(col);
-      setSortDir("asc");
+      setSortBy(col)
+      setSortDir("asc")
     } else {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"))
     }
-  };
+  }
 
   const SortIcon = ({ col }: { col: SortColumn }) => {
-    if (sortBy !== col) return <ArrowUpDown className="w-4 h-4 text-gray-400" />;
-    return sortDir === "asc" ? <ArrowUp className="w-4 h-4 text-blue-600" /> : <ArrowDown className="w-4 h-4 text-blue-600" />;
-  };
+    if (sortBy !== col) return <ArrowUpDown className="w-4 h-4 text-gray-400" />
+    return sortDir === "asc" ? (
+      <ArrowUp className="w-4 h-4 text-blue-600" />
+    ) : (
+      <ArrowDown className="w-4 h-4 text-blue-600" />
+    )
+  }
 
-  const totalSalary = employees.reduce((sum, emp) => sum + sanitizeMoney(emp.salary), 0);
+  const totalSalary = employees.reduce((sum, emp) => sum + sanitizeMoney(emp.salary), 0)
 
   const handleSubmit = () => {
     if (!formData.name || !formData.position) {
-      pushToast("warning");
-      return;
+      pushToast("warning")
+      return
     }
 
     if (popup.mode === "add") {
-      const newId = Math.max(...employees.map((e) => e.id), 0) + 1;
-      setEmployees([...employees, { ...formData, id: newId }]);
-      pushToast("success");
+      const newId = Math.max(...employees.map((e) => e.id), 0) + 1
+      setEmployees([...employees, { ...formData, id: newId }])
+      pushToast("success")
     } else if (popup.mode === "edit" && popup.data) {
-      setEmployees(employees.map((e) => (e.id === popup.data!.id ? { ...formData, id: e.id } : e)));
-      pushToast("success");
+      setEmployees(employees.map((e) => (e.id === popup.data!.id ? { ...formData, id: e.id } : e)))
+      pushToast("success")
     }
-    closePopup();
-  };
+    closePopup()
+  }
 
   const handleDelete = (id: number) => {
-    setEmployees(employees.filter((e) => e.id !== id));
-    pushToast("success");
-    closePopup();
-  };
+    setEmployees(employees.filter((e) => e.id !== id))
+    pushToast("success")
+    closePopup()
+  }
 
   useEffect(() => {
-    if (error) pushToast("error", "Gagal memuat data karyawan");
-  }, [error]);
+    if (error) pushToast("error", "Gagal memuat data karyawan")
+  }, [error])
 
   if (loading) {
-  return (
-    <MainLayout isAdmin={true}>
-    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="bg-white px-8 py-6 rounded-2xl shadow-xl flex flex-col items-center gap-4">
-        <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
-        <p className="text-gray-700 font-semibold text-lg">Loading...</p>
-      </div>
-    </div>
-    </MainLayout>
-  );
-}
+    return (
+      <MainLayout isAdmin={true}>
+        <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+          <div className="bg-white px-8 py-6 rounded-2xl shadow-xl flex flex-col items-center gap-4">
+            <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+            <p className="text-gray-700 font-semibold text-lg">Loading...</p>
+          </div>
+        </div>
+      </MainLayout>
+    )
+  }
 
   return (
     <MainLayout isAdmin={true}>
@@ -190,7 +241,9 @@ export default function LogPembayaran() {
                 <Users className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Log Pembayaran</h1>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Log Pembayaran
+                </h1>
                 <p className="text-gray-600 text-sm mt-1">Kelola Log Pembayaran</p>
               </div>
             </div>
@@ -199,7 +252,12 @@ export default function LogPembayaran() {
           {/* Layout: Main (left) + Sidebar (right) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Main Card (Table & Search) */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="lg:col-span-9 bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="lg:col-span-9 bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden"
+            >
               {/* Search Bar */}
               <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
                 <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -221,28 +279,44 @@ export default function LogPembayaran() {
                 <table className="w-full">
                   <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
                     <tr>
-                      <th className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none" onClick={() => toggleSort("name")} title="Urutkan">
+                      <th
+                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none"
+                        onClick={() => toggleSort("name")}
+                        title="Urutkan"
+                      >
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4" />
                           Nama
                           <SortIcon col="name" />
                         </div>
                       </th>
-                      <th className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none" onClick={() => toggleSort("position")} title="Urutkan">
+                      <th
+                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none"
+                        onClick={() => toggleSort("position")}
+                        title="Urutkan"
+                      >
                         <div className="flex items-center gap-2">
                           <Briefcase className="w-4 h-4" />
                           Posisi
                           <SortIcon col="position" />
                         </div>
                       </th>
-                      <th className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none" onClick={() => toggleSort("email")} title="Urutkan">
+                      <th
+                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none"
+                        onClick={() => toggleSort("email")}
+                        title="Urutkan"
+                      >
                         <div className="flex items-center gap-2">
                           <Mail className="w-4 h-4" />
                           Email
                           <SortIcon col="email" />
                         </div>
                       </th>
-                      <th className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none" onClick={() => toggleSort("salary")} title="Urutkan">
+                      <th
+                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none"
+                        onClick={() => toggleSort("salary")}
+                        title="Urutkan"
+                      >
                         <div className="flex items-center gap-2">
                           <DollarSign className="w-4 h-4" />
                           Nominal
@@ -267,12 +341,16 @@ export default function LogPembayaran() {
                           >
                             <td className="p-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center text-white font-bold">{emp.name.charAt(0)}</div>
+                                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center text-white font-bold">
+                                  {emp.name.charAt(0)}
+                                </div>
                                 <span className="font-medium text-gray-800">{emp.name}</span>
                               </div>
                             </td>
                             <td className="p-4">
-                              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium">{emp.position}</span>
+                              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium">
+                                {emp.position}
+                              </span>
                             </td>
                             <td className="p-4 text-sm text-gray-600">{emp.email}</td>
                             <td className="p-4">
@@ -280,13 +358,25 @@ export default function LogPembayaran() {
                             </td>
                             <td className="p-4">
                               <div className="flex gap-2">
-                                <button onClick={() => openPopup("view", emp)} className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-xl transition-all hover:scale-110" title="View">
+                                <button
+                                  onClick={() => openPopup("view", emp)}
+                                  className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-xl transition-all hover:scale-110"
+                                  title="View"
+                                >
                                   <Eye className="w-4 h-4" />
                                 </button>
-                                <button onClick={() => openPopup("edit", emp)} className="p-2 bg-amber-100 hover:bg-amber-200 text-amber-600 rounded-xl transition-all hover:scale-110" title="Edit">
+                                <button
+                                  onClick={() => openPopup("edit", emp)}
+                                  className="p-2 bg-amber-100 hover:bg-amber-200 text-amber-600 rounded-xl transition-all hover:scale-110"
+                                  title="Edit"
+                                >
                                   <Edit2 className="w-4 h-4" />
                                 </button>
-                                <button onClick={() => openPopup("delete", emp)} className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-xl transition-all hover:scale-110" title="Delete">
+                                <button
+                                  onClick={() => openPopup("delete", emp)}
+                                  className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-xl transition-all hover:scale-110"
+                                  title="Delete"
+                                >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
                               </div>
@@ -310,10 +400,28 @@ export default function LogPembayaran() {
                   </tbody>
                 </table>
               </div>
+
+              {sorted.length > 0 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={sorted.length}
+                  startIndex={startIndex}
+                  endIndex={endIndex}
+                  onPageChange={handlePageChange}
+                  onPrevious={handlePrevious}
+                  onNext={handleNext}
+                />
+              )}
             </motion.div>
 
             {/* Sidebar Cards (Right) */}
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }} className="lg:col-span-3 space-y-6">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 }}
+              className="lg:col-span-3 space-y-6"
+            >
               <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
@@ -330,7 +438,9 @@ export default function LogPembayaran() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <p className="text-gray-600 text-sm font-medium mb-1">Total Nominal</p>
-                    <p className="text-2xl font-bold text-green-600">Rp {new Intl.NumberFormat("id-ID").format(totalSalary)}</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      Rp {new Intl.NumberFormat("id-ID").format(totalSalary)}
+                    </p>
                   </div>
                   <div className="p-4 bg-green-100 rounded-2xl">
                     <TrendingUp className="w-7 h-7 text-green-600" />
@@ -339,7 +449,10 @@ export default function LogPembayaran() {
                 <p className="text-xs text-gray-500">Akumulasi gaji dari seluruh pegawai</p>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 cursor-pointer" onClick={() => openPopup("add")}>
+              <div
+                className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 cursor-pointer"
+                onClick={() => openPopup("add")}
+              >
                 <div className="flex items-center justify-between h-full">
                   <div>
                     <p className="text-blue-100 text-sm font-medium mb-1">Tambah Pegawai</p>
@@ -356,7 +469,13 @@ export default function LogPembayaran() {
           {/* Modal Popup */}
           <AnimatePresence>
             {popup.open && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closePopup}>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+                onClick={closePopup}
+              >
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0, y: 20 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -383,7 +502,9 @@ export default function LogPembayaran() {
                       </div>
                       <div className="p-6 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
                         <div className="flex items-center justify-center mb-4">
-                          <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg">{popup.data.name.charAt(0)}</div>
+                          <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg">
+                            {popup.data.name.charAt(0)}
+                          </div>
                         </div>
                         <div className="bg-gray-50 rounded-2xl p-4">
                           <p className="text-xs text-gray-500 mb-1">Nama Lengkap</p>
@@ -411,7 +532,10 @@ export default function LogPembayaran() {
                           <p className="text-xs text-gray-500 mb-1">Tanggal Masuk</p>
                           <p className="font-semibold text-gray-800">{popup.data.startDate}</p>
                         </div>
-                        <button onClick={closePopup} className="w-full py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-2xl font-medium transition-colors mt-2">
+                        <button
+                          onClick={closePopup}
+                          className="w-full py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-2xl font-medium transition-colors mt-2"
+                        >
                           Tutup
                         </button>
                       </div>
@@ -424,8 +548,12 @@ export default function LogPembayaran() {
                       <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">{popup.mode === "add" ? <Plus className="w-6 h-6" /> : <Edit2 className="w-6 h-6" />}</div>
-                            <h2 className="text-2xl font-bold">{popup.mode === "add" ? "Tambah Pegawai" : "Edit Pegawai"}</h2>
+                            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                              {popup.mode === "add" ? <Plus className="w-6 h-6" /> : <Edit2 className="w-6 h-6" />}
+                            </div>
+                            <h2 className="text-2xl font-bold">
+                              {popup.mode === "add" ? "Tambah Pegawai" : "Edit Pegawai"}
+                            </h2>
                           </div>
                           <button onClick={closePopup} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
                             <X className="w-6 h-6" />
@@ -496,10 +624,16 @@ export default function LogPembayaran() {
                           />
                         </div>
                         <div className="flex gap-3 pt-2">
-                          <button onClick={handleSubmit} className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl font-medium transition-all hover:shadow-lg">
+                          <button
+                            onClick={handleSubmit}
+                            className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl font-medium transition-all hover:shadow-lg"
+                          >
                             Simpan
                           </button>
-                          <button onClick={closePopup} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl font-medium transition-colors">
+                          <button
+                            onClick={closePopup}
+                            className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl font-medium transition-colors"
+                          >
                             Batal
                           </button>
                         </div>
@@ -526,7 +660,8 @@ export default function LogPembayaran() {
                       <div className="p-6">
                         <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 mb-6">
                           <p className="text-gray-700 text-center">
-                            Apakah Anda yakin ingin menghapus pegawai <span className="font-bold text-red-600">{popup.data.name}</span>?
+                            Apakah Anda yakin ingin menghapus pegawai{" "}
+                            <span className="font-bold text-red-600">{popup.data.name}</span>?
                           </p>
                           <p className="text-gray-500 text-sm text-center mt-2">Tindakan ini tidak dapat dibatalkan</p>
                         </div>
@@ -537,7 +672,10 @@ export default function LogPembayaran() {
                           >
                             Ya, Hapus
                           </button>
-                          <button onClick={closePopup} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl font-medium transition-colors">
+                          <button
+                            onClick={closePopup}
+                            className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl font-medium transition-colors"
+                          >
                             Batal
                           </button>
                         </div>
@@ -551,5 +689,5 @@ export default function LogPembayaran() {
         </div>
       </div>
     </MainLayout>
-  );
+  )
 }
