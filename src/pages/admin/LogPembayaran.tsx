@@ -17,8 +17,7 @@ import {
   ArrowDown,
 } from "lucide-react";
 import MainLayout from "../../components/layout/MainLayout";
-import AlertNotification from "../../components/AlertNotification";
-import type { Toast } from "../../components/AlertNotification";
+import AlertNotification, { type Toast } from "../../components/AlertNotification";
 
 interface Employee {
   id: number;
@@ -48,35 +47,37 @@ interface FormData {
 type SortColumn = "name" | "position" | "email" | "salary";
 
 export default function LogPembayaran() {
-  const [employees, setEmployees] = useState<Employee[]>([
-    {
-      id: 1,
-      name: "Budi Santoso",
-      position: "Senior Developer",
-      email: "budi@example.com",
-      status: "Aktif",
-      salary: "8.000.000",
-      startDate: "2021-05-10",
-    },
-    {
-      id: 2,
-      name: "Sinta Dewi",
-      position: "UI/UX Designer",
-      email: "sinta@example.com",
-      status: "Cuti",
-      salary: "7.500.000",
-      startDate: "2022-01-18",
-    },
-    {
-      id: 3,
-      name: "Ahmad Fauzi",
-      position: "Product Manager",
-      email: "ahmad@example.com",
-      status: "Aktif",
-      salary: "12.000.000",
-      startDate: "2020-03-15",
-    },
-  ]);
+  const [employees, setEmployees] = useState<Employee[]>(
+    [
+      {
+        id: 1,
+        name: "Budi Santoso",
+        position: "Senior Developer",
+        email: "budi@example.com",
+        status: "Aktif",
+        salary: "8.000.000",
+        startDate: "2021-05-10",
+      },
+      {
+        id: 2,
+        name: "Sinta Dewi",
+        position: "UI/UX Designer",
+        email: "sinta@example.com",
+        status: "Cuti",
+        salary: "7.500.000",
+        startDate: "2022-01-18",
+      },
+      {
+        id: 3,
+        name: "Ahmad Fauzi",
+        position: "Product Manager",
+        email: "ahmad@example.com",
+        status: "Aktif",
+        salary: "12.000.000",
+        startDate: "2020-03-15",
+      },
+    ]
+  );
 
   const [filter, setFilter] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortColumn>("name");
@@ -96,8 +97,8 @@ export default function LogPembayaran() {
     startDate: "",
   });
 
-  // Fungsi untuk menambahkan toast
-  const pushToast = (type: Toast["type"], message: string) => {
+  // Fungsi untuk menambahkan toast (tanpa message akan gunakan default dari component)
+  const pushToast = (type: Toast["type"], message?: string) => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, type, message }]);
     setTimeout(() => {
@@ -227,27 +228,37 @@ export default function LogPembayaran() {
 
   const handleSubmit = () => {
     if (!formData.name || !formData.position) {
-      pushToast("error", "Nama dan Posisi wajib diisi");
+      pushToast("error");
       return;
     }
 
-    if (popup.mode === "add") {
-      const newId = Math.max(...employees.map((e) => e.id), 0) + 1;
-      setEmployees([...employees, { ...formData, id: newId }]);
-      pushToast("success", "Pegawai berhasil ditambahkan");
-    } else if (popup.mode === "edit" && popup.data) {
-      setEmployees(
-        employees.map((e) => (e.id === popup.data!.id ? { ...formData, id: e.id } : e))
-      );
-      pushToast("success", "Data pegawai berhasil diperbarui");
-    }
-    closePopup();
+    pushToast("loading");
+
+    // Simulasi proses async
+    setTimeout(() => {
+      if (popup.mode === "add") {
+        const newId = Math.max(...employees.map((e) => e.id), 0) + 1;
+        setEmployees([...employees, { ...formData, id: newId }]);
+        pushToast("success", "Pegawai berhasil ditambahkan");
+      } else if (popup.mode === "edit" && popup.data) {
+        setEmployees(
+          employees.map((e) => (e.id === popup.data!.id ? { ...formData, id: e.id } : e))
+        );
+        pushToast("success", "Pegawai berhasil diperbarui");
+      }
+      closePopup();
+    }, 1000);
   };
 
   const handleDelete = (id: number) => {
-    setEmployees(employees.filter((e) => e.id !== id));
-    pushToast("warning", "Pegawai berhasil dihapus");
-    closePopup();
+    pushToast("loading");
+    
+    // Simulasi proses async
+    setTimeout(() => {
+      setEmployees(employees.filter((e) => e.id !== id));
+      pushToast("warning", "Pegawai berhasil dihapus");
+      closePopup();
+    }, 800);
   };
 
   return (
