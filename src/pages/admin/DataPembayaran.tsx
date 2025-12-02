@@ -1,98 +1,104 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, Plus, Eye, Edit2, Trash2, DollarSign, CheckCircle, Filter, ArrowUpDown } from "lucide-react";
-import MainLayout from "../../components/layout/MainLayout";
-import AlertNotification, { Toast } from "../../components/AlertNotification";
-import GenericModal, { ModalField } from "../../components/ModalPop";
+"use client"
+
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Search, Plus, Eye, Edit2, Trash2, DollarSign, CheckCircle, Filter, ArrowUpDown } from "lucide-react"
+import MainLayout from "../../components/layout/MainLayout"
+import AlertNotification, { type Toast } from "../../components/AlertNotification"
+import GenericModal, { type ModalField } from "../../components/ModalPop"
+import Pagination from "../../components/pagination"
 
 interface TunjanganPengolahan {
-  id: number;
-  nama_pegawai: string;
-  nip: string;
-  jabatan: string;
-  grade: string;
-  unit_kerja: string;
-  nominal_tunjangan: number;
-  bulan_pembayaran: string;
-  tahun_pembayaran: string;
-  status_pembayaran: string;
+  id: number
+  nama_pegawai: string
+  nip: string
+  jabatan: string
+  grade: string
+  unit_kerja: string
+  nominal_tunjangan: number
+  bulan_pembayaran: string
+  tahun_pembayaran: string
+  status_pembayaran: string
 }
 
 interface PopupState {
-  open: boolean;
-  mode: "view" | "add" | "edit" | "delete";
-  data: TunjanganPengolahan | null;
+  open: boolean
+  mode: "view" | "add" | "edit" | "delete"
+  data: TunjanganPengolahan | null
 }
 
-type SortKey = keyof TunjanganPengolahan;
-type SortOrder = "asc" | "desc";
+type SortKey = keyof TunjanganPengolahan
+type SortOrder = "asc" | "desc"
 
 export default function DataPembayaran() {
   const [tunjanganData, setTunjanganData] = useState<TunjanganPengolahan[]>([
-    { 
-      id: 1, 
-      nama_pegawai: "Dr. Ahmad Sudrajat, M.Si", 
+    {
+      id: 1,
+      nama_pegawai: "Dr. Ahmad Sudrajat, M.Si",
       nip: "198501012010011001",
-      jabatan: "Kepala Bidang", 
+      jabatan: "Kepala Bidang",
       grade: "Grade 12",
       unit_kerja: "Sekretariat Utama",
       nominal_tunjangan: 5000000,
       bulan_pembayaran: "Desember",
       tahun_pembayaran: "2024",
-      status_pembayaran: "Sudah Dibayar"
+      status_pembayaran: "Sudah Dibayar",
     },
-    { 
-      id: 2, 
-      nama_pegawai: "Siti Nurhaliza, S.Sos", 
+    {
+      id: 2,
+      nama_pegawai: "Siti Nurhaliza, S.Sos",
       nip: "199203152015022001",
-      jabatan: "Kepala Sub Bagian", 
+      jabatan: "Kepala Sub Bagian",
       grade: "Grade 10",
       unit_kerja: "Pusat Pengolahan Arsip",
       nominal_tunjangan: 3500000,
       bulan_pembayaran: "Desember",
       tahun_pembayaran: "2024",
-      status_pembayaran: "Belum Dibayar"
+      status_pembayaran: "Belum Dibayar",
     },
-    { 
-      id: 3, 
-      nama_pegawai: "Budi Santoso, S.Kom", 
+    {
+      id: 3,
+      nama_pegawai: "Budi Santoso, S.Kom",
       nip: "199807202018011002",
-      jabatan: "Staff Pelaksana", 
+      jabatan: "Staff Pelaksana",
       grade: "Grade 7",
       unit_kerja: "Bidang Layanan Arsip",
       nominal_tunjangan: 2000000,
       bulan_pembayaran: "Desember",
       tahun_pembayaran: "2024",
-      status_pembayaran: "Proses"
+      status_pembayaran: "Proses",
     },
-  ]);
+  ])
 
-  const [search, setSearch] = useState<string>("");
-  const [filterStatus, setFilterStatus] = useState<string>("");
-  const [sortKey, setSortKey] = useState<SortKey>("id");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-  const [popup, setPopup] = useState<PopupState>({ open: false, mode: "view", data: null });
-  const [formData, setFormData] = useState<Partial<TunjanganPengolahan>>({});
-  
+  const [search, setSearch] = useState<string>("")
+  const [filterStatus, setFilterStatus] = useState<string>("")
+  const [sortKey, setSortKey] = useState<SortKey>("id")
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
+  const [popup, setPopup] = useState<PopupState>({ open: false, mode: "view", data: null })
+  const [formData, setFormData] = useState<Partial<TunjanganPengolahan>>({})
+
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const itemsPerPage = 5
+
   // Toast Management
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toasts, setToasts] = useState<Toast[]>([])
 
   const addToast = (type: Toast["type"], message?: string) => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, type, message }]);
-    
+    const id = Date.now()
+    setToasts((prev) => [...prev, { id, type, message }])
+
     if (type !== "loading") {
       setTimeout(() => {
-        removeToast(id);
-      }, 3000);
+        removeToast(id)
+      }, 3000)
     }
-    
-    return id;
-  };
+
+    return id
+  }
 
   const removeToast = (id: number) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+    setToasts((prev) => prev.filter((t) => t.id !== id))
+  }
 
   // Definisi fields untuk modal
   const modalFields: ModalField[] = [
@@ -193,129 +199,146 @@ export default function DataPembayaran() {
         { value: "Sudah Dibayar", label: "Sudah Dibayar" },
       ],
     },
-  ];
+  ]
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
     } else {
-      setSortKey(key);
-      setSortOrder("asc");
+      setSortKey(key)
+      setSortOrder("asc")
     }
-  };
+  }
 
   const filteredData = tunjanganData
     .filter((item) => {
-      const matchesSearch = 
+      const matchesSearch =
         item.nama_pegawai.toLowerCase().includes(search.toLowerCase()) ||
         item.nip.toLowerCase().includes(search.toLowerCase()) ||
-        item.jabatan.toLowerCase().includes(search.toLowerCase());
-      const matchesStatus = filterStatus ? item.status_pembayaran === filterStatus : true;
-      return matchesSearch && matchesStatus;
+        item.jabatan.toLowerCase().includes(search.toLowerCase())
+      const matchesStatus = filterStatus ? item.status_pembayaran === filterStatus : true
+      return matchesSearch && matchesStatus
     })
     .sort((a, b) => {
-      const aValue = a[sortKey];
-      const bValue = b[sortKey];
-      
+      const aValue = a[sortKey]
+      const bValue = b[sortKey]
+
       if (typeof aValue === "string" && typeof bValue === "string") {
-        return sortOrder === "asc" 
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+        return sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue)
       }
-      
-      return sortOrder === "asc" 
-        ? (aValue > bValue ? 1 : -1)
-        : (bValue > aValue ? 1 : -1);
-    });
+
+      return sortOrder === "asc" ? (aValue > bValue ? 1 : -1) : bValue > aValue ? 1 : -1
+    })
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedData = filteredData.slice(startIndex, endIndex)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, filterStatus])
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
 
   const openPopup = (mode: PopupState["mode"], data: TunjanganPengolahan | null = null) => {
-    setFormData(data || {});
-    setPopup({ open: true, mode, data });
-  };
+    setFormData(data || {})
+    setPopup({ open: true, mode, data })
+  }
 
   const closePopup = () => {
-    setPopup({ open: false, mode: "view", data: null });
-    setFormData({});
-  };
+    setPopup({ open: false, mode: "view", data: null })
+    setFormData({})
+  }
 
   const validateForm = (): boolean => {
     for (const field of modalFields) {
       if (field.required && !formData[field.name as keyof TunjanganPengolahan]?.toString().trim()) {
-        addToast("error", `${field.label} harus diisi!`);
-        return false;
+        addToast("error", `${field.label} harus diisi!`)
+        return false
       }
     }
-    return true;
-  };
+    return true
+  }
 
   const handleSubmit = () => {
-    if (!validateForm()) return;
+    if (!validateForm()) return
 
-    const loadingId = addToast("loading", "Menyimpan data...");
+    const loadingId = addToast("loading", "Menyimpan data...")
 
     setTimeout(() => {
-      removeToast(loadingId);
-      
+      removeToast(loadingId)
+
       if (popup.mode === "add") {
-        setTunjanganData([...tunjanganData, { id: Date.now(), ...formData } as TunjanganPengolahan]);
-        addToast("success", "Data tunjangan berhasil ditambahkan!");
+        setTunjanganData([...tunjanganData, { id: Date.now(), ...formData } as TunjanganPengolahan])
+        addToast("success", "Data tunjangan berhasil ditambahkan!")
       } else if (popup.mode === "edit" && popup.data) {
-        setTunjanganData(tunjanganData.map((item) =>
-          item.id === popup.data?.id ? { ...item, ...formData } : item
-        ));
-        addToast("success", "Data tunjangan berhasil diperbarui!");
+        setTunjanganData(tunjanganData.map((item) => (item.id === popup.data?.id ? { ...item, ...formData } : item)))
+        addToast("success", "Data tunjangan berhasil diperbarui!")
       }
-      
-      closePopup();
-    }, 1000);
-  };
+
+      closePopup()
+    }, 1000)
+  }
 
   const handleDelete = () => {
     if (popup.data) {
-      const loadingId = addToast("loading", "Menghapus data...");
+      const loadingId = addToast("loading", "Menghapus data...")
 
       setTimeout(() => {
-        removeToast(loadingId);
-        
-        setTunjanganData(tunjanganData.filter((item) => item.id !== popup.data?.id));
-        addToast("success", "Data tunjangan berhasil dihapus!");
-        closePopup();
-      }, 1000);
+        removeToast(loadingId)
+
+        setTunjanganData(tunjanganData.filter((item) => item.id !== popup.data?.id))
+        addToast("success", "Data tunjangan berhasil dihapus!")
+        closePopup()
+      }, 1000)
     }
-  };
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Sudah Dibayar":
-        return "bg-green-100 text-green-700 border-green-200";
+        return "bg-green-100 text-green-700 border-green-200"
       case "Proses":
-        return "bg-yellow-100 text-yellow-700 border-yellow-200";
+        return "bg-yellow-100 text-yellow-700 border-yellow-200"
       case "Belum Dibayar":
-        return "bg-red-100 text-red-700 border-red-200";
+        return "bg-red-100 text-red-700 border-red-200"
       default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
+        return "bg-gray-100 text-gray-700 border-gray-200"
     }
-  };
+  }
 
   const formatRupiah = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
       minimumFractionDigits: 0,
-    }).format(amount);
-  };
+    }).format(amount)
+  }
 
-  const totalTunjangan = tunjanganData.reduce((sum, item) => sum + item.nominal_tunjangan, 0);
-  const sudahDibayar = tunjanganData.filter(item => item.status_pembayaran === "Sudah Dibayar").length;
+  const totalTunjangan = tunjanganData.reduce((sum, item) => sum + item.nominal_tunjangan, 0)
+  const sudahDibayar = tunjanganData.filter((item) => item.status_pembayaran === "Sudah Dibayar").length
 
   const SortIcon = ({ column }: { column: SortKey }) => {
     if (sortKey !== column) {
-      return <ArrowUpDown className="w-4 h-4 text-gray-400" />;
+      return <ArrowUpDown className="w-4 h-4 text-gray-400" />
     }
-    return sortOrder === "asc" ? 
-      <span className="text-blue-600">↑</span> : 
-      <span className="text-blue-600">↓</span>;
-  };
+    return sortOrder === "asc" ? <span className="text-blue-600">↑</span> : <span className="text-blue-600">↓</span>
+  }
 
   return (
     <MainLayout>
@@ -343,11 +366,7 @@ export default function DataPembayaran() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
                 <DollarSign className="w-8 h-8 text-white" />
@@ -399,7 +418,7 @@ export default function DataPembayaran() {
               </div>
             </div>
 
-            <div 
+            <div
               className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 cursor-pointer"
               onClick={() => openPopup("add")}
             >
@@ -435,7 +454,7 @@ export default function DataPembayaran() {
                     className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all"
                   />
                 </div>
-                
+
                 <div className="relative">
                   <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <select
@@ -457,7 +476,7 @@ export default function DataPembayaran() {
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
                   <tr>
-                    <th 
+                    <th
                       className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 select-none"
                       onClick={() => handleSort("nama_pegawai")}
                     >
@@ -465,7 +484,7 @@ export default function DataPembayaran() {
                         Nama Pegawai <SortIcon column="nama_pegawai" />
                       </div>
                     </th>
-                    <th 
+                    <th
                       className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 select-none"
                       onClick={() => handleSort("nip")}
                     >
@@ -473,7 +492,7 @@ export default function DataPembayaran() {
                         NIP <SortIcon column="nip" />
                       </div>
                     </th>
-                    <th 
+                    <th
                       className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 select-none"
                       onClick={() => handleSort("jabatan")}
                     >
@@ -481,7 +500,7 @@ export default function DataPembayaran() {
                         Jabatan <SortIcon column="jabatan" />
                       </div>
                     </th>
-                    <th 
+                    <th
                       className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 select-none"
                       onClick={() => handleSort("nominal_tunjangan")}
                     >
@@ -489,7 +508,7 @@ export default function DataPembayaran() {
                         Nominal <SortIcon column="nominal_tunjangan" />
                       </div>
                     </th>
-                    <th 
+                    <th
                       className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 select-none"
                       onClick={() => handleSort("status_pembayaran")}
                     >
@@ -503,8 +522,8 @@ export default function DataPembayaran() {
 
                 <tbody>
                   <AnimatePresence>
-                    {filteredData.length > 0 ? (
-                      filteredData.map((item, index) => (
+                    {paginatedData.length > 0 ? (
+                      paginatedData.map((item, index) => (
                         <motion.tr
                           key={item.id}
                           initial={{ opacity: 0, y: 20 }}
@@ -533,11 +552,15 @@ export default function DataPembayaran() {
                           <td className="p-4">
                             <div>
                               <p className="font-semibold text-blue-600">{formatRupiah(item.nominal_tunjangan)}</p>
-                              <p className="text-xs text-gray-500">{item.bulan_pembayaran} {item.tahun_pembayaran}</p>
+                              <p className="text-xs text-gray-500">
+                                {item.bulan_pembayaran} {item.tahun_pembayaran}
+                              </p>
                             </div>
                           </td>
                           <td className="p-4">
-                            <span className={`px-3 py-1.5 rounded-full text-xs font-semibold inline-flex items-center border ${getStatusColor(item.status_pembayaran)}`}>
+                            <span
+                              className={`px-3 py-1.5 rounded-full text-xs font-semibold inline-flex items-center border ${getStatusColor(item.status_pembayaran)}`}
+                            >
                               {item.status_pembayaran}
                             </span>
                           </td>
@@ -585,9 +608,22 @@ export default function DataPembayaran() {
                 </tbody>
               </table>
             </div>
+
+            {filteredData.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={filteredData.length}
+                startIndex={startIndex}
+                endIndex={endIndex}
+                onPageChange={handlePageChange}
+                onPrevious={handlePrevious}
+                onNext={handleNext}
+              />
+            )}
           </motion.div>
         </div>
       </div>
     </MainLayout>
-  );
+  )
 }
