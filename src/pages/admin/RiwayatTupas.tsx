@@ -1,697 +1,168 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, Plus, Eye, Edit2, Trash2, X, Users, Building2, ArrowUpDown, Mail, Briefcase, Hash } from "lucide-react"
+import { Search, Plus, Eye, Edit2, Trash2, Users, Building2, ArrowUpDown, Mail, Briefcase, Hash } from "lucide-react"
 import MainLayout from "../../components/layout/MainLayout"
 import Pagination from "../../components/pagination"
+import AlertNotification, { type Toast } from "../../components/AlertNotification"
+import GenericModal, { type ModalField } from "../../components/ModalPop"
 
-type Pegawai = {
-  id?: number
-  nama: string
-  nip: string
-  jabatan: string
-  departemen: string
-  email: string
-}
+// --- Types & Configs ---
+type Pegawai = { id?: number; nama: string; nip: string; jabatan: string; departemen: string; email: string }
 
-interface PopupState {
-  open: boolean
-  mode: string
-  data: Pegawai | null
-}
-
-type SortField = "nama" | "nip" | "jabatan" | "departemen" | "email" | null
-type SortOrder = "asc" | "desc"
+const modalFields: ModalField[] = [
+  { name: "nama", label: "Nama Lengkap", type: "text", required: true, placeholder: "Masukkan nama lengkap" },
+  { name: "nip", label: "NIP", type: "text", required: true, placeholder: "Masukkan NIP" },
+  { name: "jabatan", label: "Jabatan", type: "text", required: true, placeholder: "Masukkan jabatan" },
+  { name: "departemen", label: "Departemen", type: "text", required: true, placeholder: "Masukkan departemen" },
+  { name: "email", label: "Email", type: "email", required: true, placeholder: "contoh@email.com" },
+]
 
 export default function RiwayatTupas() {
+  // --- State ---
   const [pegawai, setPegawai] = useState<Pegawai[]>([
-    {
-      id: 1,
-      nama: "Ahmad Fauzi",
-      nip: "198501012010011001",
-      jabatan: "Kepala Bagian",
-      departemen: "IT",
-      email: "ahmad.fauzi@example.com",
-    },
-    {
-      id: 2,
-      nama: "Siti Nurhaliza",
-      nip: "199203152015012002",
-      jabatan: "Staff Administrasi",
-      departemen: "HR",
-      email: "siti.nurhaliza@example.com",
-    },
-    {
-      id: 3,
-      nama: "Budi Santoso",
-      nip: "198709202012011003",
-      jabatan: "Developer",
-      departemen: "IT",
-      email: "budi.santoso@example.com",
-    },
-    {
-      id: 4,
-      nama: "Dewi Lestari",
-      nip: "199105102014012004",
-      jabatan: "Manager",
-      departemen: "Finance",
-      email: "dewi.lestari@example.com",
-    },
-    {
-      id: 5,
-      nama: "Eko Prasetyo",
-      nip: "198812252013011005",
-      jabatan: "Supervisor",
-      departemen: "Operations",
-      email: "eko.prasetyo@example.com",
-    },
-    {
-      id: 6,
-      nama: "Fitri Handayani",
-      nip: "199406182016012006",
-      jabatan: "Analyst",
-      departemen: "IT",
-      email: "fitri.handayani@example.com",
-    },
-    {
-      id: 7,
-      nama: "Gunawan Wijaya",
-      nip: "198603072011011007",
-      jabatan: "Coordinator",
-      departemen: "Marketing",
-      email: "gunawan.wijaya@example.com",
-    },
+    { id: 1, nama: "Ahmad Fauzi", nip: "198501012010011001", jabatan: "Kepala Bagian", departemen: "IT", email: "ahmad.fauzi@example.com" },
+    { id: 2, nama: "Siti Nurhaliza", nip: "199203152015012002", jabatan: "Staff Administrasi", departemen: "HR", email: "siti.nurhaliza@example.com" },
+    { id: 3, nama: "Budi Santoso", nip: "198709202012011003", jabatan: "Developer", departemen: "IT", email: "budi.santoso@example.com" },
+    { id: 4, nama: "Dewi Lestari", nip: "199105102014012004", jabatan: "Manager", departemen: "Finance", email: "dewi.lestari@example.com" },
+    { id: 5, nama: "Eko Prasetyo", nip: "198812252013011005", jabatan: "Supervisor", departemen: "Operations", email: "eko.prasetyo@example.com" },
+    { id: 6, nama: "Fitri Handayani", nip: "199406182016012006", jabatan: "Analyst", departemen: "IT", email: "fitri.handayani@example.com" },
+    { id: 7, nama: "Gunawan Wijaya", nip: "198603072011011007", jabatan: "Coordinator", departemen: "Marketing", email: "gunawan.wijaya@example.com" },
   ])
+  
+  const [params, setParams] = useState({ filter: "", sort: null as keyof Pegawai | null, order: "asc" as "asc" | "desc", page: 1 })
+  const [popup, setPopup] = useState<{ open: boolean; mode: "view" | "add" | "edit" | "delete"; data: Pegawai | null }>({ open: false, mode: "view", data: null })
+  const [formData, setFormData] = useState<Partial<Pegawai>>({})
+  const [toasts, setToasts] = useState<Toast[]>([])
 
-  const [loading, setLoading] = useState(false)
-  const [filter, setFilter] = useState<string>("")
-  const [sortField, setSortField] = useState<SortField>(null)
-  const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
+  // --- Logic Helpers ---
+  const pushToast = (type: Toast["type"], message: string) => {
+    const id = Date.now(); setToasts(p => [...p, { id, type, message }])
+    setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), 3000)
+  }
 
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(5)
+  const processedData = useMemo(() => {
+    const q = params.filter.toLowerCase()
+    return pegawai
+      .filter(p => p.nama.toLowerCase().includes(q) || p.nip.includes(q) || p.departemen.toLowerCase().includes(q))
+      .sort((a, b) => {
+        if (!params.sort) return 0
+        const [xA, xB] = [a[params.sort], b[params.sort]]
+        // Handle sorting NIP as number, others as string
+        const val = params.sort === "nip" ? Number(xA) - Number(xB) : String(xA).localeCompare(String(xB))
+        return (params.order === "asc" ? 1 : -1) * val
+      })
+  }, [pegawai, params.filter, params.sort, params.order])
 
-  const [popup, setPopup] = useState<PopupState>({
-    open: false,
-    mode: "",
-    data: null,
-  })
-  const [formData, setFormData] = useState<Pegawai>({
-    nama: "",
-    nip: "",
-    jabatan: "",
-    departemen: "",
-    email: "",
-  })
+  const paginated = processedData.slice((params.page - 1) * 5, params.page * 5)
+  const handleSort = (key: keyof Pegawai) => setParams(p => ({ ...p, sort: key, order: p.sort === key && p.order === "asc" ? "desc" : "asc" }))
+  const openModal = (mode: any, data: Pegawai | null = null) => { setFormData(data || {}); setPopup({ open: true, mode, data }) }
 
-  // Filter pegawai berdasarkan search
-  const filteredPegawai = pegawai.filter(
-    (p) =>
-      p.nama.toLowerCase().includes(filter.toLowerCase()) ||
-      p.nip.includes(filter) ||
-      p.departemen.toLowerCase().includes(filter.toLowerCase()),
-  )
-
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [filter])
-
-  // Sort pegawai
-  const sortedPegawai = [...filteredPegawai].sort((a, b) => {
-    if (!sortField) return 0
-
-    const aValue = a[sortField]
-    const bValue = b[sortField]
-
-    // Handle numeric sorting for NIP
-    if (sortField === "nip") {
-      const aNum = Number.parseInt(aValue) || 0
-      const bNum = Number.parseInt(bValue) || 0
-      return sortOrder === "asc" ? aNum - bNum : bNum - aNum
+  // --- Actions ---
+  // FIX: Added submittedData parameter and used it instead of formData state
+  const handleSubmit = (submittedData?: any) => {
+    // Validation using submittedData
+    if (!submittedData?.nama?.trim() || !submittedData?.nip?.trim()) {
+      return pushToast("error", "Nama dan NIP wajib diisi!")
     }
-
-    // Handle string sorting for other fields
-    const aStr = String(aValue).toLowerCase()
-    const bStr = String(bValue).toLowerCase()
-
-    if (sortOrder === "asc") {
-      return aStr.localeCompare(bStr, "id-ID")
-    } else {
-      return bStr.localeCompare(aStr, "id-ID")
+    
+    if (popup.mode === "add") {
+      setPegawai(p => [...p, { ...submittedData, id: Date.now() } as Pegawai])
+      pushToast("success", "Pegawai berhasil ditambahkan")
+    } else if (popup.mode === "edit") {
+      setPegawai(p => p.map(item => item.id === popup.data?.id ? { ...item, ...submittedData } as Pegawai : item))
+      pushToast("success", "Data pegawai diperbarui")
     }
-  })
-
-  const totalPages = Math.ceil(sortedPegawai.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentData = sortedPegawai.slice(startIndex, endIndex)
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
+    setPopup(p => ({ ...p, open: false }))
   }
 
-  const handlePrevious = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1)
-    }
+  const handleDelete = () => {
+    setPegawai(p => p.filter(item => item.id !== popup.data?.id))
+    pushToast("success", "Pegawai berhasil dihapus")
+    setPopup(p => ({ ...p, open: false }))
   }
 
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1)
-    }
-  }
-
-  // Handle column header click for sorting
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-    } else {
-      setSortField(field)
-      setSortOrder("asc")
-    }
-  }
-
-  // Render sort indicator
-  const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="w-4 h-4 text-gray-400" />
-    }
-    return sortOrder === "asc" ? <span className="text-blue-600">↑</span> : <span className="text-blue-600">↓</span>
-  }
-
-  // Open Popup
-  const openPopup = (mode: string, data: Pegawai | null = null) => {
-    setFormData(
-      data || {
-        nama: "",
-        nip: "",
-        jabatan: "",
-        departemen: "",
-        email: "",
-      },
-    )
-    setPopup({ open: true, mode, data })
-  }
-
-  // Close Popup
-  const closePopup = () => {
-    setPopup({ open: false, mode: "", data: null })
-    setFormData({
-      nama: "",
-      nip: "",
-      jabatan: "",
-      departemen: "",
-      email: "",
-    })
-  }
-
-  // Handle Submit (Add/Edit)
-  const handleSubmit = async () => {
-    if (!formData.nama.trim() || !formData.nip.trim()) {
-      alert("Nama dan NIP wajib diisi!")
-      return
-    }
-
-    try {
-      if (popup.mode === "add") {
-        setPegawai([...pegawai, { id: Date.now(), ...formData }])
-      } else if (popup.mode === "edit" && popup.data) {
-        setPegawai(pegawai.map((p) => (p.id === popup.data?.id ? { ...p, ...formData } : p)))
-      }
-      closePopup()
-    } catch (err: any) {
-      console.error("Gagal menyimpan data", err)
-      alert("Gagal menyimpan data")
-    }
-  }
-
-  // Handle Delete
-  const handleDelete = async (id: number) => {
-    try {
-      setPegawai(pegawai.filter((p) => p.id !== id))
-      closePopup()
-    } catch (err: any) {
-      console.error("Gagal menghapus data", err)
-      alert("Gagal menghapus data")
-    }
-  }
-
-  // Handle Input Change
-  const handleInputChange = (field: keyof Pegawai, value: string) => {
-    setFormData({ ...formData, [field]: value })
-  }
+  // --- UI Configs ---
+  const columns = [
+    { key: "nama", label: "Nama", icon: Users }, { key: "nip", label: "NIP", icon: Hash },
+    { key: "jabatan", label: "Jabatan", icon: Briefcase }, { key: "departemen", label: "Departemen", icon: Building2 },
+    { key: "email", label: "Email", icon: Mail }
+  ] as const
 
   return (
     <MainLayout>
+      <AlertNotification toasts={toasts} removeToast={(id) => setToasts(p => p.filter(t => t.id !== id))} />
+      
+      {/* Generic Modal menggantikan manual modal code */}
+      <GenericModal
+        isOpen={popup.open}
+        mode={popup.mode}
+        title={{ view: "Detail Pegawai", add: "Tambah Pegawai", edit: "Edit Pegawai", delete: "Hapus Pegawai" }}
+        data={formData}
+        fields={modalFields}
+        onClose={() => setPopup(p => ({ ...p, open: false }))}
+        onSubmit={handleSubmit}
+        onDelete={handleDelete}
+        deleteMessage={`Apakah Anda yakin ingin menghapus pegawai ${popup.data?.nama}?`}
+      />
+
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
-                <Users className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Riwayat Tupas
-                </h1>
-                <p className="text-gray-600 text-sm mt-1">Kelola Riwayat secara lengkap</p>
-              </div>
-            </div>
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg"><Users className="w-8 h-8 text-white" /></div>
+            <div><h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Riwayat Tupas</h1><p className="text-gray-600 text-sm mt-1">Kelola Riwayat secara lengkap</p></div>
           </motion.div>
 
-          {/* Statistics Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
-          >
-            <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium mb-1">Total Pegawai</p>
-                  <p className="text-4xl font-bold text-blue-600">{pegawai.length}</p>
-                </div>
-                <div className="p-4 bg-blue-100 rounded-2xl">
-                  <Users className="w-8 h-8 text-blue-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium mb-1">Total Departemen</p>
-                  <p className="text-4xl font-bold text-blue-600">{new Set(pegawai.map((p) => p.departemen)).size}</p>
-                </div>
-                <div className="p-4 bg-blue-100 rounded-2xl">
-                  <Building2 className="w-8 h-8 text-blue-600" />
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 cursor-pointer"
-              onClick={() => openPopup("add")}
-            >
-              <div className="flex items-center justify-between h-full">
-                <div>
-                  <p className="text-blue-100 text-sm font-medium mb-1">Tambah Pegawai</p>
-                  <p className="text-white text-lg font-semibold">Klik untuk menambah</p>
-                </div>
-                <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                  <Plus className="w-8 h-8 text-white" />
-                </div>
-              </div>
-            </div>
+          {/* Stats Cards */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-3xl shadow-lg p-6 hover:shadow-xl transition-shadow flex justify-between items-center"><div><p className="text-gray-600 text-sm font-medium mb-1">Total Pegawai</p><p className="text-4xl font-bold text-blue-600">{pegawai.length}</p></div><div className="p-4 bg-blue-100 rounded-2xl"><Users className="w-8 h-8 text-blue-600" /></div></div>
+            <div className="bg-white rounded-3xl shadow-lg p-6 hover:shadow-xl transition-shadow flex justify-between items-center"><div><p className="text-gray-600 text-sm font-medium mb-1">Total Departemen</p><p className="text-4xl font-bold text-blue-600">{new Set(pegawai.map(p => p.departemen)).size}</p></div><div className="p-4 bg-blue-100 rounded-2xl"><Building2 className="w-8 h-8 text-blue-600" /></div></div>
+            <div onClick={() => openModal("add")} className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 cursor-pointer flex justify-between items-center"><div><p className="text-blue-100 text-sm font-medium mb-1">Tambah Pegawai</p><p className="text-white text-lg font-semibold">Klik untuk menambah</p></div><div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm"><Plus className="w-8 h-8 text-white" /></div></div>
           </motion.div>
 
-          {/* Main Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden"
-          >
-            {/* Search Bar */}
-            <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Cari berdasarkan nama, NIP, atau departemen..."
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all"
-                />
-              </div>
+          {/* Table Card */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+            <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 relative">
+              <Search className="absolute left-10 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input type="text" placeholder="Cari berdasarkan nama, NIP, atau departemen..." value={params.filter} onChange={e => setParams(p => ({ ...p, filter: e.target.value, page: 1 }))} className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl focus:border-blue-400 focus:outline-none transition-all" />
             </div>
 
-            {/* Loading State */}
-            {loading && (
-              <div className="text-center py-8">
-                <p className="text-gray-500">Memuat data...</p>
-              </div>
-            )}
-
-            {/* Table */}
-            {!loading && (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
-                    <tr>
-                      <th
-                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 select-none"
-                        onClick={() => handleSort("nama")}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4" />
-                          Nama <SortIcon field="nama" />
-                        </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b-2 border-gray-200">
+                  <tr>
+                    {columns.map(c => (
+                      <th key={c.key} className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 select-none" onClick={() => handleSort(c.key as keyof Pegawai)}>
+                        <div className="flex items-center gap-2"><c.icon className="w-4 h-4" /> {c.label} {params.sort === c.key ? <span className="text-blue-600">{params.order === "asc" ? "↑" : "↓"}</span> : <ArrowUpDown className="w-4 h-4 text-gray-400" />}</div>
                       </th>
-                      <th
-                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 select-none"
-                        onClick={() => handleSort("nip")}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Hash className="w-4 h-4" />
-                          NIP <SortIcon field="nip" />
-                        </div>
-                      </th>
-                      <th
-                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 select-none"
-                        onClick={() => handleSort("jabatan")}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Briefcase className="w-4 h-4" />
-                          Jabatan <SortIcon field="jabatan" />
-                        </div>
-                      </th>
-                      <th
-                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 select-none"
-                        onClick={() => handleSort("departemen")}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4" />
-                          Departemen <SortIcon field="departemen" />
-                        </div>
-                      </th>
-                      <th
-                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 select-none"
-                        onClick={() => handleSort("email")}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4" />
-                          Email <SortIcon field="email" />
-                        </div>
-                      </th>
-                      <th className="p-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <AnimatePresence>
-                      {currentData.length > 0 ? (
-                        currentData.map((p, index) => (
-                          <motion.tr
-                            key={p.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors"
-                          >
-                            <td className="p-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center text-white font-bold">
-                                  {p.nama.charAt(0)}
-                                </div>
-                                <span className="font-medium text-gray-800">{p.nama}</span>
-                              </div>
-                            </td>
-                            <td className="p-4">
-                              <span className="font-mono text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded-lg">
-                                {p.nip}
-                              </span>
-                            </td>
-                            <td className="p-4">
-                              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium">
-                                {p.jabatan}
-                              </span>
-                            </td>
-                            <td className="p-4">
-                              <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg text-sm font-medium">
-                                {p.departemen}
-                              </span>
-                            </td>
-                            <td className="p-4 text-sm text-gray-600">{p.email}</td>
-                            <td className="p-4">
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => openPopup("view", p)}
-                                  className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-xl transition-all hover:scale-110"
-                                  title="View"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => openPopup("edit", p)}
-                                  className="p-2 bg-amber-100 hover:bg-amber-200 text-amber-600 rounded-xl transition-all hover:scale-110"
-                                  title="Edit"
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => openPopup("delete", p)}
-                                  className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-xl transition-all hover:scale-110"
-                                  title="Delete"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </motion.tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={6} className="p-12 text-center">
-                            <div className="flex flex-col items-center gap-3">
-                              <div className="p-4 bg-gray-100 rounded-full">
-                                <Users className="w-12 h-12 text-gray-400" />
-                              </div>
-                              <p className="text-gray-500 font-medium">Tidak ada data pegawai</p>
-                              <p className="text-gray-400 text-sm">Coba ubah filter pencarian Anda</p>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </AnimatePresence>
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {!loading && sortedPegawai.length > 0 && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={sortedPegawai.length}
-                startIndex={startIndex}
-                endIndex={endIndex}
-                onPageChange={handlePageChange}
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-              />
-            )}
+                    ))}
+                    <th className="p-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <AnimatePresence>
+                    {paginated.length > 0 ? paginated.map((p, i) => (
+                      <motion.tr key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: i * 0.05 }} className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors">
+                        <td className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center text-white font-bold">{p.nama.charAt(0)}</div><span className="font-medium text-gray-800">{p.nama}</span></div></td>
+                        <td className="p-4"><span className="font-mono text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded-lg">{p.nip}</span></td>
+                        <td className="p-4"><span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium">{p.jabatan}</span></td>
+                        <td className="p-4"><span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg text-sm font-medium">{p.departemen}</span></td>
+                        <td className="p-4 text-sm text-gray-600">{p.email}</td>
+                        <td className="p-4"><div className="flex gap-2">
+                          <button onClick={() => openModal("view", p)} className="p-2 bg-blue-100 text-blue-600 rounded-xl hover:scale-110 transition-all"><Eye className="w-4 h-4" /></button>
+                          <button onClick={() => openModal("edit", p)} className="p-2 bg-amber-100 text-amber-600 rounded-xl hover:scale-110 transition-all"><Edit2 className="w-4 h-4" /></button>
+                          <button onClick={() => openModal("delete", p)} className="p-2 bg-red-100 text-red-600 rounded-xl hover:scale-110 transition-all"><Trash2 className="w-4 h-4" /></button>
+                        </div></td>
+                      </motion.tr>
+                    )) : <tr><td colSpan={6} className="p-12 text-center text-gray-500">Tidak ada data pegawai</td></tr>}
+                  </AnimatePresence>
+                </tbody>
+              </table>
+            </div>
+            {processedData.length > 0 && <Pagination currentPage={params.page} totalPages={Math.ceil(processedData.length / 5)} totalItems={processedData.length} startIndex={(params.page - 1) * 5} endIndex={Math.min(params.page * 5, processedData.length)} onPageChange={p => setParams(prev => ({ ...prev, page: p }))} onPrevious={() => setParams(prev => ({ ...prev, page: prev.page - 1 }))} onNext={() => setParams(prev => ({ ...prev, page: prev.page + 1 }))} />}
           </motion.div>
-
-          {/* Modal Popup */}
-          <AnimatePresence>
-            {popup.open && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-                onClick={closePopup}
-              >
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                  transition={{ type: "spring", duration: 0.5 }}
-                  className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {/* VIEW MODE */}
-                  {popup.mode === "view" && popup.data && (
-                    <>
-                      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                              <Eye className="w-6 h-6" />
-                            </div>
-                            <h2 className="text-2xl font-bold">Detail Pegawai</h2>
-                          </div>
-                          <button onClick={closePopup} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
-                            <X className="w-6 h-6" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="p-6 space-y-4">
-                        <div className="flex items-center justify-center mb-4">
-                          <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg">
-                            {popup.data.nama.charAt(0)}
-                          </div>
-                        </div>
-                        <div className="bg-gray-50 rounded-2xl p-4">
-                          <p className="text-xs text-gray-500 mb-1">Nama Lengkap</p>
-                          <p className="text-lg font-semibold text-gray-800">{popup.data.nama}</p>
-                        </div>
-                        <div className="bg-gray-50 rounded-2xl p-4">
-                          <p className="text-xs text-gray-500 mb-1">NIP</p>
-                          <p className="font-mono font-semibold text-gray-800">{popup.data.nip}</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-gray-50 rounded-2xl p-4">
-                            <p className="text-xs text-gray-500 mb-1">Jabatan</p>
-                            <p className="font-semibold text-gray-800">{popup.data.jabatan}</p>
-                          </div>
-                          <div className="bg-gray-50 rounded-2xl p-4">
-                            <p className="text-xs text-gray-500 mb-1">Departemen</p>
-                            <p className="font-semibold text-gray-800">{popup.data.departemen}</p>
-                          </div>
-                        </div>
-                        <div className="bg-gray-50 rounded-2xl p-4">
-                          <p className="text-xs text-gray-500 mb-1">Email</p>
-                          <p className="text-gray-700">{popup.data.email}</p>
-                        </div>
-                        <button
-                          onClick={closePopup}
-                          className="w-full py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-2xl font-medium transition-colors mt-2"
-                        >
-                          Tutup
-                        </button>
-                      </div>
-                    </>
-                  )}
-
-                  {/* ADD & EDIT MODE */}
-                  {(popup.mode === "add" || popup.mode === "edit") && (
-                    <>
-                      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                              {popup.mode === "add" ? <Plus className="w-6 h-6" /> : <Edit2 className="w-6 h-6" />}
-                            </div>
-                            <h2 className="text-2xl font-bold">
-                              {popup.mode === "add" ? "Tambah Pegawai" : "Edit Pegawai"}
-                            </h2>
-                          </div>
-                          <button onClick={closePopup} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
-                            <X className="w-6 h-6" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="p-6 space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-                          <input
-                            type="text"
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all"
-                            placeholder="Masukkan nama lengkap"
-                            value={formData.nama}
-                            onChange={(e) => handleInputChange("nama", e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">NIP</label>
-                          <input
-                            type="text"
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all"
-                            placeholder="Masukkan NIP"
-                            value={formData.nip}
-                            onChange={(e) => handleInputChange("nip", e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Jabatan</label>
-                          <input
-                            type="text"
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all"
-                            placeholder="Masukkan jabatan"
-                            value={formData.jabatan}
-                            onChange={(e) => handleInputChange("jabatan", e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Departemen</label>
-                          <input
-                            type="text"
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all"
-                            placeholder="Masukkan departemen"
-                            value={formData.departemen}
-                            onChange={(e) => handleInputChange("departemen", e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                          <input
-                            type="email"
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all"
-                            placeholder="contoh@email.com"
-                            value={formData.email}
-                            onChange={(e) => handleInputChange("email", e.target.value)}
-                          />
-                        </div>
-                        <div className="flex gap-3 pt-2">
-                          <button
-                            onClick={handleSubmit}
-                            className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl font-medium transition-all hover:shadow-lg"
-                          >
-                            Simpan
-                          </button>
-                          <button
-                            onClick={closePopup}
-                            className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl font-medium transition-colors"
-                          >
-                            Batal
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* DELETE MODE */}
-                  {popup.mode === "delete" && popup.data && (
-                    <>
-                      <div className="bg-gradient-to-r from-red-500 to-pink-600 p-6 text-white">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                              <Trash2 className="w-6 h-6" />
-                            </div>
-                            <h2 className="text-2xl font-bold">Hapus Pegawai</h2>
-                          </div>
-                          <button onClick={closePopup} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
-                            <X className="w-6 h-6" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="p-6">
-                        <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 mb-6">
-                          <p className="text-gray-700 text-center">
-                            Apakah Anda yakin ingin menghapus pegawai{" "}
-                            <span className="font-bold text-red-600">{popup.data.nama}</span>?
-                          </p>
-                          <p className="text-gray-500 text-sm text-center mt-2">Tindakan ini tidak dapat dibatalkan</p>
-                        </div>
-                        <div className="flex gap-3">
-                          <button
-                            onClick={() => handleDelete(popup.data!.id!)}
-                            className="flex-1 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-2xl font-medium transition-all hover:shadow-lg"
-                          >
-                            Ya, Hapus
-                          </button>
-                          <button
-                            onClick={closePopup}
-                            className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl font-medium transition-colors"
-                          >
-                            Batal
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </div>
     </MainLayout>

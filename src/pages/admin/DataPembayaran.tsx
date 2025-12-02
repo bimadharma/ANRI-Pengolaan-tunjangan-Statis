@@ -159,7 +159,6 @@ export default function DataPembayaran() {
     {
       label: "Total Tunjangan",
       val: formatRupiah(data.reduce((s, i) => s + i.nominal_tunjangan, 0)),
-      color: "blue",
     },
   ];
   const columns = [
