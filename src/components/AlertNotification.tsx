@@ -52,7 +52,7 @@ export default function AlertNotification({
   };
 
   return (
-    <div className="fixed top-4 right-4 z-[60] flex flex-col gap-3 w-72">
+    <div className="fixed top-23 right-4 z-[60] flex flex-col gap-3 w-72">
       <AnimatePresence>
         {toasts.map((t) => (
           <motion.div

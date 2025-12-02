@@ -14,5 +14,35 @@
       "role": "admin",
       "name": "Bima Admin"
     }
+  ],
+
+  "employees": [
+    {
+      "id": 1,
+      "name": "Budi Santoso",
+      "position": "Senior Developer",
+      "email": "budi@example.com",
+      "status": "Aktif",
+      "salary": "8.000.000",
+      "startDate": "2021-05-10"
+    },
+    {
+      "id": 2,
+      "name": "Sinta Dewi",
+      "position": "UI/UX Designer",
+      "email": "sinta@example.com",
+      "status": "Cuti",
+      "salary": "7.500.000",
+      "startDate": "2022-01-18"
+    },
+    {
+      "id": 3,
+      "name": "Ahmad Fauzi",
+      "position": "Product Manager",
+      "email": "ahmad@example.com",
+      "status": "Aktif",
+      "salary": "12.000.000",
+      "startDate": "2020-03-15"
+    }
   ]
 }

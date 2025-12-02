@@ -1,84 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Search,
-  Plus,
-  Eye,
-  Edit2,
-  Trash2,
-  X,
-  Users,
-  Briefcase,
-  DollarSign,
-  Mail,
-  TrendingUp,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-} from "lucide-react";
+import { Search, Plus, Eye, Edit2, Trash2, X, Users, Briefcase, DollarSign, Mail, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import MainLayout from "../../components/layout/MainLayout";
 import AlertNotification, { type Toast } from "../../components/AlertNotification";
 
-interface Employee {
-  id: number;
-  name: string;
-  position: string;
-  email: string;
-  status: string;
-  salary: string; // disimpan sebagai string berformat "8.000.000"
-  startDate: string;
-}
+import type { Employee, PopupState, FormData } from "../../types/employee";
+import { Loader2 } from 'lucide-react';
+import { useEmployees } from "../../hooks/useEmployees";
 
-interface PopupState {
-  open: boolean;
-  mode: string;
-  data: Employee | null;
-}
-
-interface FormData {
-  name: string;
-  position: string;
-  email: string;
-  status: string;
-  salary: string;
-  startDate: string;
-}
+import { sanitizeMoney, formatSalary } from "../../utils/salary";
 
 type SortColumn = "name" | "position" | "email" | "salary";
 
 export default function LogPembayaran() {
-  const [employees, setEmployees] = useState<Employee[]>(
-    [
-      {
-        id: 1,
-        name: "Budi Santoso",
-        position: "Senior Developer",
-        email: "budi@example.com",
-        status: "Aktif",
-        salary: "8.000.000",
-        startDate: "2021-05-10",
-      },
-      {
-        id: 2,
-        name: "Sinta Dewi",
-        position: "UI/UX Designer",
-        email: "sinta@example.com",
-        status: "Cuti",
-        salary: "7.500.000",
-        startDate: "2022-01-18",
-      },
-      {
-        id: 3,
-        name: "Ahmad Fauzi",
-        position: "Product Manager",
-        email: "ahmad@example.com",
-        status: "Aktif",
-        salary: "12.000.000",
-        startDate: "2020-03-15",
-      },
-    ]
-  );
-
+  const { employees, setEmployees, loading, error } = useEmployees();
   const [filter, setFilter] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortColumn>("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -97,7 +32,6 @@ export default function LogPembayaran() {
     startDate: "",
   });
 
-  // Fungsi untuk menambahkan toast (tanpa message akan gunakan default dari component)
   const pushToast = (type: Toast["type"], message?: string) => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, type, message }]);
@@ -106,19 +40,8 @@ export default function LogPembayaran() {
     }, 5000);
   };
 
-  // Fungsi untuk menghapus toast
   const removeToast = (id: number) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const sanitizeMoney = (s: string) => {
-    const n = parseInt((s || "0").replace(/[^\d]/g, "") || "0", 10);
-    return isNaN(n) ? 0 : n;
-  };
-
-  const formatSalary = (salary: string) => {
-    const n = sanitizeMoney(salary);
-    return new Intl.NumberFormat("id-ID").format(n);
   };
 
   const openPopup = (mode: string, data: Employee | null = null) => {
@@ -164,22 +87,13 @@ export default function LogPembayaran() {
     }
   };
 
-  // Search across all kolom yang tampil (nama, posisi, email, nominal)
+  // filter
   const searched = employees.filter((e) => {
     const q = filter.toLowerCase();
-    const name = e.name.toLowerCase();
-    const position = e.position.toLowerCase();
-    const email = e.email.toLowerCase();
-    const salaryText = formatSalary(e.salary).toLowerCase(); // "12.000.000"
-    return (
-      name.includes(q) ||
-      position.includes(q) ||
-      email.includes(q) ||
-      salaryText.includes(q)
-    );
+    return e.name.toLowerCase().includes(q) || e.position.toLowerCase().includes(q) || e.email.toLowerCase().includes(q) || formatSalary(e.salary).toLowerCase().includes(q);
   });
 
-  // Sorting per kolom
+  // sort
   const visible = [...searched].sort((a, b) => {
     let x: number | string = "";
     let y: number | string = "";
@@ -189,16 +103,16 @@ export default function LogPembayaran() {
         y = sanitizeMoney(b.salary);
         break;
       case "name":
-        x = (a.name || "").toLowerCase();
-        y = (b.name || "").toLowerCase();
+        x = a.name.toLowerCase();
+        y = b.name.toLowerCase();
         break;
       case "position":
-        x = (a.position || "").toLowerCase();
-        y = (b.position || "").toLowerCase();
+        x = a.position.toLowerCase();
+        y = b.position.toLowerCase();
         break;
       case "email":
-        x = (a.email || "").toLowerCase();
-        y = (b.email || "").toLowerCase();
+        x = a.email.toLowerCase();
+        y = b.email.toLowerCase();
         break;
     }
     if (x < y) return sortDir === "asc" ? -1 : 1;
@@ -217,11 +131,7 @@ export default function LogPembayaran() {
 
   const SortIcon = ({ col }: { col: SortColumn }) => {
     if (sortBy !== col) return <ArrowUpDown className="w-4 h-4 text-gray-400" />;
-    return sortDir === "asc" ? (
-      <ArrowUp className="w-4 h-4 text-blue-600" />
-    ) : (
-      <ArrowDown className="w-4 h-4 text-blue-600" />
-    );
+    return sortDir === "asc" ? <ArrowUp className="w-4 h-4 text-blue-600" /> : <ArrowDown className="w-4 h-4 text-blue-600" />;
   };
 
   const totalSalary = employees.reduce((sum, emp) => sum + sanitizeMoney(emp.salary), 0);
@@ -237,9 +147,7 @@ export default function LogPembayaran() {
       setEmployees([...employees, { ...formData, id: newId }]);
       pushToast("success");
     } else if (popup.mode === "edit" && popup.data) {
-      setEmployees(
-        employees.map((e) => (e.id === popup.data!.id ? { ...formData, id: e.id } : e))
-      );
+      setEmployees(employees.map((e) => (e.id === popup.data!.id ? { ...formData, id: e.id } : e)));
       pushToast("success");
     }
     closePopup();
@@ -250,6 +158,23 @@ export default function LogPembayaran() {
     pushToast("success");
     closePopup();
   };
+
+  useEffect(() => {
+    if (error) pushToast("error", "Gagal memuat data karyawan");
+  }, [error]);
+
+  if (loading) {
+  return (
+    <MainLayout isAdmin={true}>
+    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="bg-white px-8 py-6 rounded-2xl shadow-xl flex flex-col items-center gap-4">
+        <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+        <p className="text-gray-700 font-semibold text-lg">Loading...</p>
+      </div>
+    </div>
+    </MainLayout>
+  );
+}
 
   return (
     <MainLayout isAdmin={true}>
@@ -265,9 +190,7 @@ export default function LogPembayaran() {
                 <Users className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Log Pembayaran
-                </h1>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Log Pembayaran</h1>
                 <p className="text-gray-600 text-sm mt-1">Kelola Log Pembayaran</p>
               </div>
             </div>
@@ -276,12 +199,7 @@ export default function LogPembayaran() {
           {/* Layout: Main (left) + Sidebar (right) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Main Card (Table & Search) */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="lg:col-span-9 bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="lg:col-span-9 bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
               {/* Search Bar */}
               <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
                 <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -303,44 +221,28 @@ export default function LogPembayaran() {
                 <table className="w-full">
                   <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
                     <tr>
-                      <th
-                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none"
-                        onClick={() => toggleSort("name")}
-                        title="Urutkan"
-                      >
+                      <th className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none" onClick={() => toggleSort("name")} title="Urutkan">
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4" />
                           Nama
                           <SortIcon col="name" />
                         </div>
                       </th>
-                      <th
-                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none"
-                        onClick={() => toggleSort("position")}
-                        title="Urutkan"
-                      >
+                      <th className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none" onClick={() => toggleSort("position")} title="Urutkan">
                         <div className="flex items-center gap-2">
                           <Briefcase className="w-4 h-4" />
                           Posisi
                           <SortIcon col="position" />
                         </div>
                       </th>
-                      <th
-                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none"
-                        onClick={() => toggleSort("email")}
-                        title="Urutkan"
-                      >
+                      <th className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none" onClick={() => toggleSort("email")} title="Urutkan">
                         <div className="flex items-center gap-2">
                           <Mail className="w-4 h-4" />
                           Email
                           <SortIcon col="email" />
                         </div>
                       </th>
-                      <th
-                        className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none"
-                        onClick={() => toggleSort("salary")}
-                        title="Urutkan"
-                      >
+                      <th className="p-4 text-left text-sm font-semibold text-gray-700 cursor-pointer select-none" onClick={() => toggleSort("salary")} title="Urutkan">
                         <div className="flex items-center gap-2">
                           <DollarSign className="w-4 h-4" />
                           Nominal
@@ -365,44 +267,26 @@ export default function LogPembayaran() {
                           >
                             <td className="p-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center text-white font-bold">
-                                  {emp.name.charAt(0)}
-                                </div>
+                                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center text-white font-bold">{emp.name.charAt(0)}</div>
                                 <span className="font-medium text-gray-800">{emp.name}</span>
                               </div>
                             </td>
                             <td className="p-4">
-                              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium">
-                                {emp.position}
-                              </span>
+                              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium">{emp.position}</span>
                             </td>
                             <td className="p-4 text-sm text-gray-600">{emp.email}</td>
                             <td className="p-4">
-                              <span className="font-semibold text-green-600">
-                                Rp {formatSalary(emp.salary)}
-                              </span>
+                              <span className="font-semibold text-green-600">Rp {formatSalary(emp.salary)}</span>
                             </td>
                             <td className="p-4">
                               <div className="flex gap-2">
-                                <button
-                                  onClick={() => openPopup("view", emp)}
-                                  className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-xl transition-all hover:scale-110"
-                                  title="View"
-                                >
+                                <button onClick={() => openPopup("view", emp)} className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-xl transition-all hover:scale-110" title="View">
                                   <Eye className="w-4 h-4" />
                                 </button>
-                                <button
-                                  onClick={() => openPopup("edit", emp)}
-                                  className="p-2 bg-amber-100 hover:bg-amber-200 text-amber-600 rounded-xl transition-all hover:scale-110"
-                                  title="Edit"
-                                >
+                                <button onClick={() => openPopup("edit", emp)} className="p-2 bg-amber-100 hover:bg-amber-200 text-amber-600 rounded-xl transition-all hover:scale-110" title="Edit">
                                   <Edit2 className="w-4 h-4" />
                                 </button>
-                                <button
-                                  onClick={() => openPopup("delete", emp)}
-                                  className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-xl transition-all hover:scale-110"
-                                  title="Delete"
-                                >
+                                <button onClick={() => openPopup("delete", emp)} className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-xl transition-all hover:scale-110" title="Delete">
                                   <Trash2 className="w-4 h-4" />
                                 </button>
                               </div>
@@ -429,12 +313,7 @@ export default function LogPembayaran() {
             </motion.div>
 
             {/* Sidebar Cards (Right) */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.15 }}
-              className="lg:col-span-3 space-y-6"
-            >
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }} className="lg:col-span-3 space-y-6">
               <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
@@ -460,10 +339,7 @@ export default function LogPembayaran() {
                 <p className="text-xs text-gray-500">Akumulasi gaji dari seluruh pegawai</p>
               </div>
 
-              <div
-                className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 cursor-pointer"
-                onClick={() => openPopup("add")}
-              >
+              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 cursor-pointer" onClick={() => openPopup("add")}>
                 <div className="flex items-center justify-between h-full">
                   <div>
                     <p className="text-blue-100 text-sm font-medium mb-1">Tambah Pegawai</p>
@@ -480,13 +356,7 @@ export default function LogPembayaran() {
           {/* Modal Popup */}
           <AnimatePresence>
             {popup.open && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-                onClick={closePopup}
-              >
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closePopup}>
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0, y: 20 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -513,9 +383,7 @@ export default function LogPembayaran() {
                       </div>
                       <div className="p-6 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
                         <div className="flex items-center justify-center mb-4">
-                          <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg">
-                            {popup.data.name.charAt(0)}
-                          </div>
+                          <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg">{popup.data.name.charAt(0)}</div>
                         </div>
                         <div className="bg-gray-50 rounded-2xl p-4">
                           <p className="text-xs text-gray-500 mb-1">Nama Lengkap</p>
@@ -543,10 +411,7 @@ export default function LogPembayaran() {
                           <p className="text-xs text-gray-500 mb-1">Tanggal Masuk</p>
                           <p className="font-semibold text-gray-800">{popup.data.startDate}</p>
                         </div>
-                        <button
-                          onClick={closePopup}
-                          className="w-full py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-2xl font-medium transition-colors mt-2"
-                        >
+                        <button onClick={closePopup} className="w-full py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-2xl font-medium transition-colors mt-2">
                           Tutup
                         </button>
                       </div>
@@ -559,12 +424,8 @@ export default function LogPembayaran() {
                       <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                              {popup.mode === "add" ? <Plus className="w-6 h-6" /> : <Edit2 className="w-6 h-6" />}
-                            </div>
-                            <h2 className="text-2xl font-bold">
-                              {popup.mode === "add" ? "Tambah Pegawai" : "Edit Pegawai"}
-                            </h2>
+                            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">{popup.mode === "add" ? <Plus className="w-6 h-6" /> : <Edit2 className="w-6 h-6" />}</div>
+                            <h2 className="text-2xl font-bold">{popup.mode === "add" ? "Tambah Pegawai" : "Edit Pegawai"}</h2>
                           </div>
                           <button onClick={closePopup} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
                             <X className="w-6 h-6" />
@@ -635,16 +496,10 @@ export default function LogPembayaran() {
                           />
                         </div>
                         <div className="flex gap-3 pt-2">
-                          <button
-                            onClick={handleSubmit}
-                            className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl font-medium transition-all hover:shadow-lg"
-                          >
+                          <button onClick={handleSubmit} className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl font-medium transition-all hover:shadow-lg">
                             Simpan
                           </button>
-                          <button
-                            onClick={closePopup}
-                            className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl font-medium transition-colors"
-                          >
+                          <button onClick={closePopup} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl font-medium transition-colors">
                             Batal
                           </button>
                         </div>
@@ -671,12 +526,9 @@ export default function LogPembayaran() {
                       <div className="p-6">
                         <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 mb-6">
                           <p className="text-gray-700 text-center">
-                            Apakah Anda yakin ingin menghapus pegawai{" "}
-                            <span className="font-bold text-red-600">{popup.data.name}</span>?
+                            Apakah Anda yakin ingin menghapus pegawai <span className="font-bold text-red-600">{popup.data.name}</span>?
                           </p>
-                          <p className="text-gray-500 text-sm text-center mt-2">
-                            Tindakan ini tidak dapat dibatalkan
-                          </p>
+                          <p className="text-gray-500 text-sm text-center mt-2">Tindakan ini tidak dapat dibatalkan</p>
                         </div>
                         <div className="flex gap-3">
                           <button
@@ -685,10 +537,7 @@ export default function LogPembayaran() {
                           >
                             Ya, Hapus
                           </button>
-                          <button
-                            onClick={closePopup}
-                            className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl font-medium transition-colors"
-                          >
+                          <button onClick={closePopup} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl font-medium transition-colors">
                             Batal
                           </button>
                         </div>
