@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Edit2, Eye, Trash2, X } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export interface ModalField {
   name: string;
@@ -23,7 +24,7 @@ export interface GenericModalProps {
   fields: ModalField[];
   data: any;
   onClose: () => void;
-  onSubmit: () => void;
+  onSubmit: (formData: any) => void;
   onDelete?: () => void;
   deleteMessage?: string;
 }
@@ -39,6 +40,25 @@ export default function GenericModal({
   onDelete,
   deleteMessage = "Apakah Anda yakin ingin menghapus data ini?",
 }: GenericModalProps) {
+  const [formData, setFormData] = useState<any>({});
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(data || {});
+    }
+  }, [isOpen, data]);
+
+  const handleInputChange = (fieldName: string, value: any) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      [fieldName]: value,
+    }));
+  };
+
+  const handleSubmit = () => {
+    onSubmit(formData);
+  };
+
   if (!isOpen) return null;
 
   const getModalConfig = () => {
@@ -74,7 +94,7 @@ export default function GenericModal({
   const Icon = config.icon;
 
   const renderField = (field: ModalField) => {
-    const value = data[field.name] || "";
+    const value = formData[field.name] || "";
 
     if (mode === "view") {
       return (
@@ -102,9 +122,7 @@ export default function GenericModal({
             <select
               className={baseInputClass}
               value={value}
-              onChange={(e) => {
-                data[field.name] = e.target.value;
-              }}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
               disabled={field.readOnly}
             >
               <option value="">{field.placeholder || `Pilih ${field.label}`}</option>
@@ -127,9 +145,7 @@ export default function GenericModal({
               className={baseInputClass + " min-h-24 resize-y"}
               placeholder={field.placeholder || `Masukkan ${field.label}`}
               value={value}
-              onChange={(e) => {
-                data[field.name] = e.target.value;
-              }}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
               readOnly={field.readOnly}
               rows={4}
             />
@@ -147,9 +163,7 @@ export default function GenericModal({
               className={baseInputClass}
               placeholder={field.placeholder || `Masukkan ${field.label}`}
               value={value}
-              onChange={(e) => {
-                data[field.name] = e.target.value;
-              }}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
               readOnly={field.readOnly}
             />
           </div>
@@ -174,9 +188,11 @@ export default function GenericModal({
       </div>
       <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
         {fields.map((field) => renderField(field))}
+      </div>
+      <div className="p-6 pt-0">
         <button
           onClick={onClose}
-          className="w-full py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-2xl font-medium transition-colors mt-2"
+          className="w-full py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-2xl font-medium transition-colors"
         >
           Tutup
         </button>
@@ -199,11 +215,13 @@ export default function GenericModal({
           </button>
         </div>
       </div>
-      <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+      <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
         {fields.map((field) => renderField(field))}
-        <div className="flex gap-3 pt-2 sticky bottom-0 bg-white">
+      </div>
+      <div className="p-6 pt-0 bg-white border-t border-gray-100">
+        <div className="flex gap-3">
           <button
-            onClick={onSubmit}
+            onClick={handleSubmit}
             className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl font-medium transition-all hover:shadow-lg"
           >
             Simpan
@@ -259,26 +277,28 @@ export default function GenericModal({
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-        onClick={onClose}
-      >
+      {isOpen && (
         <motion.div
-          initial={{ scale: 0.9, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          transition={{ type: "spring", duration: 0.5 }}
-          className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          onClick={onClose}
         >
-          {mode === "view" && renderViewMode()}
-          {(mode === "add" || mode === "edit") && renderFormMode()}
-          {mode === "delete" && renderDeleteMode()}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: "spring", duration: 0.5 }}
+            className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {mode === "view" && renderViewMode()}
+            {(mode === "add" || mode === "edit") && renderFormMode()}
+            {mode === "delete" && renderDeleteMode()}
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </AnimatePresence>
   );
 }
