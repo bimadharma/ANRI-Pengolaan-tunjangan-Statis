@@ -18,6 +18,7 @@ import RiwayatTupas from "../pages/admin/RiwayatTupas";
 // Notifications
 import NotificationsPage from "../pages/notifications";
 import NotificationDetailPage from "../pages/notifications/Detail";
+import SettingsMenu from "../pages/settings";
 
 export default function AppRoutes() {
   const { user } = useAuth();
@@ -119,6 +120,14 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute role="admin">
             <RiwayatTupas />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <ProtectedRoute>
+            <SettingsMenu />
           </ProtectedRoute>
         }
       />

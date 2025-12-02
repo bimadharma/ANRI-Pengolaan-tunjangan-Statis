@@ -318,7 +318,7 @@ export default function DataPembayaran() {
   };
 
   return (
-    <MainLayout isAdmin={true}>
+    <MainLayout>
       {/* Toast Notifications */}
       <AlertNotification toasts={toasts} removeToast={removeToast} />
 

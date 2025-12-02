@@ -216,7 +216,7 @@ export default function LogPembayaran() {
 
   if (loading) {
     return (
-      <MainLayout isAdmin={true}>
+      <MainLayout>
         <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
           <div className="bg-white px-8 py-6 rounded-2xl shadow-xl flex flex-col items-center gap-4">
             <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
@@ -228,7 +228,7 @@ export default function LogPembayaran() {
   }
 
   return (
-    <MainLayout isAdmin={true}>
+    <MainLayout>
       {/* Toast Notification */}
       <AlertNotification toasts={toasts} removeToast={removeToast} />
 

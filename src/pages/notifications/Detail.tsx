@@ -28,7 +28,7 @@ export default function NotificationDetailPage() {
   }, [id]);
 
   return (
-    <MainLayout isAdmin={false}>
+    <MainLayout>
       <div className="p-6 max-w-3xl mx-auto">
         {loading ? (
           <p className="text-gray-500 text-center">Memuat...</p>

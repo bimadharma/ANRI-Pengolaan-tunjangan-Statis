@@ -259,7 +259,7 @@ export default function PerhitunganTunjanganPAS() {
   const grandTotal = data.reduce((sum, item) => sum + item.totalTunjangan, 0);
 
   return (
-    <MainLayout isAdmin={true}>
+    <MainLayout>
       <div className="p-6 max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-blue-600">💰 Perhitungan Tunjangan PAS</h1>
 

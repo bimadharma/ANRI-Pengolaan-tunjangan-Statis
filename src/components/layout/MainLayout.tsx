@@ -10,7 +10,9 @@ export default function MainLayout({ children, isAdmin = false }: Props) {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <main className={`pt-20 ${isAdmin ? "md:pl-64" : ""}`}>{children}</main>
+       <main className="pt-20 md:pl-64">
+        {children}
+      </main>
     </div>
   );
 }
