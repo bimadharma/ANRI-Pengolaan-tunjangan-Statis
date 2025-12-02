@@ -1,21 +1,23 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, Plus, Eye, Edit2, Trash2, X, Database, CheckCircle } from "lucide-react";
-import MainLayout from "../../components/layout/MainLayout";
+"use client"
+
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Search, Plus, Eye, Edit2, Trash2, X, Database, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react"
+import MainLayout from "../../components/layout/MainLayout"
 
 interface MasterDataItem {
-  id?: number;
-  kode: string;
-  nama: string;
-  deskripsi: string;
-  status: string;
-  createdAt?: string;
+  id?: number
+  kode: string
+  nama: string
+  deskripsi: string
+  status: string
+  createdAt?: string
 }
 
 interface PopupState {
-  open: boolean;
-  mode: string;
-  data: MasterDataItem | null;
+  open: boolean
+  mode: string
+  data: MasterDataItem | null
 }
 
 export default function Ketentuan() {
@@ -44,34 +46,51 @@ export default function Ketentuan() {
       status: "Non-Aktif",
       createdAt: "2024-01-17",
     },
-  ]);
+  ])
 
-  const [filter, setFilter] = useState<string>("");
-  const [popup, setPopup] = useState<PopupState>({ open: false, mode: "", data: null });
+  const [filter, setFilter] = useState<string>("")
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const itemsPerPage = 5
+
+  const [popup, setPopup] = useState<PopupState>({ open: false, mode: "", data: null })
   const [formData, setFormData] = useState<MasterDataItem>({
     kode: "",
     nama: "",
     deskripsi: "",
     status: "Aktif",
-  });
-
-  // alert / toast state
-  const [alert, setAlert] = useState<{ open: boolean; message: string; variant: "success" | "error" | "info" }>({
-    open: false,
-    message: "",
-    variant: "success",
-  });
+  })
 
   const showAlert = (message: string, variant: "success" | "error" | "info" = "success", duration = 3000) => {
-    setAlert({ open: true, message, variant });
-    window.setTimeout(() => setAlert((s) => ({ ...s, open: false })), duration);
-  };
+    setAlert({ open: true, message, variant })
+    window.setTimeout(() => setAlert((s) => ({ ...s, open: false })), duration)
+  }
 
   const filteredData = data.filter(
     (item) =>
-      item.nama.toLowerCase().includes(filter.toLowerCase()) ||
-      item.kode.toLowerCase().includes(filter.toLowerCase())
-  );
+      item.nama.toLowerCase().includes(filter.toLowerCase()) || item.kode.toLowerCase().includes(filter.toLowerCase()),
+  )
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedData = filteredData.slice(startIndex, endIndex)
+
+  const handleFilterChange = (value: string) => {
+    setFilter(value)
+    setCurrentPage(1)
+  }
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const goToPrevious = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1)
+  }
+
+  const goToNext = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1)
+  }
 
   const openPopup = (mode: string, item: MasterDataItem | null = null) => {
     setFormData(
@@ -80,28 +99,28 @@ export default function Ketentuan() {
         nama: "",
         deskripsi: "",
         status: "Aktif",
-      }
-    );
-    setPopup({ open: true, mode, data: item });
-  };
+      },
+    )
+    setPopup({ open: true, mode, data: item })
+  }
 
   const closePopup = () => {
-    setPopup({ open: false, mode: "", data: null });
+    setPopup({ open: false, mode: "", data: null })
     setFormData({
       kode: "",
       nama: "",
       deskripsi: "",
       status: "Aktif",
-    });
-  };
+    })
+  }
 
   const handleSubmit = () => {
     if (!formData.kode.trim() || !formData.nama.trim()) {
-      showAlert("Kode dan Nama wajib diisi!", "error");
-      return;
+      showAlert("Kode dan Nama wajib diisi!", "error")
+      return
     }
 
-    const isAdd = popup.mode === "add";
+    const isAdd = popup.mode === "add"
 
     if (isAdd) {
       setData([
@@ -111,26 +130,30 @@ export default function Ketentuan() {
           ...formData,
           createdAt: new Date().toISOString().split("T")[0],
         },
-      ]);
+      ])
     } else if (popup.mode === "edit" && popup.data) {
-      setData(
-        data.map((item) => (item.id === popup.data?.id ? { ...item, ...formData } : item))
-      );
+      setData(data.map((item) => (item.id === popup.data?.id ? { ...item, ...formData } : item)))
     }
 
-    closePopup();
-    showAlert(isAdd ? "Data berhasil ditambahkan" : "Data berhasil diperbarui", "success");
-  };
+    closePopup()
+    showAlert(isAdd ? "Data berhasil ditambahkan" : "Data berhasil diperbarui", "success")
+  }
 
   const handleDelete = (id: number) => {
-    setData(data.filter((item) => item.id !== id));
-    closePopup();
-    showAlert("Data berhasil dihapus", "success");
-  };
+    setData(data.filter((item) => item.id !== id))
+    closePopup()
+    showAlert("Data berhasil dihapus", "success")
+  }
 
   const handleInputChange = (field: keyof MasterDataItem, value: string) => {
-    setFormData({ ...formData, [field]: value });
-  };
+    setFormData({ ...formData, [field]: value })
+  }
+
+  const [alert, setAlert] = useState<{ open: boolean; message: string; variant: "success" | "error" | "info" }>({
+    open: false,
+    message: "",
+    variant: "success",
+  })
 
   return (
     <MainLayout isAdmin={true}>
@@ -174,9 +197,7 @@ export default function Ketentuan() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium mb-1">Status Aktif</p>
-                  <p className="text-4xl font-bold text-green-600">
-                    {data.filter((d) => d.status === "Aktif").length}
-                  </p>
+                  <p className="text-4xl font-bold text-green-600">{data.filter((d) => d.status === "Aktif").length}</p>
                 </div>
                 <div className="p-4 bg-green-100 rounded-2xl">
                   <CheckCircle className="w-8 h-8 text-green-600" />
@@ -215,7 +236,7 @@ export default function Ketentuan() {
                   type="text"
                   placeholder="Cari berdasarkan nama atau kode..."
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
+                  onChange={(e) => handleFilterChange(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all"
                 />
               </div>
@@ -237,8 +258,8 @@ export default function Ketentuan() {
 
                 <tbody>
                   <AnimatePresence>
-                    {filteredData.length > 0 ? (
-                      filteredData.map((item, index) => (
+                    {paginatedData.length > 0 ? (
+                      paginatedData.map((item, index) => (
                         <motion.tr
                           key={item.id}
                           initial={{ opacity: 0, y: 20 }}
@@ -311,6 +332,60 @@ export default function Ketentuan() {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination */}
+            {filteredData.length > 0 && (
+              <div className="p-6 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  Menampilkan {startIndex + 1} - {Math.min(endIndex, filteredData.length)} dari {filteredData.length}{" "}
+                  data
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={goToPrevious}
+                    disabled={currentPage === 1}
+                    className={`p-2 rounded-xl transition-all ${
+                      currentPage === 1
+                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                    }`}
+                    title="Previous"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+
+                  <div className="flex gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => goToPage(page)}
+                        className={`w-10 h-10 rounded-xl font-medium transition-all ${
+                          currentPage === page
+                            ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={goToNext}
+                    disabled={currentPage === totalPages}
+                    className={`p-2 rounded-xl transition-all ${
+                      currentPage === totalPages
+                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                    }`}
+                    title="Next"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            )}
           </motion.div>
 
           {/* Modal Popup */}
@@ -515,7 +590,11 @@ export default function Ketentuan() {
               >
                 <div
                   className={`max-w-sm px-4 py-3 rounded-2xl shadow-lg text-white flex items-center gap-3 ${
-                    alert.variant === "success" ? "bg-green-600" : alert.variant === "error" ? "bg-red-600" : "bg-blue-600"
+                    alert.variant === "success"
+                      ? "bg-green-600"
+                      : alert.variant === "error"
+                        ? "bg-red-600"
+                        : "bg-blue-600"
                   }`}
                 >
                   <div className="font-medium">{alert.message}</div>
@@ -533,5 +612,5 @@ export default function Ketentuan() {
         </div>
       </div>
     </MainLayout>
-  );
+  )
 }
