@@ -1,5 +1,4 @@
 import { Users, Activity, DollarSign, TrendingUp, ArrowUpRight, ArrowDownRight, MoreVertical, Search, Bell, User } from "lucide-react";
-import MainLayout from "../../components/layout/MainLayout";
 
 export default function AdminDashboard() {
   // 👉 Definisikan tipe warna berdasarkan key object colors
@@ -43,7 +42,6 @@ export default function AdminDashboard() {
   };
 
   return (
-    <MainLayout>
       <div className="">
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -161,6 +159,5 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
-    </MainLayout>
   );
 }

@@ -3,138 +3,175 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import UserDashboard from "../pages/UserDashboard";
 import AdminDashboard from "../pages/admin/AdminDashboard";
-
 import ProtectedRoute from "../components/ProtectedRoute";
 import { useAuth } from "../hooks/useAuth";
 
-// Admin pages (semua ini sudah ada di import)
+import AdminLayout from "../components/layout/AdminLayout";
+
+// Admin pages
 import DataPembayaran from "../pages/admin/DataPembayaran";
 import DataTupas from "../pages/admin/DataTupas";
 import Ketentuan from "../pages/admin/Ketentuan";
 import LogPembayaran from "../pages/admin/LogPembayaran";
 import PerhitunganTunjanganPAS from "../pages/admin/RiwayatTupas";
 import RiwayatTupas from "../pages/admin/RiwayatTupas";
+import SettingsMenu from "../pages/settings";
 
 // Notifications
 import NotificationsPage from "../pages/notifications";
 import NotificationDetailPage from "../pages/notifications/Detail";
-import SettingsMenu from "../pages/settings";
 
 export default function AppRoutes() {
   const { user } = useAuth();
 
+  // Wrapper Layout (Agar tidak berulang)
+  const PublicPage = ({ children }: { children: React.ReactNode }) => (
+    <AdminLayout isAdmin={false}>{children}</AdminLayout>
+  );
+
+  const UserPage = ({ children }: { children: React.ReactNode }) => (
+    <ProtectedRoute role="user">
+      <AdminLayout isAdmin={false}>{children}</AdminLayout>
+    </ProtectedRoute>
+  );
+
+  const AdminPage = ({ children }: { children: React.ReactNode }) => (
+    <ProtectedRoute role="admin">
+      <AdminLayout isAdmin={true}>{children}</AdminLayout>
+    </ProtectedRoute>
+  );
+
   return (
     <Routes>
-      {/* Home Page */}
+
+      {/* PUBLIC */}
       <Route
         path="/"
         element={
           user ? (
             <Navigate to={user.role === "admin" ? "/admin" : "/user"} />
           ) : (
-            <Home />
+            <PublicPage>
+              <Home />
+            </PublicPage>
           )
         }
       />
 
-      {/* Login Page */}
       <Route
         path="/login"
         element={
           user ? (
             <Navigate to={user.role === "admin" ? "/admin" : "/user"} />
           ) : (
-            <Login />
+            <PublicPage>
+              <Login />
+            </PublicPage>
           )
         }
       />
 
-      {/* User Dashboard */}
+      {/* USER */}
       <Route
         path="/user"
         element={
-          <ProtectedRoute role="user">
+          <UserPage>
             <UserDashboard />
-          </ProtectedRoute>
+          </UserPage>
         }
       />
 
-      {/* Admin Dashboard */}
+      {/* ADMIN */}
       <Route
         path="/admin"
         element={
-          <ProtectedRoute role="admin">
+          <AdminPage>
             <AdminDashboard />
-          </ProtectedRoute>
+          </AdminPage>
         }
       />
 
-      {/* === ADMIN PAGES SESUAI IMPORT === */}
       <Route
         path="/admin/DataPembayaran"
         element={
-          <ProtectedRoute role="admin">
+          <AdminPage>
             <DataPembayaran />
-          </ProtectedRoute>
+          </AdminPage>
         }
       />
 
       <Route
         path="/admin/DataTupas"
         element={
-          <ProtectedRoute role="admin">
+          <AdminPage>
             <DataTupas />
-          </ProtectedRoute>
+          </AdminPage>
         }
       />
 
       <Route
         path="/admin/Ketentuan"
         element={
-          <ProtectedRoute role="admin">
+          <AdminPage>
             <Ketentuan />
-          </ProtectedRoute>
+          </AdminPage>
         }
       />
 
       <Route
         path="/admin/LogPembayaran"
         element={
-          <ProtectedRoute role="admin">
+          <AdminPage>
             <LogPembayaran />
-          </ProtectedRoute>
+          </AdminPage>
         }
       />
 
       <Route
         path="/admin/PerhitunganTunjanganPAS"
         element={
-          <ProtectedRoute role="admin">
+          <AdminPage>
             <PerhitunganTunjanganPAS />
-          </ProtectedRoute>
+          </AdminPage>
         }
       />
 
       <Route
         path="/admin/RiwayatTupas"
         element={
-          <ProtectedRoute role="admin">
+          <AdminPage>
             <RiwayatTupas />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/settings"
-        element={
-          <ProtectedRoute>
-            <SettingsMenu />
-          </ProtectedRoute>
+          </AdminPage>
         }
       />
 
-      {/* Notifications */}
-      <Route path="/notifications" element={<NotificationsPage />} />
-      <Route path="/notifications/:id" element={<NotificationDetailPage />} />
+      <Route
+        path="/admin/settings"
+        element={
+          <AdminPage>
+            <SettingsMenu />
+          </AdminPage>
+        }
+      />
+
+      {/* NOTIFICATIONS */}
+      <Route
+        path="/notifications"
+        element={
+          <AdminPage>
+            <NotificationsPage />
+          </AdminPage>
+        }
+      />
+
+      <Route
+        path="/notifications/:id"
+        element={
+          <AdminPage>
+            <NotificationDetailPage />
+          </AdminPage>
+        }
+      />
     </Routes>
   );
 }

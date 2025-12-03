@@ -10,7 +10,6 @@ import {
   MapPin,
   Calendar
 } from 'lucide-react';
-import MainLayout from '../components/layout/MainLayout';
 
 export default function SettingsMenu() {
   const [isEditing, setIsEditing] = useState(false);
@@ -28,7 +27,7 @@ export default function SettingsMenu() {
   };
 
   return (
-    <MainLayout>
+    <>
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
@@ -192,6 +191,6 @@ export default function SettingsMenu() {
         </div>
       </div>
     </div>
-    </MainLayout>
+    </>
   );
 }

@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, Plus, Eye, Edit2, Trash2, Users, Building2, ArrowUpDown, Mail, Briefcase, Hash } from "lucide-react"
-import MainLayout from "../../components/layout/MainLayout"
 import Pagination from "../../components/pagination"
 import AlertNotification, { type Toast } from "../../components/AlertNotification"
 import GenericModal, { type ModalField } from "../../components/ModalPop"
@@ -91,7 +90,7 @@ export default function RiwayatTupas() {
   ] as const
 
   return (
-    <MainLayout>
+    <>
       <AlertNotification toasts={toasts} removeToast={(id) => setToasts(p => p.filter(t => t.id !== id))} />
       
       {/* Generic Modal menggantikan manual modal code */}
@@ -165,6 +164,6 @@ export default function RiwayatTupas() {
           </motion.div>
         </div>
       </div>
-    </MainLayout>
+    </>
   )
 }

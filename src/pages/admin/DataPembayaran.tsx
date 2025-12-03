@@ -17,7 +17,6 @@ import {
   ArrowLeft,
   ChevronRight
 } from "lucide-react";
-import MainLayout from "../../components/layout/MainLayout";
 import AlertNotification, { type Toast } from "../../components/AlertNotification";
 import GenericModal, { type ModalField } from "../../components/ModalPop";
 import Pagination from "../../components/pagination";
@@ -297,7 +296,7 @@ export default function DataPembayaran() {
   ];
 
   return (
-    <MainLayout isAdmin={true}>
+    <>
       <AlertNotification toasts={toasts} removeToast={(id) => setToasts((p) => p.filter((t) => t.id !== id))} />
       
       {/* MODAL DINAMIS 
@@ -523,6 +522,6 @@ export default function DataPembayaran() {
           </AnimatePresence>
         </div>
       </div>
-    </MainLayout>
+    </>
   );
 }

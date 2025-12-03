@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card, Badge } from "flowbite-react";
 import { useNavigate } from "react-router-dom";
-import MainLayout from "../../components/layout/MainLayout";
 
 type Notification = {
   id: number;
@@ -26,7 +25,7 @@ export default function NotificationsPage() {
   }, []);
 
   return (
-    <MainLayout>
+    <>
       <div className="p-6 max-w-5xl mx-auto">
         <h1 className="text-2xl font-bold mb-4">Notifikasi</h1>
 
@@ -71,6 +70,6 @@ export default function NotificationsPage() {
           </div>
         )}
       </div>
-    </MainLayout>
+    </>
   );
 }

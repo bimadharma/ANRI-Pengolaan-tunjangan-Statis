@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button, Badge } from "flowbite-react";
-import MainLayout from "../../components/layout/MainLayout";
 
 type Notification = {
   id: number;
@@ -28,7 +27,7 @@ export default function NotificationDetailPage() {
   }, [id]);
 
   return (
-    <MainLayout>
+    <>
       <div className="p-6 max-w-3xl mx-auto">
         {loading ? (
           <p className="text-gray-500 text-center">Memuat...</p>
@@ -78,6 +77,6 @@ export default function NotificationDetailPage() {
           </div>
         )}
       </div>
-    </MainLayout>
+    </>
   );
 }

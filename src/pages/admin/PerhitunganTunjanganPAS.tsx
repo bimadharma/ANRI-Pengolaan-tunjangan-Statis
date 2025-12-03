@@ -10,7 +10,6 @@ import {
   TrendingUp,
   CheckCircle,
 } from "lucide-react";
-import MainLayout from "../../components/layout/MainLayout";
 
 interface TunjanganPAS {
   id?: number;
@@ -172,7 +171,7 @@ export default function PerhitunganTunjanganPAS() {
   const totalPotongan = data.reduce((s, it) => s + (it.potongan || 0), 0);
 
   return (
-    <MainLayout>
+    <>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
@@ -408,6 +407,6 @@ export default function PerhitunganTunjanganPAS() {
           </AnimatePresence>
         </div>
       </div>
-    </MainLayout>
+    </>
   );
 }

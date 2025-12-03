@@ -7,7 +7,6 @@ import {
   Briefcase, Building2, BookOpen, TrendingUp
 } from "lucide-react"
 
-import MainLayout from "../../components/layout/MainLayout"
 import Pagination from "../../components/pagination"
 import AlertNotification, { type Toast } from "../../components/AlertNotification"
 import GenericModal, { type ModalField } from "../../components/ModalPop"
@@ -197,7 +196,7 @@ export default function PengaturanDataPage() {
   }
 
   return (
-    <MainLayout>
+    <>
       <AlertNotification toasts={toasts} removeToast={(id) => setToasts(p => p.filter(t => t.id !== id))} />
 
       <GenericModal 
@@ -361,6 +360,6 @@ export default function PengaturanDataPage() {
           </motion.div>
         </div>
       </div>
-    </MainLayout>
+    </>
   )
 }

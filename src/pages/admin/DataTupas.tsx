@@ -4,7 +4,6 @@ import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, Plus, Eye, Edit2, Trash2, TrendingUp, CheckCircle } from "lucide-react"
 import Pagination from "../../components/pagination"
-import MainLayout from "../../components/layout/MainLayout"
 import AlertNotification, { type Toast } from "../../components/AlertNotification"
 import GenericModal, { type ModalField } from "../../components/ModalPop"
 
@@ -91,7 +90,7 @@ export default function DataTupas() {
   }
 
   return (
-    <MainLayout>
+    <>
       <AlertNotification toasts={toasts} removeToast={(id) => setToasts(p => p.filter(t => t.id !== id))} />
       
       <GenericModal 
@@ -159,6 +158,6 @@ export default function DataTupas() {
           </motion.div>
         </div>
       </div>
-    </MainLayout>
+      </>
   )
 }

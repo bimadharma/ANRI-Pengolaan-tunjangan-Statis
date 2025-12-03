@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, Plus, Eye, Edit2, Trash2, Users, Briefcase, DollarSign, Mail, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
-import MainLayout from "../../components/layout/MainLayout"
 import AlertNotification, { type Toast } from "../../components/AlertNotification"
 import GenericModal, { type ModalField } from "../../components/ModalPop"
 import Pagination from "../../components/pagination"
@@ -100,10 +99,10 @@ export default function LogPembayaran() {
 
   const SortIcon = ({ col }: { col: SortColumn }) => params.sortBy !== col ? <ArrowUpDown className="w-4 h-4 text-gray-400" /> : params.sortDir === "asc" ? <ArrowUp className="w-4 h-4 text-blue-600" /> : <ArrowDown className="w-4 h-4 text-blue-600" />
 
-  if (loading) return <MainLayout><div className="fixed inset-0 flex items-center justify-center bg-blue-50"><Loader2 className="w-12 h-12 text-blue-500 animate-spin" /></div></MainLayout>
+  if (loading) return <><div className="fixed inset-0 flex items-center justify-center bg-blue-50"><Loader2 className="w-12 h-12 text-blue-500 animate-spin" /></div></>
 
   return (
-    <MainLayout>
+    <>
       <AlertNotification toasts={toasts} removeToast={(id) => setToasts(p => p.filter(t => t.id !== id))} />
       
       {/* Generic Modal Implementation */}
@@ -204,6 +203,6 @@ export default function LogPembayaran() {
           </div>
         </div>
       </div>
-    </MainLayout>
+    </>
   )
 }
