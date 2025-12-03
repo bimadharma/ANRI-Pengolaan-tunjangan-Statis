@@ -7,23 +7,42 @@ export const AuthProvider = ({ children }: any) => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const saved = getAuth();
-    if (saved) setUser(saved);
-    setLoading(false);
-  }, []);
+  const logout = () => {
+    clearAuth();
+    setUser(null);
+ 
+  };
 
   const login = (userdata: any) => {
     saveAuth(userdata);
     setUser(userdata);
   };
 
-  const logout = () => {
-    clearAuth();
-    setUser(null);
-  };
+  useEffect(() => {
+    const saved = getAuth(); 
+    if (saved) {
+      setUser(saved);
+    } else {
+      setUser(null);
+    }
+    setLoading(false);
+  }, []);
 
-  if (loading) return null; // atau loading spinner
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(() => {
+      const isValid = getAuth(); // Cek ke storage
+      if (!isValid) {
+        console.log("Session expired via interval check");
+        logout();
+      }
+    }, 60000); 
+
+    return () => clearInterval(interval);
+  }, [user]);
+
+  if (loading) return null;
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
@@ -31,4 +50,3 @@ export const AuthProvider = ({ children }: any) => {
     </AuthContext.Provider>
   );
 };
-

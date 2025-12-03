@@ -41,7 +41,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-slate-100 p-4 mt-5">
+    <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex justify-center items-center h-screen bg-slate-100 p-4 mt-5">
 
       {/* 🌟 ERROR POPUP */}
       {error && (

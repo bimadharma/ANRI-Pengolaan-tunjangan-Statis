@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
-import UserDashboard from "../pages/UserDashboard";
+import DashboardPAS from "../pages/Users/UserDashboard";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { useAuth } from "../hooks/useAuth";
@@ -20,6 +20,7 @@ import SettingsMenu from "../pages/settings";
 // Notifications
 import NotificationsPage from "../pages/notifications";
 import NotificationDetailPage from "../pages/notifications/Detail";
+import UserLayout from "../components/layout/UserLayout";
 
 export default function AppRoutes() {
   const { user } = useAuth();
@@ -31,7 +32,7 @@ export default function AppRoutes() {
 
   const UserPage = ({ children }: { children: React.ReactNode }) => (
     <ProtectedRoute role="user">
-      <AdminLayout isAdmin={false}>{children}</AdminLayout>
+      <UserLayout isUser={true}>{children}</UserLayout>
     </ProtectedRoute>
   );
 
@@ -76,7 +77,7 @@ export default function AppRoutes() {
         path="/user"
         element={
           <UserPage>
-            <UserDashboard />
+            <DashboardPAS />
           </UserPage>
         }
       />
