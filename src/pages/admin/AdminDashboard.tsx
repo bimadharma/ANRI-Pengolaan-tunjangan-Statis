@@ -1,7 +1,16 @@
-import { Users, Activity, DollarSign, TrendingUp, ArrowUpRight, ArrowDownRight, MoreVertical, Search, Bell, User } from "lucide-react";
+"use client"; // 1. Wajib tambahkan ini untuk interaksi
+
+import { useState } from "react";
+import { Users, Activity, DollarSign, TrendingUp, ArrowUpRight, ArrowDownRight, MoreVertical } from "lucide-react";
+// Sesuaikan path import ini dengan lokasi file pagination.tsx Anda
+import Pagination from "../../components/pagination"; 
 
 export default function AdminDashboard() {
-  // 👉 Definisikan tipe warna berdasarkan key object colors
+  // --- STATE PAGINATION ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // 👉 Definisikan tipe warna
   const colors = {
     blue: "bg-blue-100 text-blue-600",
     green: "bg-green-100 text-green-600",
@@ -9,9 +18,8 @@ export default function AdminDashboard() {
     orange: "bg-orange-100 text-orange-600",
   };
 
-  type ColorKey = keyof typeof colors; // "blue" | "green" | "purple" | "orange"
+  type ColorKey = keyof typeof colors;
 
-  // 👉 Perbaiki stats dengan define type
   type Stat = {
     title: string;
     value: string;
@@ -28,15 +36,32 @@ export default function AdminDashboard() {
     { title: "Conversion Rate", value: "3.24%", change: "-2.4%", trend: "down", icon: TrendingUp, color: "orange" },
   ];
 
-  const recentUsers = [
+  // 👉 Data diperbanyak agar pagination terlihat (Total 12 data)
+  const allUsers = [
     { name: "John Doe", email: "john@example.com", status: "Active", joined: "2 hours ago" },
     { name: "Sarah Smith", email: "sarah@example.com", status: "Active", joined: "5 hours ago" },
     { name: "Mike Johnson", email: "mike@example.com", status: "Inactive", joined: "1 day ago" },
     { name: "Emily Brown", email: "emily@example.com", status: "Active", joined: "2 days ago" },
     { name: "David Wilson", email: "david@example.com", status: "Active", joined: "3 days ago" },
+    { name: "Jessica Lee", email: "jessica@example.com", status: "Active", joined: "4 days ago" },
+    { name: "Robert Taylor", email: "robert@example.com", status: "Inactive", joined: "5 days ago" },
+    { name: "William Clark", email: "william@example.com", status: "Active", joined: "6 days ago" },
+    { name: "Linda Martinez", email: "linda@example.com", status: "Active", joined: "1 week ago" },
+    { name: "Michael Bond", email: "bond@example.com", status: "Inactive", joined: "1 week ago" },
+    { name: "Olivia King", email: "olivia@example.com", status: "Active", joined: "2 weeks ago" },
+    { name: "James Wright", email: "james@example.com", status: "Active", joined: "2 weeks ago" },
   ];
 
-  // 👉 getColorClasses sudah bertipe aman
+  // --- LOGIKA PAGINATION ---
+  const totalItems = allUsers.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  
+  // Data yang ditampilkan saat ini (hanya 5 per halaman)
+  const currentUsers = allUsers.slice(startIndex, endIndex);
+
   const getColorClasses = (color: ColorKey) => {
     return colors[color];
   };
@@ -131,7 +156,8 @@ export default function AdminDashboard() {
                 </thead>
 
                 <tbody className="divide-y divide-gray-100">
-                  {recentUsers.map((user, index) => (
+                  {/* 👉 Kita map currentUsers, BUKAN allUsers */}
+                  {currentUsers.map((user, index) => (
                     <tr key={index} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -156,6 +182,18 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
             </div>
+
+            {/* 👉 Sisipkan Pagination Component disini */}
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              startIndex={startIndex}
+              endIndex={endIndex}
+              onPageChange={(page) => setCurrentPage(page)}
+              onPrevious={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onNext={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            />
           </div>
         </div>
       </div>
