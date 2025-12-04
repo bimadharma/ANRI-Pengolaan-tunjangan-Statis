@@ -1,10 +1,14 @@
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import Navbar from "../../components/Navbar"; 
+import { Link, useLocation } from "react-router-dom";
+// GANTI: Gunakan hook dari Refine
+import { useLogout } from "@refinedev/core"; 
 
-// Icons
-import { HiOutlineHome, HiOutlineDocumentText, HiOutlineClipboardList, HiOutlineCreditCard, HiOutlineDocumentReport, HiOutlineClock, HiOutlineCog, HiX } from "react-icons/hi";
+import Navbar from "../Navbar"; 
+
+
+import { HiOutlineHome, HiX } from "react-icons/hi";
+import { HiArrowRightOnRectangle } from "react-icons/hi2";
+
 
 interface UserLayoutProps {
   children: React.ReactNode;
@@ -13,19 +17,20 @@ interface UserLayoutProps {
 
 export default function UserLayout({ children, isUser = false }: UserLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { logout } = useAuth();
-  const navigate = useNavigate();
+  
+  // --- LOGIC BARU REFINE ---
+  const { mutate: logout } = useLogout();
   const location = useLocation();
 
-  // --- LOGIKA SIDEBAR DI SINI ---
-
+  // Menu User
   const navItems = [
-    { label: "Home", to: "/user", icon: <HiOutlineHome /> },
-
+    { label: "Dashboard", to: "/user", icon: <HiOutlineHome /> },
+    // Anda bisa menambahkan menu lain di sini, misal: Profile
+    // { label: "My Profile", to: "/user/profile", icon: <HiOutlineUser /> },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* 1. Navbar */}
       <Navbar onSidebarClick={() => setSidebarOpen(true)} isUserPage={isUser} />
 
@@ -44,10 +49,9 @@ export default function UserLayout({ children, isUser = false }: UserLayoutProps
             className={`fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 z-40 transform transition-transform duration-300 ease-in-out 
               ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
               md:translate-x-0 md:top-16 md:h-[calc(100vh-4rem)] md:z-30`}
-            // Catatan: md:top-16 agar sidebar turun dibawah navbar di desktop
           >
             <div className="flex flex-col h-full">
-              {/* Sidebar Header (Mobile Only - karena desktop header ada di Navbar) */}
+              {/* Sidebar Header (Mobile Only) */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200 md:hidden">
                 <span className="font-bold text-lg text-slate-800">Menu</span>
                 <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-md hover:bg-gray-100 text-slate-600">
@@ -63,7 +67,7 @@ export default function UserLayout({ children, isUser = false }: UserLayoutProps
                     <Link
                       key={item.to}
                       to={item.to}
-                      onClick={() => setSidebarOpen(false)} // Tutup sidebar saat klik menu (mobile)
+                      onClick={() => setSidebarOpen(false)}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200 ${isActive ? "bg-blue-50 text-blue-700 font-medium" : "text-slate-600 hover:bg-gray-100 hover:text-slate-900"}`}
                     >
                       <span className="text-xl">{item.icon}</span>
@@ -75,8 +79,9 @@ export default function UserLayout({ children, isUser = false }: UserLayoutProps
 
               {/* Footer Sidebar */}
               <div className="p-4 border-t border-gray-200">
-                <div className="bg-gray-50 rounded p-3 mb-2">
-                  <p className="text-xs text-gray-500 text-center">App Version 1.0</p>
+
+                <div className="bg-gray-50 rounded p-3 text-center">
+                  <p className="text-xs text-gray-500">App Version 1.0</p>
                 </div>
               </div>
             </div>
@@ -85,9 +90,12 @@ export default function UserLayout({ children, isUser = false }: UserLayoutProps
       )}
 
       {/* 3. Main Content Wrapper */}
-      <main className={isUser ? "pt-15 min-h-screen transition-all duration-300 md:ml-64" : ""}>
-        {children}
-    </main>
+      {/* pt-16 (4rem) menyesuaikan tinggi navbar. ml-64 menyesuaikan lebar sidebar */}
+      <main className={`flex-1 transition-all duration-300 pt-16 ${isUser ? "md:ml-64" : ""}`}>
+        <div className="p-6">
+            {children}
+        </div>
+      </main>
     </div>
   );
 }
