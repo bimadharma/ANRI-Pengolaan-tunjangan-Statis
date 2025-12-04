@@ -1,102 +1,112 @@
-"use client"; // 1. Wajib tambahkan ini untuk interaksi
+"use client"
 
-import { useState } from "react";
-import { Users, Activity, DollarSign, TrendingUp, ArrowUpRight, ArrowDownRight, MoreVertical } from "lucide-react";
-// Sesuaikan path import ini dengan lokasi file pagination.tsx Anda
-import Pagination from "../../components/pagination"; 
+import { useState, useEffect } from "react"
+import { Users, Activity, DollarSign, TrendingUp, Loader2, ArrowUpRight, ArrowDownRight, MoreVertical } from "lucide-react"
+import Pagination from "../../components/pagination"
 
+// --- TIPE DATA ---
+type UserData = {
+  id: number
+  name: string
+  email: string
+  status: string
+  joined: string
+}
+
+type ColorKey = "blue" | "green" | "purple" | "orange"
+
+// --- SIMULASI DATABASE ---
+const FAKE_DB_USERS = Array.from({ length: 500 }, (_, i) => ({
+  id: i + 1,
+  name: `User ${i + 1}`,
+  email: `user${i + 1}@example.com`,
+  status: i % 3 === 0 ? "Inactive" : "Active",
+  joined: `${Math.floor(Math.random() * 30) + 1} days ago`,
+}))
+
+const fakeFetchUsersAPI = (page: number, limit: number): Promise<{ data: UserData[], meta: any }> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const startIndex = (page - 1) * limit
+      const endIndex = startIndex + limit
+      resolve({
+        data: FAKE_DB_USERS.slice(startIndex, endIndex),
+        meta: {
+          totalPages: Math.ceil(FAKE_DB_USERS.length / limit),
+          totalItems: FAKE_DB_USERS.length
+        }
+      })
+    }, 600)
+  })
+}
+
+// --- KOMPONEN ---
 export default function AdminDashboard() {
-  // --- STATE PAGINATION ---
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(1)
+  const [dataUsers, setDataUsers] = useState<UserData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [paginationInfo, setPaginationInfo] = useState({ totalPages: 1, totalItems: 0 })
+  const itemsPerPage = 5
 
-  // 👉 Definisikan tipe warna
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true)
+      try {
+        const result = await fakeFetchUsersAPI(currentPage, itemsPerPage)
+        setDataUsers(result.data)
+        setPaginationInfo({
+          totalPages: result.meta.totalPages,
+          totalItems: result.meta.totalItems,
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }, [currentPage])
+
   const colors = {
     blue: "bg-blue-100 text-blue-600",
     green: "bg-green-100 text-green-600",
     purple: "bg-purple-100 text-purple-600",
     orange: "bg-orange-100 text-orange-600",
-  };
+  }
+  const getColorClasses = (color: ColorKey) => colors[color]
 
-  type ColorKey = keyof typeof colors;
-
-  type Stat = {
-    title: string;
-    value: string;
-    change: string;
-    trend: "up" | "down";
-    icon: React.ComponentType<any>;
-    color: ColorKey;
-  };
-
-  const stats: Stat[] = [
-    { title: "Total Users", value: "2,543", change: "+12.5%", trend: "up", icon: Users, color: "blue" },
-    { title: "Active Sessions", value: "847", change: "+8.2%", trend: "up", icon: Activity, color: "green" },
-    { title: "Monthly Revenue", value: "$45,231", change: "+23.1%", trend: "up", icon: DollarSign, color: "purple" },
-    { title: "Conversion Rate", value: "3.24%", change: "-2.4%", trend: "down", icon: TrendingUp, color: "orange" },
-  ];
-
-  // 👉 Data diperbanyak agar pagination terlihat (Total 12 data)
-  const allUsers = [
-    { name: "John Doe", email: "john@example.com", status: "Active", joined: "2 hours ago" },
-    { name: "Sarah Smith", email: "sarah@example.com", status: "Active", joined: "5 hours ago" },
-    { name: "Mike Johnson", email: "mike@example.com", status: "Inactive", joined: "1 day ago" },
-    { name: "Emily Brown", email: "emily@example.com", status: "Active", joined: "2 days ago" },
-    { name: "David Wilson", email: "david@example.com", status: "Active", joined: "3 days ago" },
-    { name: "Jessica Lee", email: "jessica@example.com", status: "Active", joined: "4 days ago" },
-    { name: "Robert Taylor", email: "robert@example.com", status: "Inactive", joined: "5 days ago" },
-    { name: "William Clark", email: "william@example.com", status: "Active", joined: "6 days ago" },
-    { name: "Linda Martinez", email: "linda@example.com", status: "Active", joined: "1 week ago" },
-    { name: "Michael Bond", email: "bond@example.com", status: "Inactive", joined: "1 week ago" },
-    { name: "Olivia King", email: "olivia@example.com", status: "Active", joined: "2 weeks ago" },
-    { name: "James Wright", email: "james@example.com", status: "Active", joined: "2 weeks ago" },
-  ];
-
-  // --- LOGIKA PAGINATION ---
-  const totalItems = allUsers.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  
-  // Data yang ditampilkan saat ini (hanya 5 per halaman)
-  const currentUsers = allUsers.slice(startIndex, endIndex);
-
-  const getColorClasses = (color: ColorKey) => {
-    return colors[color];
-  };
+  const stats = [
+    { title: "Total Users", value: "2,543", change: "+12.5%", trend: "up", icon: Users, color: "blue" as ColorKey },
+    { title: "Active Sessions", value: "847", change: "+8.2%", trend: "up", icon: Activity, color: "green" as ColorKey },
+    { title: "Monthly Revenue", value: "$45,231", change: "+23.1%", trend: "up", icon: DollarSign, color: "purple" as ColorKey },
+    { title: "Conversion Rate", value: "3.24%", change: "-2.4%", trend: "down", icon: TrendingUp, color: "orange" as ColorKey },
+  ]
 
   return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div key={index} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
-                      <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                      <div className="flex items-center mt-2">
+    <div className="">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* STATS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+           {stats.map((stat, i) => (
+             <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+               <div className="flex justify-between items-start">
+                 <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
+                    <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                    <div className="flex items-center mt-2">
                         {stat.trend === "up" ? <ArrowUpRight className="w-4 h-4 text-green-500" /> : <ArrowDownRight className="w-4 h-4 text-red-500" />}
                         <span className={`text-sm font-medium ml-1 ${stat.trend === "up" ? "text-green-600" : "text-red-600"}`}>{stat.change}</span>
-                        <span className="text-sm text-gray-500 ml-1">vs last month</span>
-                      </div>
                     </div>
-                    <div className={`p-3 rounded-xl ${getColorClasses(stat.color)}`}>
-                      <Icon className="w-6 h-6" />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                 </div>
+                 <div className={`p-3 rounded-xl ${getColorClasses(stat.color)}`}>
+                   <stat.icon className="w-6 h-6"/>
+                 </div>
+               </div>
+             </div>
+           ))}
+        </div>
 
-          {/* Chart and Recent Activity */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* GRAFIK & QUICK STATS (DIKEMBALIKAN KE KODE AWAL) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Chart Card */}
             <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between mb-6">
@@ -114,88 +124,79 @@ export default function AdminDashboard() {
 
             {/* Quick Stats */}
             <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 shadow-lg text-white">
-              <h3 className="text-lg font-semibold mb-6">Quick Stats</h3>
-              <div className="space-y-6">
-                <div>
-                  <p className="text-blue-100 text-sm mb-1">Daily Active Users</p>
-                  <p className="text-3xl font-bold">1,234</p>
+                <h3 className="text-lg font-semibold mb-6">Quick Stats</h3>
+                <div className="space-y-6">
+                    <div><p className="text-blue-100 text-sm">Daily Users</p><p className="text-3xl font-bold">1,234</p></div>
+                    <div><p className="text-blue-100 text-sm">Avg Duration</p><p className="text-3xl font-bold">8m 42s</p></div>
+                    <div><p className="text-blue-100 text-sm">Bounce Rate</p><p className="text-3xl font-bold">42.3%</p></div>
                 </div>
-                <div>
-                  <p className="text-blue-100 text-sm mb-1">Avg. Session Duration</p>
-                  <p className="text-3xl font-bold">8m 42s</p>
-                </div>
-                <div>
-                  <p className="text-blue-100 text-sm mb-1">Page Views</p>
-                  <p className="text-3xl font-bold">45.2K</p>
-                </div>
-              </div>
             </div>
+        </div>
+
+        {/* TABLE SECTION */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h2 className="text-xl font-bold text-gray-900">Recent Users</h2>
+            {loading && <span className="text-sm text-blue-500 flex items-center gap-1"><Loader2 className="w-4 h-4 animate-spin"/> Updating...</span>}
           </div>
 
-          {/* Recent Users Table */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Recent Users</h2>
-                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                  <MoreVertical className="w-5 h-5 text-gray-600" />
-                </button>
+          <div className="overflow-x-auto min-h-[300px]">
+            {loading && dataUsers.length === 0 ? (
+              <div className="flex flex-col justify-center items-center h-64 text-gray-400 gap-2">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                <p>Mengambil data...</p>
               </div>
-            </div>
-
-            <div className="overflow-x-auto">
+            ) : (
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Joined</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                    {["Name", "Email", "Status", "Joined", "Actions"].map(h => (
+                        <th key={h} className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">{h}</th>
+                    ))}
                   </tr>
                 </thead>
-
                 <tbody className="divide-y divide-gray-100">
-                  {/* 👉 Kita map currentUsers, BUKAN allUsers */}
-                  {currentUsers.map((user, index) => (
-                    <tr key={index} className="hover:bg-gray-50 transition-colors">
+                  {dataUsers.map((user) => (
+                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-semibold">{user.name.charAt(0)}</div>
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-semibold shadow-sm">
+                            {user.name.charAt(0)}
+                          </div>
                           <span className="ml-3 font-medium text-gray-900">{user.name}</span>
                         </div>
                       </td>
-
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
-
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${user.status === "Active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>{user.status}</span>
+                      <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          user.status === "Active" ? "bg-green-100 text-green-700 border border-green-200" : "bg-gray-100 text-gray-600 border border-gray-200"
+                        }`}>
+                          {user.status}
+                        </span>
                       </td>
-
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.joined}</td>
-
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">View</button>
+                      <td className="px-6 py-4 text-sm text-gray-600">{user.joined}</td>
+                      <td className="px-6 py-4">
+                        <button className="text-blue-600 hover:text-blue-700 font-medium text-sm hover:underline">View</button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
-
-            {/* 👉 Sisipkan Pagination Component disini */}
-            <Pagination 
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalItems}
-              startIndex={startIndex}
-              endIndex={endIndex}
-              onPageChange={(page) => setCurrentPage(page)}
-              onPrevious={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              onNext={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            />
+            )}
           </div>
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={paginationInfo.totalPages}
+            totalItems={paginationInfo.totalItems}
+            startIndex={(currentPage - 1) * itemsPerPage}
+            endIndex={Math.min((currentPage - 1) * itemsPerPage + itemsPerPage, paginationInfo.totalItems)}
+            onPageChange={setCurrentPage}
+            onPrevious={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            onNext={() => setCurrentPage((p) => Math.min(paginationInfo.totalPages, p + 1))}
+          />
         </div>
       </div>
-  );
+    </div>
+  )
 }
