@@ -46,7 +46,7 @@ export default function Login() {
       {/* Alert Component */}
       {alert.show && (
         <div
-          className={`fixed top-6 right-6 max-w-md w-full shadow-2xl rounded-lg p-4 flex items-start gap-3 z-50 animate-slide-in ${
+          className={`fixed top-18 right-6 max-w-md w-full shadow-2xl rounded-lg p-4 flex items-start gap-3 z-50 animate-slide-in ${
             alert.type === "error"
               ? "bg-red-50 border-l-4 border-red-500"
               : "bg-green-50 border-l-4 border-green-500"
