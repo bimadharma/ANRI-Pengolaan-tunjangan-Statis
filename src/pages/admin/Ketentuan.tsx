@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
-  Search, Plus, Edit2, Trash2, Eye, // <--- 1. Import Eye Icon
-  Briefcase, Building2, BookOpen, TrendingUp
+  Search, Plus, Edit2, Trash2, Eye, Briefcase, Building2, BookOpen, TrendingUp,
+  Filter, ArrowUpDown, Check
 } from "lucide-react"
 
 import Pagination from "../../components/pagination"
@@ -62,13 +62,19 @@ export default function PengaturanDataPage() {
   const [rules, setRules] = useState<KetentuanItem[]>(INITIAL_RULES)
 
   // UI State
-  const [filter, setFilter] = useState("")
+  const [search, setSearch] = useState("")
+  const [filterColumn, setFilterColumn] = useState<string>("") 
+  const [filterValue, setFilterValue] = useState("")           
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([])
   const [popup, setPopup] = useState<{ open: boolean; mode: "view" | "add" | "edit" | "delete"; data: any | null }>({ 
     open: false, mode: "add", data: null 
   })
   const [toasts, setToasts] = useState<Toast[]>([])
-  
+  const [sortConfig, setSortConfig] = useState<{ key: string | null; direction: "asc" | "desc" }>({ key: null, direction: "asc" })
+
   const itemsPerPage = 5
 
   // --- HELPERS ---
@@ -83,7 +89,7 @@ export default function PengaturanDataPage() {
 
   // --- CONFIGURATION ---
   
-  // 1. Modal Fields Configuration (Dynamic based on Tab)
+  // 1. Modal Fields Configuration
   const modalFields: ModalField[] = useMemo(() => {
     switch (activeTab) {
       case "unit":
@@ -116,34 +122,101 @@ export default function PengaturanDataPage() {
   }, [activeTab, positions])
 
   // 2. Table Headers Configuration
-  const tableHeaders = useMemo(() => {
+  const columnDefs = useMemo(() => {
     switch (activeTab) {
-      case "unit": return ["Kode", "Nama Unit", "Lokasi"]
-      case "jabatan": return ["Nama Jabatan", "Grade"]
-      case "ketentuan": return ["Jabatan (Ref)", "Masa Kerja Min", "Paragraf Penjelasan", "Nominal"]
+      case "unit": return [
+        { key: "kode", label: "Kode" },
+        { key: "nama_unit", label: "Nama Unit" },
+        { key: "lokasi", label: "Lokasi" },
+      ]
+      case "jabatan": return [
+        { key: "nama_jabatan", label: "Nama Jabatan" },
+        { key: "grade", label: "Grade" },
+      ]
+      case "ketentuan": return [
+        { key: "jabatan_nama", label: "Jabatan (Ref)" },
+        { key: "masa_kerja_min", label: "Masa Kerja Min" },
+        { key: "paragraf_ketentuan", label: "Paragraf Penjelasan" },
+        { key: "nominal", label: "Nominal" },
+      ]
+      default: return []
     }
   }, [activeTab])
 
+  useEffect(() => {
+    if (columnDefs.length) {
+      setFilterColumn(columnDefs[0].key)
+      setFilterValue("")
+    }
+    setSelectedFilters([]) 
+    setSortConfig({ key: null, direction: "asc" })
+  }, [activeTab, columnDefs])
+
+  // Helper: available filter options per tab
+  const filterOptions = useMemo(() => {
+    if (activeTab === "ketentuan") {
+      return Array.from(new Set(rules.map(r => r.jabatan_nama))).sort()
+    }
+    if (activeTab === "unit") {
+      return Array.from(new Set(units.map(u => u.lokasi))).sort()
+    }
+    return Array.from(new Set(positions.map(p => String(p.grade)))).sort((a, b) => Number(a) - Number(b))
+  }, [activeTab, rules, units, positions])
+
+  const toggleFilterValue = (val: string) => {
+    setSelectedFilters(prev =>
+      prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]
+    )
+  }
+
   // --- LOGIC ---
 
-  // Filtering
-  const filteredData = useMemo(() => {
-    const search = filter.toLowerCase()
-    if (activeTab === "unit") {
-      return units.filter(i => i.nama_unit.toLowerCase().includes(search) || i.kode.toLowerCase().includes(search))
-    } else if (activeTab === "jabatan") {
-      return positions.filter(i => i.nama_jabatan.toLowerCase().includes(search))
-    } else {
-      return rules.filter(i => i.jabatan_nama.toLowerCase().includes(search) || i.paragraf_ketentuan.toLowerCase().includes(search))
-    }
-  }, [activeTab, units, positions, rules, filter])
+  // Filtering - PERBAIKAN: Menggunakan explicit type casting <any[]> untuk menghindari konflik union type
+  const filteredData = useMemo<any[]>(() => {
+    const s = search.toLowerCase()
+    let base: any[] = []
 
-  const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+    if (activeTab === "unit") {
+        base = units.filter(i => i.nama_unit.toLowerCase().includes(s) || i.kode.toLowerCase().includes(s))
+    } else if (activeTab === "jabatan") {
+        base = positions.filter(i => i.nama_jabatan.toLowerCase().includes(s))
+    } else {
+        base = rules.filter(i => i.jabatan_nama.toLowerCase().includes(s) || i.paragraf_ketentuan.toLowerCase().includes(s))
+    }
+
+    if (selectedFilters.length > 0) {
+      const key = activeTab === "unit" ? "lokasi" : activeTab === "jabatan" ? "grade" : "jabatan_nama"
+      base = base.filter((item: any) => selectedFilters.includes(String(item[key])))
+    }
+    return base
+  }, [activeTab, units, positions, rules, search, selectedFilters])
+
+  // Sorting - PERBAIKAN: Menggunakan explicit type casting <any[]>
+  const sortedData = useMemo<any[]>(() => {
+    if (!sortConfig.key) return filteredData
+    const dir = sortConfig.direction === "asc" ? 1 : -1
+    return [...filteredData].sort((a: any, b: any) => {
+      const va = a[sortConfig.key!]
+      const vb = b[sortConfig.key!]
+      if (va == null || vb == null) return 0
+      if (!isNaN(Number(va)) && !isNaN(Number(vb))) return (Number(va) - Number(vb)) * dir
+      return String(va).localeCompare(String(vb)) * dir
+    })
+  }, [filteredData, sortConfig])
+
+  const paginatedData = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage)
+
+  const toggleSort = (key: string) => {
+    setSortConfig(prev =>
+      prev.key === key
+        ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
+        : { key, direction: "asc" }
+    )
+  }
 
   // CRUD Operations
   const handleSubmit = (formData: any) => {
-    // Jika mode VIEW, tidak perlu simpan apa-apa (GenericModal biasanya handle tombol submit jadi 'Tutup')
     if (popup.mode === 'view') {
         setPopup({ ...popup, open: false })
         return
@@ -157,7 +230,6 @@ export default function PengaturanDataPage() {
       const isAdd = popup.mode === "add"
       const id = isAdd ? Date.now() : popup.data.id
       
-      // Parse numbers if necessary based on fields
       const processedData = { ...formData }
       if (processedData.grade) processedData.grade = parseInt(processedData.grade)
       if (processedData.jabatan_id) processedData.jabatan_id = parseInt(processedData.jabatan_id)
@@ -203,7 +275,7 @@ export default function PengaturanDataPage() {
         isOpen={popup.open}
         mode={popup.mode}
         title={{
-          view: "Detail Data", // <--- Title untuk View
+          view: "Detail Data",
           add: `Tambah Data ${activeTab === 'unit' ? 'Unit' : activeTab === 'jabatan' ? 'Jabatan' : 'Ketentuan'}`,
           edit: "Edit Data",
           delete: "Hapus Data"
@@ -232,7 +304,7 @@ export default function PengaturanDataPage() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => { setActiveTab(tab.id as any); setFilter(""); setCurrentPage(1) }}
+                onClick={() => { setActiveTab(tab.id as any); setSearch(""); setFilterValue(""); setCurrentPage(1) }}
                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-medium transition-all ${
                   activeTab === tab.id 
                   ? "bg-blue-600 text-white shadow-lg shadow-blue-200 scale-105" 
@@ -257,25 +329,96 @@ export default function PengaturanDataPage() {
                 <input
                   type="text"
                   placeholder={`Cari di ${activeTab}...`}
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none"
                 />
               </div>
-              <button 
-                onClick={() => setPopup({ open: true, mode: "add", data: null })}
-                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors shadow-md shadow-blue-100"
-              >
-                <Plus className="w-5 h-5" /> Tambah Data
-              </button>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <button
+                    onClick={() => setIsFilterOpen(o => !o)}
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
+                  >
+                    <Filter className="w-4 h-4" /> Filter
+                    {selectedFilters.length > 0 && (
+                      <span className="ml-1 text-xs text-blue-600">({selectedFilters.length})</span>
+                    )}
+                  </button>
+                  {isFilterOpen && (
+                    <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-lg p-4 space-y-3 z-20">
+                      <p className="text-xs text-gray-500">
+                        {activeTab === "ketentuan" && "Filter Jabatan"}
+                        {activeTab === "unit" && "Filter Lokasi"}
+                        {activeTab === "jabatan" && "Filter Grade"}
+                      </p>
+                      <div className="max-h-56 overflow-y-auto space-y-2">
+                        {filterOptions.length === 0 && (
+                          <p className="text-sm text-gray-400">Tidak ada opsi filter.</p>
+                        )}
+                        {filterOptions.map((opt) => {
+                          const checked = selectedFilters.includes(opt)
+                          return (
+                            <button
+                              key={opt}
+                              onClick={() => toggleFilterValue(opt)}
+                              className="w-full flex items-center justify-between px-2 py-2 text-sm rounded-lg hover:bg-gray-50"
+                            >
+                              <span className="text-gray-800">{opt}</span>
+                              <span
+                                className={`w-5 h-5 flex items-center justify-center rounded border ${
+                                  checked ? "bg-blue-500 border-blue-500 text-white" : "border-gray-300 text-transparent"
+                                }`}
+                              >
+                                <Check className="w-4 h-4" />
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <button
+                          onClick={() => setSelectedFilters([])}
+                          className="text-xs text-blue-600 hover:text-blue-700"
+                        >
+                          Reset filter
+                        </button>
+                        <button
+                          onClick={() => setIsFilterOpen(false)}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Tutup
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <button 
+                  onClick={() => setPopup({ open: true, mode: "add", data: null })}
+                  className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors shadow-md shadow-blue-100"
+                >
+                  <Plus className="w-5 h-5" /> Tambah Data
+                </button>
+              </div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider">
                   <tr>
-                    {tableHeaders?.map((header, idx) => (
-                      <th key={idx} className="p-5 text-left">{header}</th>
+                    {columnDefs.map((col) => (
+                      <th key={col.key} className="p-5 text-left">
+                        <button
+                          className="inline-flex items-center gap-1 font-semibold"
+                          onClick={() => toggleSort(col.key)}
+                        >
+                          {col.label}
+                          <ArrowUpDown className="w-4 h-4 text-gray-400" />
+                          {sortConfig.key === col.key && (
+                            <span className="text-[10px] text-blue-600">{sortConfig.direction}</span>
+                          )}
+                        </button>
+                      </th>
                     ))}
                     <th className="p-5 text-center w-32">Aksi</th>
                   </tr>
@@ -314,7 +457,6 @@ export default function PengaturanDataPage() {
                           {/* ACTION BUTTONS */}
                           <td className="p-5">
                             <div className="flex justify-center gap-2">
-                              {/* 2. Tombol View */}
                               <button 
                                 onClick={() => setPopup({ open: true, mode: "view", data: item })} 
                                 className="p-2 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg"
@@ -343,17 +485,17 @@ export default function PengaturanDataPage() {
                         </motion.tr>
                       ))
                     ) : (
-                      <tr><td colSpan={5} className="p-12 text-center text-gray-400">Tidak ada data ditemukan.</td></tr>
+                      <tr><td colSpan={columnDefs.length + 1} className="p-12 text-center text-gray-400">Tidak ada data ditemukan.</td></tr>
                     )}
                   </AnimatePresence>
                 </tbody>
               </table>
             </div>
 
-            {filteredData.length > 0 && (
+            {sortedData.length > 0 && (
               <Pagination 
-                currentPage={currentPage} totalPages={totalPages} totalItems={filteredData.length}
-                startIndex={(currentPage-1)*itemsPerPage} endIndex={Math.min(currentPage*itemsPerPage, filteredData.length)}
+                currentPage={currentPage} totalPages={totalPages} totalItems={sortedData.length}
+                startIndex={(currentPage-1)*itemsPerPage} endIndex={Math.min(currentPage*itemsPerPage, sortedData.length)}
                 onPageChange={setCurrentPage} onPrevious={()=>setCurrentPage(c=>c-1)} onNext={()=>setCurrentPage(c=>c+1)}
               />
             )}

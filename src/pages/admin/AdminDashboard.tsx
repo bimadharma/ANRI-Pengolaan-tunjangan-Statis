@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Users, Activity, DollarSign, TrendingUp, Loader2, ArrowUpRight, ArrowDownRight, MoreVertical } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { Users, Activity, DollarSign, TrendingUp, Loader2, ArrowUpRight, ArrowDownRight, Filter, Check } from "lucide-react"
 import Pagination from "../../components/pagination"
 
 // --- TIPE DATA ---
@@ -47,6 +47,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [paginationInfo, setPaginationInfo] = useState({ totalPages: 1, totalItems: 0 })
   const itemsPerPage = 5
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   useEffect(() => {
     const loadData = async () => {
@@ -79,6 +81,17 @@ export default function AdminDashboard() {
     { title: "Monthly Revenue", value: "$45,231", change: "+23.1%", trend: "up", icon: DollarSign, color: "purple" as ColorKey },
     { title: "Conversion Rate", value: "3.24%", change: "-2.4%", trend: "down", icon: TrendingUp, color: "orange" as ColorKey },
   ]
+
+  const toggleStatus = (status: string) => {
+    setSelectedStatuses((prev) =>
+      prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
+    )
+  }
+
+  const filteredUsers = useMemo(() => {
+    if (selectedStatuses.length === 0) return dataUsers
+    return dataUsers.filter((u) => selectedStatuses.includes(u.status))
+  }, [dataUsers, selectedStatuses])
 
   return (
     <div className="">
@@ -137,7 +150,49 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-6 border-b border-gray-100 flex justify-between items-center">
             <h2 className="text-xl font-bold text-gray-900">Recent Users</h2>
-            {loading && <span className="text-sm text-blue-500 flex items-center gap-1"><Loader2 className="w-4 h-4 animate-spin"/> Updating...</span>}
+            <div className="flex items-center gap-3 relative">
+              <button
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50"
+                onClick={() => setIsFilterOpen((o) => !o)}
+              >
+                <Filter className="w-4 h-4" />
+                Status
+              </button>
+              {loading && (
+                <span className="text-sm text-blue-500 flex items-center gap-1">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Updating...
+                </span>
+              )}
+              {isFilterOpen && (
+                <div className="absolute right-0 top-12 w-44 bg-white border border-gray-200 rounded-xl shadow-lg p-3 space-y-2 z-10">
+                  {["Active", "Inactive"].map((status) => {
+                    const checked = selectedStatuses.includes(status)
+                    return (
+                      <button
+                        key={status}
+                        onClick={() => toggleStatus(status)}
+                        className="w-full flex items-center justify-between px-2 py-2 text-sm rounded-lg hover:bg-gray-50"
+                      >
+                        <span className="text-gray-800">{status}</span>
+                        <span
+                          className={`w-5 h-5 flex items-center justify-center rounded border ${
+                            checked ? "bg-blue-500 border-blue-500 text-white" : "border-gray-300 text-transparent"
+                          }`}
+                        >
+                          <Check className="w-4 h-4" />
+                        </span>
+                      </button>
+                    )
+                  })}
+                  <button
+                    onClick={() => setSelectedStatuses([])}
+                    className="w-full text-left text-xs text-blue-600 hover:text-blue-700 pt-1"
+                  >
+                    Reset filter
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="overflow-x-auto min-h-[300px]">
@@ -156,7 +211,7 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {dataUsers.map((user) => (
+                  {filteredUsers.map((user) => (
                     <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
