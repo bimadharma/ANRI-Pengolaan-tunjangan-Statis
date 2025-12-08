@@ -90,9 +90,8 @@ export default function UserLayout({ children, isUser = false }: UserLayoutProps
       )}
 
       {/* 3. Main Content Wrapper */}
-      {/* pt-16 (4rem) menyesuaikan tinggi navbar. ml-64 menyesuaikan lebar sidebar */}
       <main className={`flex-1 transition-all duration-300 pt-16 ${isUser ? "md:ml-64" : ""}`}>
-        <div className="p-6">
+        <div className="">
             {children}
         </div>
       </main>
