@@ -19,6 +19,7 @@ import SettingsMenu from "./pages/settings";
 import NotificationsPage from "./pages/notifications";
 import NotificationDetailPage from "./pages/notifications/Detail";
 import DashboardPAS from "./pages/Users/UserDashboard";
+import TupasUserPage from "./pages/Users/DataTupas";
 
 // 1. Guard Khusus Admin
 const AdminRouteGuard = ({ children }: { children: React.ReactNode }) => {
@@ -139,6 +140,7 @@ function App() {
               </Authenticated>
             }
           >
+            <Route path="/user/DataTupas" element={<TupasUserPage/>} />
             <Route path="/user" element={<DashboardPAS />} />
             {/* Tambahkan halaman user lain di sini */}
           </Route>

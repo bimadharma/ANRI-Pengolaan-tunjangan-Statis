@@ -6,7 +6,7 @@ import { useLogout } from "@refinedev/core";
 import Navbar from "../Navbar"; 
 
 
-import { HiOutlineHome, HiX } from "react-icons/hi";
+import { HiOutlineHome,HiOutlineClipboardList, HiX } from "react-icons/hi";
 import { HiArrowRightOnRectangle } from "react-icons/hi2";
 
 
@@ -25,7 +25,7 @@ export default function UserLayout({ children, isUser = false }: UserLayoutProps
   // Menu User
   const navItems = [
     { label: "Dashboard", to: "/user", icon: <HiOutlineHome /> },
-    // Anda bisa menambahkan menu lain di sini, misal: Profile
+    { label: "Data Tupas", to: "/user/DataTupas", icon: <HiOutlineClipboardList /> },
     // { label: "My Profile", to: "/user/profile", icon: <HiOutlineUser /> },
   ];
 
