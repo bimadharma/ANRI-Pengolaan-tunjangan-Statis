@@ -3,9 +3,12 @@ import { AuthProvider } from "@refinedev/core";
 export const authProvider: AuthProvider = {
   login: async ({ email, role, name, redirectPath }) => {
     localStorage.setItem("auth", JSON.stringify({ email, role, name }));
+
+    const defaultPath = role === "admin" ? "/dashboard" : "/dashboard";
+    
     return {
       success: true,
-      redirectTo: redirectPath || "/",
+      redirectTo: redirectPath || defaultPath,
     };
   },
   
@@ -44,7 +47,11 @@ export const authProvider: AuthProvider = {
   getIdentity: async () => {
     const auth = localStorage.getItem("auth");
     if (auth) {
-      return JSON.parse(auth);
+      const user = JSON.parse(auth);
+      return {
+        ...user,
+        avatar: user.avatar || undefined,
+      };
     }
     return null;
   },

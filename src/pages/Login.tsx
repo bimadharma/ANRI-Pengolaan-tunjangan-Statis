@@ -1,100 +1,126 @@
-import { useEffect } from "react";
-import { Card, Form, Input, Button, App } from "antd";
-import { LockOutlined, MailOutlined } from "@ant-design/icons";
-import { useLogin } from "@refinedev/core";
+import React, { useState } from "react";
+import { Layout, Card, Typography, Form, Input, Button, Space, App as AntApp } from "antd";
+import { UserOutlined, LockOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useLogin } from "@refinedev/core";
+import "../styles/login.css";
 
-export default function Login() {
-  const { mutate: login } = useLogin();
+const { Content } = Layout;
+const { Title, Paragraph } = Typography;
+
+const Login: React.FC = () => {
+  const { message, notification } = AntApp.useApp();
   const navigate = useNavigate();
-  const { notification } = App.useApp();
+  const { mutateAsync: login } = useLogin();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    // Cek apakah sudah login
-    const auth = localStorage.getItem("auth");
-    if (auth) {
-      const user = JSON.parse(auth);
-      const redirectTo = user.role === "admin" ? "/admin" : "/user";
-      navigate(redirectTo, { replace: true });
-    }
-  }, [navigate]);
+  const onFinish = async (values: { identifier: string; password: string }) => {
+    if (isSubmitting) return;
 
-  const onFinish = async (values: any) => {
+    setIsSubmitting(true);
+    const hideMessage = message.loading("Memeriksa kredensial...", 0);
+
     try {
-      console.log("Login attempt with:", values);
-      
-      // Ambil semua users
-      const res = await axios.get("http://localhost:3001/users");
-      console.log("Users from API:", res.data);
-      
-      // Cari user yang cocok dengan email dan password
-      const user = res.data.find(
-        (u: any) => u.email === values.email && u.password === values.password
+      const { data } = await axios.get("http://localhost:3001/users", {
+        params: {
+          q: values.identifier,
+        },
+      });
+
+      const user = data.find(
+        (item: any) =>
+          (item.email === values.identifier || item.username === values.identifier) &&
+          item.password === values.password
       );
 
-      console.log("Found user:", user);
-
       if (!user) {
-        console.log("No user found - showing error notification");
         notification.error({
-          message: "Login Gagal",
-          description: "Email atau password yang Anda masukkan salah. Silakan coba lagi.",
-          placement: "topRight",
-          duration: 4,
+          message: "Login gagal",
+          description: "Email/username atau password tidak sesuai.",
         });
         return;
       }
 
-      console.log("Login successful - showing success notification");
-      notification.success({
-        message: "Login Berhasil",
-        description: `Selamat datang, ${user.name}!`,
-        placement: "topRight",
-        duration: 3,
+      await login({
+        email: user.email || user.username,
+        role: user.role || "user",
+        name: user.name || user.email || user.username,
+        redirectPath: "/dashboard",
       });
 
-      login({
-        email: user.email,
-        role: user.role,
-        name: user.name,
-        redirectPath: user.role === "admin" ? "/admin" : "/user",
+      sessionStorage.setItem("loginSuccess", "true");
+
+      notification.success({
+        message: "Login berhasil",
+        description: `Halo ${user.name || user.email}, Anda masuk sebagai ${user.role || "user"}.`,
       });
+
+      navigate("/dashboard", { replace: true });
     } catch (error) {
-      console.error("Login error:", error);
       notification.error({
-        message: "Login Gagal",
-        description: "Terjadi kesalahan saat mencoba login. Silakan coba lagi.",
-        placement: "topRight",
-        duration: 4,
+        message: "Login gagal",
+        description: "Terjadi kesalahan pada server. Silakan coba lagi.",
       });
+    } finally {
+      hideMessage();
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Card title="Login" style={{ maxWidth: 400, margin: "120px auto" }}>
-      <Form layout="vertical" onFinish={onFinish}>
-        <Form.Item
-          name="email"
-          label="Email"
-          rules={[
-            { required: true, message: "Email tidak boleh kosong!" },
-            { type: "email", message: "Format email tidak valid!" },
-          ]}
-        >
-          <Input prefix={<MailOutlined />} placeholder="Masukkan email" />
-        </Form.Item>
-        <Form.Item
-          name="password"
-          label="Password"
-          rules={[{ required: true, message: "Password tidak boleh kosong!" }]}
-        >
-          <Input.Password prefix={<LockOutlined />} placeholder="Masukkan password" />
-        </Form.Item>
-        <Button type="primary" htmlType="submit" block>
-          Login
-        </Button>
-      </Form>
-    </Card>
+    <Layout className="login-layout">
+      <Content className="login-content">
+        <Card className="login-card" bordered={false}>
+          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+            <div className="login-header">
+              <Title level={2}>Selamat Datang</Title>
+              <Paragraph>
+                Silakan login untuk melanjutkan ke sistem SITARA
+              </Paragraph>
+            </div>
+
+            <Form layout="vertical" size="large" onFinish={onFinish}>
+              <Form.Item
+                name="identifier"
+                label="Email atau Username"
+                rules={[{ required: true, message: "Email atau username wajib diisi" }]}
+              >
+                <Input
+                  prefix={<UserOutlined />}
+                  placeholder="Masukkan email atau username"
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="password"
+                label="Password"
+                rules={[{ required: true, message: "Password wajib diisi" }]}
+              >
+                <Input.Password
+                  prefix={<LockOutlined />}
+                  placeholder="Masukkan password"
+                />
+              </Form.Item>
+
+              <Button type="primary" htmlType="submit" block loading={isSubmitting} disabled={isSubmitting}>
+                Login
+              </Button>
+
+              <Button
+                type="link"
+                block
+                icon={<ArrowLeftOutlined />}
+                onClick={() => navigate("/")}
+              >
+                Kembali ke Beranda
+              </Button>
+            </Form>
+          </Space>
+        </Card>
+      </Content>
+    </Layout>
   );
-}
+};
+
+export default Login;
