@@ -76,7 +76,6 @@ export const DashboardAdmin: React.FC = () => {
             style={{ backgroundColor: record.avatarColor, verticalAlign: 'middle' }} 
             size="large"
           >
-            {/* Mengambil inisial */}
             {text.charAt(0)}
           </Avatar>
           <Text className="user-name-text">{text}</Text>

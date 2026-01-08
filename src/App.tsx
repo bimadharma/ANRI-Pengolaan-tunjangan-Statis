@@ -29,6 +29,14 @@ import Login from "./pages/Login";
 import { DashboardAdmin } from "./pages/DashboardAdmin/Admin";
 import { DashboardUser } from "./pages/DashboardUser/User";
 import Home from "./pages/home";
+import { KetentuanList } from "./pages/DashboardAdmin/Ketentuan/list";
+import { TupasList } from "./pages/DashboardAdmin/DataTupas/list";
+import { PembayaranList } from "./pages/DashboardAdmin/DataPembayaran/list";
+import { LogPembayaranList } from "./pages/DashboardAdmin/LogPembayaran/list";
+import { RiwayatTupasList } from "./pages/DashboardAdmin/RiwayatTupas/list";
+import { UserProfile } from "./pages/DashboardAdmin/Profile/list";
+
+import { AppTitle } from "./components/AppTitle";
 
 
 const Placeholder = ({ title }: { title: string }) => (
@@ -103,7 +111,7 @@ export default function App() {
               {
                 name: "data_tupas",
                 list: "/data-tupas",
-                meta: { label: "Data Tupas", icon: <FileTextOutlined />, roles: ["admin", "user"] },
+                meta: { label: "Data Tupas", icon: <FileTextOutlined />, roles: ["admin"] },
               },
               {
                 name: "data_pembayaran",
@@ -152,7 +160,7 @@ export default function App() {
               <Route
                 element={
                   <Authenticated key="auth-layout" fallback={<CatchAllNavigate to="/login" />}>
-                    <ThemedLayout>
+                    <ThemedLayout Title={AppTitle}>
                       <Outlet />
                     </ThemedLayout>
                   </Authenticated>
@@ -160,15 +168,15 @@ export default function App() {
               >
                 {/* Bisa Diakses Semua Role */}
                 <Route path="/dashboard" element={<DashboardWrapper />} />
-                <Route path="/data-tupas" element={<Placeholder title="Data Tupas (Shared)" />} />
 
                 {/* ADMIN ONLY ROUTES */}
                 <Route element={<RoleProtected allowedRoles={["admin"]} />}>
-                    <Route path="/ketentuan" element={<Placeholder title="Ketentuan" />} />
-                    <Route path="/data-pembayaran" element={<Placeholder title="Data Pembayaran" />} />
-                    <Route path="/log-pembayaran" element={<Placeholder title="Log Pembayaran" />} />
-                    <Route path="/riwayat-pembayaran" element={<Placeholder title="Riwayat Pembayaran" />} />
-                    <Route path="/settings" element={<Placeholder title="Settings" />} />
+                    <Route path="/ketentuan" element={<KetentuanList />} />
+                    <Route path="/data-tupas" element={<TupasList />} />
+                    <Route path="/data-pembayaran" element={<PembayaranList />} />
+                    <Route path="/log-pembayaran" element={<LogPembayaranList />} />
+                    <Route path="/riwayat-pembayaran" element={<RiwayatTupasList />} />
+                    <Route path="/settings" element={<UserProfile />} />
                 </Route>
               </Route>
 
@@ -176,7 +184,7 @@ export default function App() {
               <Route
                 element={
                   <Authenticated key="catch-all" fallback={<CatchAllNavigate to="/login" />}>
-                    <ThemedLayout>
+                    <ThemedLayout Title={AppTitle}>
                        <Outlet />
                     </ThemedLayout>
                   </Authenticated>

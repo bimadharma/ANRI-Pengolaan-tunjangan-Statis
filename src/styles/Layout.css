@@ -1,0 +1,77 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+.ant-layout {
+  overflow: hidden;
+}
+
+:root {
+  --sider-bg: #ffffff;
+  --sider-border: #f0f0f0;
+  --menu-text: #64748b;
+  --menu-active-bg: #dee6ff;
+  --menu-active-text: #000000;
+  --header-bg: rgba(255, 255, 255, 0.85);
+  --header-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  --sider-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
+}
+
+
+.custom-sider {
+  background-color: var(--sider-bg) !important;
+  box-shadow: var(--sider-shadow);
+  border-right: 1px solid var(--sider-border) !important;
+  z-index: 100;
+}
+
+
+.sider-logo-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 64px;
+  background-color: var(--sider-bg);
+  border-bottom: 1px solid var(--sider-border);
+  padding: 0 24px;
+  transition: all 0.2s ease;
+}
+
+.sider-logo-container.collapsed {
+  justify-content: center;
+  padding: 0;
+}
+
+
+.custom-menu {
+  background: transparent !important;
+  border-inline-end: none !important;
+  padding: 16px 8px !important;
+}
+
+
+.custom-menu .ant-menu-item,
+.custom-menu .ant-menu-submenu-title {
+  border-radius: 12px !important;
+  color: var(--menu-text) !important;
+  margin-bottom: 4px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.custom-menu .ant-menu-item-selected {
+  background-color: var(--menu-active-bg) !important;
+  color: var(--menu-active-text) !important;
+  font-weight: 600;
+}
+
+
+.custom-trigger-btn {
+  border-top: 1px solid var(--sider-border);
+  color: var(--menu-text) !important;
+  background-color: var(--sider-bg) !important;
+  transition: background 0.3s;
+}
+

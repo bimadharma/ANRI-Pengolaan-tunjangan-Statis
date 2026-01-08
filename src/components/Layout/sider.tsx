@@ -7,7 +7,6 @@ import {
   useIsExistAuthentication,
   useMenu,
   useLink,
-  useWarnAboutChange,
 } from "@refinedev/core";
 import { ThemedTitle, useThemedLayoutContext } from "@refinedev/antd";
 import {
@@ -29,6 +28,8 @@ import {
 import type { RefineThemedLayoutSiderProps } from "@refinedev/antd";
 import type { CSSProperties } from "react";
 
+import "../../styles/Layout.css";
+
 const drawerButtonStyles: CSSProperties = {
   borderStartStartRadius: 0,
   borderEndStartRadius: 0,
@@ -41,8 +42,7 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
   Title: TitleFromProps,
   render,
   meta,
-  fixed,
-  activeItemDisabled = false,
+  fixed = true, 
   siderItemsAreCollapsed = true,
 }) => {
   const { token } = theme.useToken();
@@ -56,7 +56,6 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
   const isExistAuthentication = useIsExistAuthentication();
   const direction = useContext(ConfigProvider.ConfigContext)?.direction;
   const Link = useLink();
-  const { warnWhen, setWarnWhen } = useWarnAboutChange();
   const translate = useTranslate();
   const { menuItems, selectedKey, defaultOpenKeys } = useMenu({ meta });
   const breakpoint = Grid.useBreakpoint();
@@ -70,10 +69,8 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
   const renderTreeView = (tree: TreeMenuItem[], selectedKey?: string) => {
     return tree.map((item: TreeMenuItem) => {
       const { key, name, children, meta, list } = item;
-      const parentName = meta?.parent;
       const label = item?.label ?? meta?.label ?? name;
       const icon = meta?.icon;
-      const route = list;
 
       if (children.length > 0) {
         return (
@@ -96,10 +93,7 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
         );
       }
       const isSelected = key === selectedKey;
-      const isRoute = !(parentName !== undefined && children.length === 0);
-
-      const linkStyle: React.CSSProperties =
-        activeItemDisabled && isSelected ? { pointerEvents: "none" } : {};
+      const isRoute = !(meta?.parent !== undefined && children.length === 0);
 
       return (
         <CanAccess
@@ -113,9 +107,8 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
           <Menu.Item
             key={item.key}
             icon={icon ?? (isRoute && <UnorderedListOutlined />)}
-            style={linkStyle}
           >
-            <Link to={route ?? ""} style={linkStyle}>
+            <Link to={list ?? ""}>
               {label}
             </Link>
             {!siderCollapsed && isSelected && (
@@ -128,21 +121,7 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
   };
 
   const handleLogout = () => {
-    if (warnWhen) {
-      const confirm = window.confirm(
-        translate(
-          "warnWhenUnsavedChanges",
-          "Are you sure you want to leave? You have unsaved changes."
-        )
-      );
-
-      if (confirm) {
-        setWarnWhen(false);
-        mutateLogout();
-      }
-    } else {
-      mutateLogout();
-    }
+    mutateLogout();
   };
 
   const logout = isExistAuthentication && (
@@ -177,14 +156,17 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
   const renderMenu = () => {
     return (
       <Menu
+        className="custom-menu"
         selectedKeys={selectedKey ? [selectedKey] : []}
         defaultOpenKeys={[...defaultOpenKeys, ...defaultExpandMenuItems]}
         mode="inline"
         style={{
-          paddingTop: "8px",
-          border: "none",
-          overflow: "auto",
-          height: "calc(100% - 72px)",
+          
+          borderRight: "none",
+          overflowY: "auto", 
+          overflowX: "hidden", 
+          height: "calc(100vh - 64px - 48px)", 
+          
         }}
         onClick={() => {
           setMobileSiderOpen(false);
@@ -203,7 +185,7 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
           onClose={() => setMobileSiderOpen(false)}
           placement={direction === "rtl" ? "right" : "left"}
           closable={false}
-          width={200}
+          width={240}
           styles={{
             body: {
               padding: 0,
@@ -213,22 +195,17 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
         >
           <Layout>
             <Layout.Sider
+              className="custom-sider"
+              width={240}
               style={{
                 height: "100vh",
-                backgroundColor: token.colorBgContainer,
-                borderRight: `1px solid ${token.colorBgElevated}`,
+                overflow: "hidden",
               }}
             >
               <div
-                style={{
-                  width: "200px",
-                  padding: "0 16px",
-                  display: "flex",
-                  justifyContent: "flex-start",
-                  alignItems: "center",
-                  height: "64px",
-                  backgroundColor: token.colorBgElevated,
-                }}
+                className={`sider-logo-container ${
+                  siderCollapsed ? "collapsed" : ""
+                }`}
               >
                 <RenderToTitle collapsed={false} />
               </div>
@@ -250,37 +227,40 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
     return renderDrawerSider();
   }
 
+  
   const siderStyles: React.CSSProperties = {
-    backgroundColor: token.colorBgContainer,
-    borderRight: `1px solid ${token.colorBgElevated}`,
+    
+    position: "fixed",
+    top: 0,
+    left: 0,
+    height: "100vh", 
+    zIndex: 999,
   };
+  
 
-  if (fixed) {
-    siderStyles.position = "fixed";
-    siderStyles.top = 0;
-    siderStyles.height = "100vh";
-    siderStyles.zIndex = 999;
-  }
   const renderClosingIcons = () => {
     const iconProps = { style: { color: token.colorPrimary } };
     const OpenIcon = direction === "rtl" ? RightOutlined : LeftOutlined;
     const CollapsedIcon = direction === "rtl" ? LeftOutlined : RightOutlined;
     const IconComponent = siderCollapsed ? CollapsedIcon : OpenIcon;
 
-    return <IconComponent {...iconProps} />;
+    return <IconComponent />;
   };
 
   return (
     <>
-      {fixed && (
-        <div
-          style={{
-            width: siderCollapsed ? "80px" : "200px",
-            transition: "all 0.2s",
-          }}
-        />
-      )}
+
+      <div
+        style={{
+          width: siderCollapsed ? "80px" : "240px",
+          height: "100vh", 
+          transition: "all 0.2s",
+          flexShrink: 0, 
+        }}
+      />
+
       <Layout.Sider
+        className="custom-sider"
         style={siderStyles}
         collapsible
         collapsed={siderCollapsed}
@@ -290,15 +270,16 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
           }
         }}
         collapsedWidth={80}
+        width={240}
         breakpoint="lg"
         trigger={
           <Button
             type="text"
+            className="custom-trigger-btn"
             style={{
               borderRadius: 0,
-              height: "100%",
+              height: "48px", 
               width: "100%",
-              backgroundColor: token.colorBgElevated,
             }}
           >
             {renderClosingIcons()}
@@ -306,16 +287,10 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
         }
       >
         <div
-          style={{
-            width: siderCollapsed ? "80px" : "200px",
-            padding: siderCollapsed ? "0" : "0 16px",
-            display: "flex",
-            justifyContent: siderCollapsed ? "center" : "flex-start",
-            alignItems: "center",
-            height: "64px",
-            backgroundColor: token.colorBgElevated,
-            fontSize: "14px",
-          }}
+          className={`sider-logo-container ${
+            siderCollapsed ? "collapsed" : ""
+          }`}
+          style={{ height: "64px" }}
         >
           <RenderToTitle collapsed={siderCollapsed} />
         </div>

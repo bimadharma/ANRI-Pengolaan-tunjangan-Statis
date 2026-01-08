@@ -33,7 +33,8 @@ export const ThemedLayout: React.FC<RefineThemedLayoutProps> = ({
           <AntdLayout.Content
             style={{
               minHeight: 360,
-              padding: isSmall ? 15 : 12
+              padding: isSmall ? 15 : 12,
+              marginTop: 64
             }}
           >
             <div>
