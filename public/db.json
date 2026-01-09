@@ -1,14 +1,18 @@
 {
   "users": [
     {
-      "id": 1,
+      "id": "1",
       "email": "admin@gmail.com",
       "password": "admin123",
       "role": "admin",
-      "name": "Admin Refine"
+      "name": "Admin Refine",
+      "nama": "John Doekoko",
+      "jabatan": "Senior Frontend Developer",
+      "unit": "IT",
+      "lokasi": "Jakarta, Indonesia"
     },
     {
-      "id": 2,
+      "id": "2",
       "email": "user@gmail.com",
       "password": "user123",
       "role": "user",

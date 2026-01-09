@@ -14,7 +14,7 @@ body,
   --sider-border: #f0f0f0;
   --menu-text: #64748b;
   --menu-active-bg: #dee6ff;
-  --menu-active-text: #000000;
+  --menu-active-text: #ffffff;
   --header-bg: rgba(255, 255, 255, 0.85);
   --header-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   --sider-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
@@ -62,7 +62,7 @@ body,
 }
 
 .custom-menu .ant-menu-item-selected {
-  background-color: var(--menu-active-bg) !important;
+ background: linear-gradient(135deg, #00C9E8 0%, #0096C9 100%);
   color: var(--menu-active-text) !important;
   font-weight: 600;
 }

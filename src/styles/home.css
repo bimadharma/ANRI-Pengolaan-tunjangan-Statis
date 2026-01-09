@@ -1,7 +1,7 @@
 
 .home-hero {
   min-height: 100vh;
-  background: linear-gradient(135deg, #60a5fa, #1e3a8a);
+  background: linear-gradient(135deg, #00C9E8 0%, #0096C9 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,6 +16,7 @@
 
 .hero-title {
   font-size: 56px !important;
+  font-weight: 700 !important;
   color: #ffffff !important;
   letter-spacing: -1px;
   margin-bottom: 12px !important;
@@ -23,7 +24,7 @@
 
 .hero-desc {
   font-size: 18px;
-  color: #e0e7ff;
+  color: #f0f0f0;
   margin: 0 auto;
 }
 

@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import {
   type TreeMenuItem,
   useTranslate,
-  useLogout,
   CanAccess,
   useIsExistAuthentication,
   useMenu,
@@ -10,7 +9,6 @@ import {
 } from "@refinedev/core";
 import { ThemedTitle, useThemedLayoutContext } from "@refinedev/antd";
 import {
-  LogoutOutlined,
   UnorderedListOutlined,
   BarsOutlined,
   LeftOutlined,
@@ -59,7 +57,6 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
   const translate = useTranslate();
   const { menuItems, selectedKey, defaultOpenKeys } = useMenu({ meta });
   const breakpoint = Grid.useBreakpoint();
-  const { mutate: mutateLogout } = useLogout();
 
   const isMobile =
     typeof breakpoint.lg === "undefined" ? false : !breakpoint.lg;
@@ -120,20 +117,6 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
     });
   };
 
-  const handleLogout = () => {
-    mutateLogout();
-  };
-
-  const logout = isExistAuthentication && (
-    <Menu.Item
-      key="logout"
-      onClick={() => handleLogout()}
-      icon={<LogoutOutlined />}
-    >
-      {translate("buttons.logout", "Logout")}
-    </Menu.Item>
-  );
-
   const defaultExpandMenuItems = (() => {
     if (siderItemsAreCollapsed) return [];
 
@@ -146,11 +129,11 @@ export const ThemedSider: React.FC<RefineThemedLayoutSiderProps> = ({
     if (render) {
       return render({
         items,
-        logout,
         collapsed: siderCollapsed,
+        logout: undefined
       });
     }
-    return [...items, logout].filter(Boolean);
+    return [...items].filter(Boolean);
   };
 
   const renderMenu = () => {

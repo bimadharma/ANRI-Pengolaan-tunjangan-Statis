@@ -1,60 +1,80 @@
 .login-layout {
   min-height: 100vh;
-  background: linear-gradient(135deg, #60a5fa, #1e3a8a);
+  background: linear-gradient(135deg, #00C9E8 0%, #0096C9 100%);
 }
 
-.login-content {
+
+.login-layout {
+  min-height: 100vh;
+  background-color: #ffffff;
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 24px;
+  align-items: center;
 }
 
 .login-card {
   width: 100%;
   max-width: 420px;
-  border-radius: 20px;
-  padding: 28px 28px;
-  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35);
-  animation: fadeUp 0.6s ease-out;
+  margin: 0px 40px;
+  padding: 0px 40px;
+  border-radius: 16px;
+  border: none;
+ 
+  box-shadow: 0 10px 40px rgba(0, 150, 201, 0.15); 
+  background: #fff;
 }
 
 .login-header {
   text-align: center;
+  margin-bottom: 32px;
 }
 
-.login-header h2 {
-  margin-bottom: 4px;
+.logo-container {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
 }
 
-.login-header p {
-  color: #64748b;
-  margin-bottom: 0;
+.app-logo {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease;
 }
 
-.ant-input,
-.ant-input-password {
-  border-radius: 10px;
+.app-logo:hover {
+  transform: scale(1.05);
 }
 
-.ant-btn-primary {
-  height: 44px;
-  border-radius: 12px;
-  font-weight: 500;
+
+.btn-gradient {
+  border: none;
+  height: 48px;
+  font-weight: 600;
+  font-size: 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #00C9E8 0%, #0096C9 100%);
+  box-shadow: 0 4px 15px rgba(0, 150, 201, 0.3);
+  transition: all 0.3s ease;
 }
 
-.ant-btn-link {
-  margin-top: 8px;
-  color: #1d4ed8;
+.btn-gradient:hover {
+  background: linear-gradient(135deg, #0096C9 0%, #007BA3 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 150, 201, 0.4);
 }
 
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+
+.custom-input .ant-input-affix-wrapper {
+  padding: 10px 11px;
+  border-radius: 8px;
+  background-color: #f8fcfd;
+  border: 1px solid #e6f7ff;
+}
+
+.custom-input .ant-input-affix-wrapper:hover,
+.custom-input .ant-input-affix-wrapper:focus,
+.custom-input .ant-input-affix-wrapper-focused {
+  border-color: #0096C9;
+  background-color: #fff;
 }

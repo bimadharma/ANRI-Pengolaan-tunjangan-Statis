@@ -7,7 +7,7 @@ import { useLogin } from "@refinedev/core";
 import "../styles/login.css";
 
 const { Content } = Layout;
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph, Text } = Typography;
 
 const Login: React.FC = () => {
   const { message, notification } = AntApp.useApp();
@@ -70,53 +70,75 @@ const Login: React.FC = () => {
 
   return (
     <Layout className="login-layout">
-      <Content className="login-content">
+      <Content style={{ padding: "20px" }}>
         <Card className="login-card" bordered={false}>
-          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-            <div className="login-header">
-              <Title level={2}>Selamat Datang</Title>
-              <Paragraph>
-                Silakan login untuk melanjutkan ke sistem SITARA
-              </Paragraph>
+          
+          {/* Bagian Header & Logo */}
+          <div className="login-header">
+            <div className="logo-container">
+              {/* Pastikan file ANRI.png ada di folder public */}
+              <img src="/ANRI.png" alt="Logo ANRI" className="app-logo" />
             </div>
+            <Title level={3} style={{ color: "#0050b3", marginBottom: 8 }}>
+              Sistem Informasi <span style={{ color: "#0096C9" }}>SITARA</span>
+            </Title>
+            <Text type="secondary">
+              Masuk untuk mengelola arsip dan data pegawai
+            </Text>
+          </div>
 
-            <Form layout="vertical" size="large" onFinish={onFinish}>
-              <Form.Item
-                name="identifier"
-                label="Email atau Username"
-                rules={[{ required: true, message: "Email atau username wajib diisi" }]}
+          {/* Form Login */}
+          <Form
+            layout="vertical"
+            size="large"
+            onFinish={onFinish}
+            initialValues={{ remember: true }}
+          >
+            <Form.Item
+              name="identifier"
+              rules={[{ required: true, message: "Mohon masukkan Email atau Username" }]}
+              className="custom-input"
+            >
+              <Input
+                prefix={<UserOutlined style={{ color: "#0096C9" }} />}
+                placeholder="Email atau Username"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              rules={[{ required: true, message: "Mohon masukkan Password" }]}
+              className="custom-input"
+            >
+              <Input.Password
+                prefix={<LockOutlined style={{ color: "#0096C9" }} />}
+                placeholder="Password"
+              />
+            </Form.Item>
+
+            <Form.Item style={{ marginTop: "24px" }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                loading={isSubmitting}
+                className="btn-gradient"
               >
-                <Input
-                  prefix={<UserOutlined />}
-                  placeholder="Masukkan email atau username"
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="password"
-                label="Password"
-                rules={[{ required: true, message: "Password wajib diisi" }]}
-              >
-                <Input.Password
-                  prefix={<LockOutlined />}
-                  placeholder="Masukkan password"
-                />
-              </Form.Item>
-
-              <Button type="primary" htmlType="submit" block loading={isSubmitting} disabled={isSubmitting}>
-                Login
+                Masuk Sekarang
               </Button>
+            </Form.Item>
 
+            <div style={{ textAlign: "center" }}>
               <Button
                 type="link"
-                block
                 icon={<ArrowLeftOutlined />}
                 onClick={() => navigate("/")}
+                style={{ color: "#8c8c8c" }}
               >
                 Kembali ke Beranda
               </Button>
-            </Form>
-          </Space>
+            </div>
+          </Form>
         </Card>
       </Content>
     </Layout>
