@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Button, Space, Tag, Tooltip, notification, Form } from "antd";
+import { Table, Button, Space, Tag, Tooltip, notification, Form, Tabs } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, BookOutlined, BankOutlined, IdcardOutlined, LineChartOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { ComponentModal } from "../../../components/componentModal";
@@ -7,153 +7,209 @@ import { CreateForm } from "./create";
 import "../../../styles/ketentuan.css";
 
 
-interface KetentuanData {
+interface FaktorRisikoData {
   key: string;
-  jabatan: string;
-  masaKerja: string;
-  penjelasan: string;
-  nominal: number;
+  kodeRisiko: string;
+  kategoriRisiko: string;
+  deskripsi: string;
+  nilaiFaktor: number;
+  status: "Aktif" | "Tidak Aktif";
 }
 
-interface UnitData {
+interface FaktorTanggungJawabData {
   key: string;
-  kode: string;
-  namaUnit: string;
-  lokasi: string;
+  kodeFaktor: string;
+  jabatanTanggungJawab: string;
+  nilaiFaktor: number;
+  keterangan: string;
 }
+
+interface FaktorLamaKerjaData {
+  key: string;
+  rentangMasaKerja: string;
+  nilaiFaktor: number;
+  keterangan: string;
+}
+
+interface MappingTunjanganData {
+  key: string;
+  totalNilai: number;
+  tingkatRisiko: string;
+  besarTunjangan: number;
+}
+
+interface MetadataKetentuanData {
+  key: string;
+  tahunBerlaku: string;
+  nomorRegulasi: string;
+  tanggalBerlaku: string;
+  statusKetentuan: "Aktif" | "Tidak Aktif";
+}
+
+
+interface UnitKerjaData {
+  key: string;
+  kodeUnit: string;
+  namaUnit: string;
+  levelOrganisasi: string;
+  unitInduk: string;
+  status: "Aktif" | "Nonaktif";
+}
+
 
 interface JabatanData {
   key: string;
+  kodeJabatan: string;
   namaJabatan: string;
-  grade: string;
+  jenisJabatan: "Struktural" | "Fungsional";
+  golonganMinimal: string;
+  faktorTanggungJawab: number;
+  statusJabatan: "Aktif" | "Nonaktif";
 }
 
-
-const dummyKetentuan: KetentuanData[] = [
-  {
-    key: "1",
-    jabatan: "Arsiparis Ahli Pertama",
-    masaKerja: "2 Tahun",
-    penjelasan: "Pasal 5 Ayat 1 (Masa kerja minimal terpenuhi)",
-    nominal: 5400000,
-  },
-  {
-    key: "2",
-    jabatan: "Arsiparis Ahli Madya",
-    masaKerja: "10 Tahun",
-    penjelasan: "Pasal 7 Ayat 2 (Keahlian khusus)",
-    nominal: 8500000,
-  },
+const dummyFaktorTanggungJawab: FaktorTanggungJawabData[] = [
+  { key: "1", kodeFaktor: "FT-001", jabatanTanggungJawab: "Kepala Arsip", nilaiFaktor: 2.5, keterangan: "Tanggung jawab penuh unit" },
+  { key: "2", kodeFaktor: "FT-002", jabatanTanggungJawab: "Arsiparis Ahli Madya", nilaiFaktor: 2.0, keterangan: "Tanggung jawab supervisi" },
+  { key: "3", kodeFaktor: "FT-003", jabatanTanggungJawab: "Arsiparis Ahli Muda", nilaiFaktor: 1.5, keterangan: "Tanggung jawab operasional" },
 ];
 
-const dummyUnit: UnitData[] = [
-  { key: "1", kode: "UK-001", namaUnit: "Pusat Pengolahan Arsip", lokasi: "Gedung A" },
-  { key: "2", kode: "UK-002", namaUnit: "Sekretariat Utama", lokasi: "Gedung B" },
+const dummyFaktorLamaKerja: FaktorLamaKerjaData[] = [
+  { key: "1", rentangMasaKerja: "0-4 tahun", nilaiFaktor: 1.0, keterangan: "Masa kerja awal" },
+  { key: "2", rentangMasaKerja: "5-8 tahun", nilaiFaktor: 1.25, keterangan: "Masa kerja menengah" },
+  { key: "3", rentangMasaKerja: "9-12 tahun", nilaiFaktor: 1.5, keterangan: "Masa kerja senior" },
+  { key: "4", rentangMasaKerja: "13+ tahun", nilaiFaktor: 2.0, keterangan: "Masa kerja sangat senior" },
 ];
+
+const dummyMappingTunjangan: MappingTunjanganData[] = [
+  { key: "1", totalNilai: 6.5, tingkatRisiko: "Sangat Tinggi", besarTunjangan: 5500000 },
+  { key: "2", totalNilai: 5.5, tingkatRisiko: "Tinggi", besarTunjangan: 4500000 },
+  { key: "3", totalNilai: 4.5, tingkatRisiko: "Sedang", besarTunjangan: 3500000 },
+  { key: "4", totalNilai: 3.0, tingkatRisiko: "Rendah", besarTunjangan: 2500000 },
+];
+
+const dummyMetadataKetentuan: MetadataKetentuanData[] = [
+  { key: "1", tahunBerlaku: "2026", nomorRegulasi: "PERKA-ANRI/01/2026", tanggalBerlaku: "01 Januari 2026", statusKetentuan: "Aktif" },
+  { key: "2", tahunBerlaku: "2025", nomorRegulasi: "PERKA-ANRI/05/2025", tanggalBerlaku: "01 Juli 2025", statusKetentuan: "Tidak Aktif" },
+];
+
+
+const dummyUnitKerja: UnitKerjaData[] = [
+  { key: "1", kodeUnit: "UK-001", namaUnit: "Sekretariat Utama", levelOrganisasi: "Eselon I", unitInduk: "-", status: "Aktif" },
+  { key: "2", kodeUnit: "UK-002", namaUnit: "Deputi Pembinaan Kearsipan", levelOrganisasi: "Eselon I", unitInduk: "-", status: "Aktif" },
+  { key: "3", kodeUnit: "UK-003", namaUnit: "Deputi Konservasi Arsip", levelOrganisasi: "Eselon I", unitInduk: "-", status: "Aktif" },
+  { key: "4", kodeUnit: "UK-004", namaUnit: "Bagian Kepegawaian", levelOrganisasi: "Eselon II", unitInduk: "Sekretariat Utama", status: "Aktif" },
+  { key: "5", kodeUnit: "UK-005", namaUnit: "Bagian Hukum", levelOrganisasi: "Eselon II", unitInduk: "Sekretariat Utama", status: "Aktif" },
+];
+
 
 const dummyJabatan: JabatanData[] = [
-  { key: "1", namaJabatan: "Arsiparis Ahli Pertama", grade: "Grade 8" },
-  { key: "2", namaJabatan: "Arsiparis Ahli Muda", grade: "Grade 9" },
-  { key: "3", namaJabatan: "Arsiparis Ahli Madya", grade: "Grade 11" },
+  { key: "1", kodeJabatan: "JB-001", namaJabatan: "Kepala Arsip Nasional", jenisJabatan: "Struktural", golonganMinimal: "IV/c", faktorTanggungJawab: 3.0, statusJabatan: "Aktif" },
+  { key: "2", kodeJabatan: "JB-002", namaJabatan: "Arsiparis Ahli Utama", jenisJabatan: "Fungsional", golonganMinimal: "IV/d", faktorTanggungJawab: 2.8, statusJabatan: "Aktif" },
+  { key: "3", kodeJabatan: "JB-003", namaJabatan: "Arsiparis Ahli Madya", jenisJabatan: "Fungsional", golonganMinimal: "IV/a", faktorTanggungJawab: 2.5, statusJabatan: "Aktif" },
+  { key: "4", kodeJabatan: "JB-004", namaJabatan: "Arsiparis Ahli Muda", jenisJabatan: "Fungsional", golonganMinimal: "III/c", faktorTanggungJawab: 2.0, statusJabatan: "Aktif" },
+  { key: "5", kodeJabatan: "JB-005", namaJabatan: "Kepala Bagian", jenisJabatan: "Struktural", golonganMinimal: "III/d", faktorTanggungJawab: 2.3, statusJabatan: "Aktif" },
 ];
 
 export const KetentuanList: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"ketentuan" | "unit" | "jabatan">("ketentuan");
+  const [activeTab, setActiveTab] = useState<"ketentuan" | "unitKerja" | "jabatan">("ketentuan");
+  const [subTab, setSubTab] = useState<string>("faktorRisiko");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [api, contextHolder] = notification.useNotification();
 
   
-  const columnsKetentuan: ColumnsType<KetentuanData> = [
+  const columnsFaktorRisiko: ColumnsType<FaktorRisikoData> = [
+    { title: "Kode Risiko", dataIndex: "kodeRisiko", key: "kodeRisiko", render: (text) => <Tag color="blue">{text}</Tag> },
+    { title: "Kategori Risiko", dataIndex: "kategoriRisiko", key: "kategoriRisiko", render: (text) => <strong>{text}</strong> },
+    { title: "Deskripsi", dataIndex: "deskripsi", key: "deskripsi" },
+    { title: "Nilai Faktor", dataIndex: "nilaiFaktor", key: "nilaiFaktor", render: (value) => <Tag color="orange">{value}</Tag> },
+    { title: "Status", dataIndex: "status", key: "status", render: (status) => <Tag color={status === "Aktif" ? "green" : "red"}>{status}</Tag> },
     {
-      title: "Jabatan (Ref)",
-      dataIndex: "jabatan",
-      key: "jabatan",
-      sorter: (a, b) => a.jabatan.localeCompare(b.jabatan),
-      render: (text) => <strong>{text}</strong>,
-    },
-    {
-      title: "Masa Kerja Min",
-      dataIndex: "masaKerja",
-      key: "masaKerja",
-      sorter: (a, b) => a.masaKerja.localeCompare(b.masaKerja),
-      render: (text) => <Tag color="default">{text}</Tag>,
-    },
-    {
-      title: "Paragraf Penjelasan",
-      dataIndex: "penjelasan",
-      key: "penjelasan",
-      render: (text) => <span style={{ color: "#595959", fontStyle: "italic" }}>{text}</span>,
-    },
-    {
-      title: "Nominal",
-      dataIndex: "nominal",
-      key: "nominal",
-      sorter: (a, b) => a.nominal - b.nominal,
-      render: (value) => <span style={{ color: "#389e0d", fontWeight: "bold" }}>Rp {value.toLocaleString("id-ID")}</span>,
-    },
-    {
-      title: "AKSI",
-      key: "action",
-      align: "center",
+      title: "AKSI", key: "action", align: "center",
       render: () => (
         <Space size={8} className="action-btn-group">
-          <Tooltip title="Detail">
-            <Button icon={<EyeOutlined />} className="action-btn action-view" />
-          </Tooltip>
+          <Tooltip title="Edit"><Button icon={<EditOutlined />} className="action-btn action-edit" /></Tooltip>
+          <Tooltip title="Hapus"><Button icon={<DeleteOutlined />} className="action-btn action-delete" /></Tooltip>
+        </Space>
+      ),
+    },
+  ];
 
-          <Tooltip title="Edit">
-            <Button icon={<EditOutlined />} className="action-btn action-edit" />
-          </Tooltip>
+  const columnsFaktorTanggungJawab: ColumnsType<FaktorTanggungJawabData> = [
+    { title: "Kode Faktor", dataIndex: "kodeFaktor", key: "kodeFaktor", render: (text) => <Tag color="purple">{text}</Tag> },
+    { title: "Jabatan Tanggung Jawab", dataIndex: "jabatanTanggungJawab", key: "jabatanTanggungJawab", render: (text) => <strong>{text}</strong> },
+    { title: "Nilai Faktor", dataIndex: "nilaiFaktor", key: "nilaiFaktor", render: (value) => <Tag color="orange">{value}</Tag> },
+    { title: "Keterangan", dataIndex: "keterangan", key: "keterangan" },
+    {
+      title: "AKSI", key: "action", align: "center",
+      render: () => (
+        <Space size={8} className="action-btn-group">
+          <Tooltip title="Edit"><Button icon={<EditOutlined />} className="action-btn action-edit" /></Tooltip>
+          <Tooltip title="Hapus"><Button icon={<DeleteOutlined />} className="action-btn action-delete" /></Tooltip>
+        </Space>
+      ),
+    },
+  ];
 
-          <Tooltip title="Hapus">
-            <Button icon={<DeleteOutlined />} className="action-btn action-delete" />
-          </Tooltip>
+  const columnsFaktorLamaKerja: ColumnsType<FaktorLamaKerjaData> = [
+    { title: "Rentang Masa Kerja", dataIndex: "rentangMasaKerja", key: "rentangMasaKerja", render: (text) => <Tag color="cyan">{text}</Tag> },
+    { title: "Nilai Faktor", dataIndex: "nilaiFaktor", key: "nilaiFaktor", render: (value) => <Tag color="orange">{value}</Tag> },
+    { title: "Keterangan", dataIndex: "keterangan", key: "keterangan" },
+    {
+      title: "AKSI", key: "action", align: "center",
+      render: () => (
+        <Space size={8} className="action-btn-group">
+          <Tooltip title="Edit"><Button icon={<EditOutlined />} className="action-btn action-edit" /></Tooltip>
+          <Tooltip title="Hapus"><Button icon={<DeleteOutlined />} className="action-btn action-delete" /></Tooltip>
+        </Space>
+      ),
+    },
+  ];
+
+  const columnsMappingTunjangan: ColumnsType<MappingTunjanganData> = [
+    { title: "Total Nilai", dataIndex: "totalNilai", key: "totalNilai", render: (value) => <Tag color="geekblue">{value}</Tag> },
+    { title: "Tingkat Risiko", dataIndex: "tingkatRisiko", key: "tingkatRisiko", render: (text) => <strong>{text}</strong> },
+    { title: "Besar Tunjangan", dataIndex: "besarTunjangan", key: "besarTunjangan", render: (value) => <span style={{ color: "#389e0d", fontWeight: "bold" }}>Rp {value.toLocaleString("id-ID")}</span> },
+    {
+      title: "AKSI", key: "action", align: "center",
+      render: () => (
+        <Space size={8} className="action-btn-group">
+          <Tooltip title="Edit"><Button icon={<EditOutlined />} className="action-btn action-edit" /></Tooltip>
+          <Tooltip title="Hapus"><Button icon={<DeleteOutlined />} className="action-btn action-delete" /></Tooltip>
+        </Space>
+      ),
+    },
+  ];
+
+  const columnsMetadataKetentuan: ColumnsType<MetadataKetentuanData> = [
+    { title: "Tahun Berlaku", dataIndex: "tahunBerlaku", key: "tahunBerlaku", render: (text) => <Tag color="blue">{text}</Tag> },
+    { title: "Nomor Regulasi", dataIndex: "nomorRegulasi", key: "nomorRegulasi", render: (text) => <strong>{text}</strong> },
+    { title: "Tanggal Berlaku", dataIndex: "tanggalBerlaku", key: "tanggalBerlaku" },
+    { title: "Status", dataIndex: "statusKetentuan", key: "statusKetentuan", render: (status) => <Tag color={status === "Aktif" ? "green" : "red"}>{status}</Tag> },
+    {
+      title: "AKSI", key: "action", align: "center",
+      render: () => (
+        <Space size={8} className="action-btn-group">
+          <Tooltip title="Detail"><Button icon={<EyeOutlined />} className="action-btn action-view" /></Tooltip>
+          <Tooltip title="Edit"><Button icon={<EditOutlined />} className="action-btn action-edit" /></Tooltip>
         </Space>
       ),
     },
   ];
 
   
-  const columnsUnit: ColumnsType<UnitData> = [
+  const columnsUnitKerja: ColumnsType<UnitKerjaData> = [
+    { title: "Kode Unit", dataIndex: "kodeUnit", key: "kodeUnit", render: (text) => <Tag color="blue">{text}</Tag> },
+    { title: "Nama Unit Kerja", dataIndex: "namaUnit", key: "namaUnit", render: (text) => <strong>{text}</strong> },
+    { title: "Level Organisasi", dataIndex: "levelOrganisasi", key: "levelOrganisasi", render: (text) => <Tag color="purple">{text}</Tag> },
+    { title: "Unit Induk", dataIndex: "unitInduk", key: "unitInduk" },
+    { title: "Status", dataIndex: "status", key: "status", render: (status) => <Tag color={status === "Aktif" ? "green" : "red"}>{status}</Tag> },
     {
-      title: "Kode",
-      dataIndex: "kode",
-      key: "kode",
-      sorter: (a, b) => a.kode.localeCompare(b.kode),
-      render: (text) => <span style={{ color: "#1677ff" }}>{text}</span>,
-    },
-    {
-      title: "Nama Unit",
-      dataIndex: "namaUnit",
-      key: "namaUnit",
-      sorter: (a, b) => a.namaUnit.localeCompare(b.namaUnit),
-      render: (text) => <strong>{text}</strong>,
-    },
-    {
-      title: "Lokasi",
-      dataIndex: "lokasi",
-      key: "lokasi",
-      sorter: (a, b) => a.lokasi.localeCompare(b.lokasi),
-      render: (text) => <span style={{ color: "#595959" }}>{text}</span>,
-    },
-    {
-      title: "AKSI",
-      key: "action",
-      align: "center",
+      title: "AKSI", key: "action", align: "center",
       render: () => (
         <Space size={8} className="action-btn-group">
-          <Tooltip title="Detail">
-            <Button icon={<EyeOutlined />} className="action-btn action-view" />
-          </Tooltip>
-
-          <Tooltip title="Edit">
-            <Button icon={<EditOutlined />} className="action-btn action-edit" />
-          </Tooltip>
-
-          <Tooltip title="Hapus">
-            <Button icon={<DeleteOutlined />} className="action-btn action-delete" />
-          </Tooltip>
+          <Tooltip title="Edit"><Button icon={<EditOutlined />} className="action-btn action-edit" /></Tooltip>
+          <Tooltip title="Hapus"><Button icon={<DeleteOutlined />} className="action-btn action-delete" /></Tooltip>
         </Space>
       ),
     },
@@ -161,51 +217,37 @@ export const KetentuanList: React.FC = () => {
 
   
   const columnsJabatan: ColumnsType<JabatanData> = [
+    { title: "Kode Jabatan", dataIndex: "kodeJabatan", key: "kodeJabatan", render: (text) => <Tag color="blue">{text}</Tag> },
+    { title: "Nama Jabatan", dataIndex: "namaJabatan", key: "namaJabatan", render: (text) => <strong>{text}</strong> },
+    { title: "Jenis Jabatan", dataIndex: "jenisJabatan", key: "jenisJabatan", render: (text) => <Tag color={text === "Struktural" ? "gold" : "cyan"}>{text}</Tag> },
+    { title: "Golongan Minimal", dataIndex: "golonganMinimal", key: "golonganMinimal" },
+    { title: "Faktor Tanggung Jawab", dataIndex: "faktorTanggungJawab", key: "faktorTanggungJawab", render: (value) => <Tag color="orange">{value}</Tag> },
+    { title: "Status", dataIndex: "statusJabatan", key: "statusJabatan", render: (status) => <Tag color={status === "Aktif" ? "green" : "red"}>{status}</Tag> },
     {
-      title: "Nama Jabatan",
-      dataIndex: "namaJabatan",
-      key: "namaJabatan",
-      sorter: (a, b) => a.namaJabatan.localeCompare(b.namaJabatan),
-      render: (text) => <strong>{text}</strong>,
-    },
-    {
-      title: "Grade",
-      dataIndex: "grade",
-      key: "grade",
-      sorter: (a, b) => a.grade.localeCompare(b.grade),
-      render: (text) => <Tag color="purple">{text}</Tag>,
-    },
-    {
-      title: "AKSI",
-      key: "action",
-      align: "center",
+      title: "AKSI", key: "action", align: "center",
       render: () => (
         <Space size={8} className="action-btn-group">
-          <Tooltip title="Detail">
-            <Button icon={<EyeOutlined />} className="action-btn action-view" />
-          </Tooltip>
-
-          <Tooltip title="Edit">
-            <Button icon={<EditOutlined />} className="action-btn action-edit" />
-          </Tooltip>
-
-          <Tooltip title="Hapus">
-            <Button icon={<DeleteOutlined />} className="action-btn action-delete" />
-          </Tooltip>
+          <Tooltip title="Edit"><Button icon={<EditOutlined />} className="action-btn action-edit" /></Tooltip>
+          <Tooltip title="Hapus"><Button icon={<DeleteOutlined />} className="action-btn action-delete" /></Tooltip>
         </Space>
       ),
     },
   ];
 
-  
   const handleOk = () => {
     form
       .validateFields()
       .then((values) => {
         console.log("Form Values:", values);
+        const tabName = activeTab === "ketentuan" 
+          ? `Ketentuan Tunjangan - ${subTab}` 
+          : activeTab === "unitKerja" 
+            ? "Master Unit Kerja" 
+            : "Master Jabatan";
+        
         api.success({
           message: "Berhasil Menambahkan Data",
-          description: `Data baru telah berhasil ditambahkan ke tabel ${activeTab === "ketentuan" ? "Ketentuan Tunjangan" : activeTab === "unit" ? "Unit Kerja" : "Master Jabatan"}.`,
+          description: `Data baru telah berhasil ditambahkan ke ${tabName}.`,
           placement: "topRight",
         });
         setIsModalOpen(false);
@@ -214,6 +256,28 @@ export const KetentuanList: React.FC = () => {
       .catch((info) => {
         console.log("Validate Failed:", info);
       });
+  };
+
+  
+  const renderKetentuanTable = () => {
+    const tabItems: Array<{ key: string; label: string; columns: ColumnsType<any>; data: any[] }> = [
+      { key: "faktorTanggungJawab", label: "Faktor Tanggung Jawab", columns: columnsFaktorTanggungJawab, data: dummyFaktorTanggungJawab },
+      { key: "faktorLamaKerja", label: "Faktor Lama Kerja", columns: columnsFaktorLamaKerja, data: dummyFaktorLamaKerja },
+      { key: "mappingTunjangan", label: "Mapping Tunjangan", columns: columnsMappingTunjangan, data: dummyMappingTunjangan },
+      { key: "metadata", label: "Metadata Ketentuan", columns: columnsMetadataKetentuan, data: dummyMetadataKetentuan },
+    ];
+
+    return (
+      <Tabs 
+        activeKey={subTab} 
+        onChange={setSubTab}
+        items={tabItems.map(item => ({
+          key: item.key,
+          label: item.label,
+          children: <Table columns={item.columns as ColumnsType<any>} dataSource={item.data} pagination={{ pageSize: 5 }} rowKey="key" />
+        }))}
+      />
+    );
   };
 
   return (
@@ -238,7 +302,7 @@ export const KetentuanList: React.FC = () => {
         <button className={`tab-pill ${activeTab === "ketentuan" ? "active" : ""}`} onClick={() => setActiveTab("ketentuan")}>
           <BookOutlined /> Ketentuan Tunjangan
         </button>
-        <button className={`tab-pill ${activeTab === "unit" ? "active" : ""}`} onClick={() => setActiveTab("unit")}>
+        <button className={`tab-pill ${activeTab === "unitKerja" ? "active" : ""}`} onClick={() => setActiveTab("unitKerja")}>
           <BankOutlined /> Master Unit Kerja
         </button>
         <button className={`tab-pill ${activeTab === "jabatan" ? "active" : ""}`} onClick={() => setActiveTab("jabatan")}>
@@ -256,13 +320,18 @@ export const KetentuanList: React.FC = () => {
           </Button>
         </div>
 
-        {activeTab === "ketentuan" && <Table columns={columnsKetentuan} dataSource={dummyKetentuan} pagination={{ pageSize: 5 }} rowKey="key" />}
-        {activeTab === "unit" && <Table columns={columnsUnit} dataSource={dummyUnit} pagination={{ pageSize: 5 }} rowKey="key" />}
-        {activeTab === "jabatan" && <Table columns={columnsJabatan} dataSource={dummyJabatan} pagination={{ pageSize: 5 }} rowKey="key" />}
+        {activeTab === "ketentuan" && renderKetentuanTable()}
+        {activeTab === "unitKerja" && <Table columns={columnsUnitKerja} dataSource={dummyUnitKerja} pagination={{ pageSize: 8 }} rowKey="key" />}
+        {activeTab === "jabatan" && <Table columns={columnsJabatan} dataSource={dummyJabatan} pagination={{ pageSize: 8 }} rowKey="key" />}
       </div>
 
-      <ComponentModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onOk={handleOk} title={`Tambah Data ${activeTab === "ketentuan" ? "Ketentuan Tunjangan" : activeTab === "unit" ? "Unit Kerja" : "Jabatan"}`}>
-        <CreateForm activeTab={activeTab} form={form} />
+      <ComponentModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onOk={handleOk} 
+        title={`Tambah Data ${activeTab === "ketentuan" ? `Ketentuan - ${subTab}` : activeTab === "unitKerja" ? "Unit Kerja" : "Jabatan"}`}
+      >
+        <CreateForm activeTab={activeTab} subTab={subTab} form={form} />
       </ComponentModal>
     </div>
   );

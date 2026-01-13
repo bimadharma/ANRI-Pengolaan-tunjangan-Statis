@@ -82,6 +82,17 @@ export const EditProfile: React.FC<EditProfileProps> = ({ open, onClose, initial
                         <Input placeholder="Kota / Lokasi Kantor" />
                     </Form.Item>
                 </div>
+
+                <Form.Item
+                    label="Role"
+                    name="role"
+                    rules={[{ required: true }]}
+                >
+                    <Select placeholder="Pilih Role">
+                        <Select.Option value="user">User</Select.Option>
+                        <Select.Option value="admin">Admin</Select.Option>
+                    </Select>
+                </Form.Item>
             </Form>
         </ComponentModal>
     );

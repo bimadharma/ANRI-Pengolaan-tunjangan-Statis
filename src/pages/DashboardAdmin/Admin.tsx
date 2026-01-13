@@ -30,46 +30,108 @@ const { Title, Text } = Typography;
 
 
 interface DashboardStats {
-  totalUsers: number;
-  activeSessions: number;
-  monthlyRevenue: number;
-  conversionRate: number;
+  totalPegawai: number;
+  pegawaiSudahUpdate: number;
+  pegawaiBelumUpdate: number;
+  totalNilaiTunjangan: number;
 }
 
-interface UserData {
+interface UnitKerjaData {
+  unit: string;
+  jumlahPegawai: number;
+  color: string;
+}
+
+interface PegawaiData {
   id: string;
-  name: string;
-  email: string;
-  status: "Active" | "Inactive";
-  joined: string;
+  nip: string;
+  nama: string;
+  unitKerja: string;
+  statusUpdate: "Sudah Update" | "Belum Update";
+  masaKerja: number; // dalam tahun
+  nilaiTunjangan: number;
   avatarColor: string;
 }
 
+interface ReminderKenaikan {
+  id: string;
+  nama: string;
+  nip: string;
+  masaKerja: number;
+  tanggalKenaikan: string;
+}
 
-const chartData = [50, 30, 60, 40, 70, 50, 45, 80, 60, 90, 75];
+// Data Statistik Dashboard
+const dashboardStats: DashboardStats = {
+  totalPegawai: 487,
+  pegawaiSudahUpdate: 356,
+  pegawaiBelumUpdate: 131,
+  totalNilaiTunjangan: 1845600000, // dalam Rupiah
+};
 
-const tableData: UserData[] = [
-  { id: "1", name: "User 1", email: "user1@example.com", status: "Inactive", joined: "22 days ago", avatarColor: "#4318FF" },
-  { id: "2", name: "User 2", email: "user2@example.com", status: "Active", joined: "1 days ago", avatarColor: "#05cd99" },
-  { id: "3", name: "User 3", email: "user3@example.com", status: "Active", joined: "5 days ago", avatarColor: "#FFB547" },
-  { id: "4", name: "User 4", email: "user4@example.com", status: "Inactive", joined: "24 days ago", avatarColor: "#4318FF" },
-  { id: "5", name: "User 5", email: "user5@example.com", status: "Active", joined: "18 days ago", avatarColor: "#05cd99" },
-  
-  { id: "6", name: "User 6", email: "user6@example.com", status: "Active", joined: "20 days ago", avatarColor: "#FFB547" },
+// Data Unit Kerja untuk Column Chart (Struktur Organisasi ANRI Sebenarnya)
+const unitKerjaData: UnitKerjaData[] = [
+  { unit: "Sekretariat Utama", jumlahPegawai: 89, color: "#4318FF" },
+  { unit: "Deputi Pembinaan Kearsipan", jumlahPegawai: 72, color: "#05cd99" },
+  { unit: "Deputi Konservasi Arsip", jumlahPegawai: 68, color: "#FFB547" },
+  { unit: "Deputi Informasi & Akses", jumlahPegawai: 65, color: "#9747FF" },
+  { unit: "Deputi Pengembangan Arsip", jumlahPegawai: 58, color: "#FF6B6B" },
+  { unit: "Inspektorat", jumlahPegawai: 34, color: "#4ECDC4" },
+  { unit: "Pusat Arsip Swasta", jumlahPegawai: 45, color: "#FFD93D" },
+  { unit: "Bagian Hukum", jumlahPegawai: 28, color: "#6BCB77" },
+  { unit: "Bagian Kepegawaian", jumlahPegawai: 28, color: "#FF8C42" },
+];
+
+// Reminder Kenaikan Tunjangan (Masa Kerja Kelipatan 4 Tahun)
+const reminderKenaikan: ReminderKenaikan[] = [
+  { id: "1", nama: "Dr. Bambang Sutrisno, M.Si", nip: "196801051994031002", masaKerja: 32, tanggalKenaikan: "05 Maret 2026" },
+  { id: "2", nama: "Dra. Siti Maemunah, M.A", nip: "197205122002122001", masaKerja: 24, tanggalKenaikan: "12 April 2026" },
+  { id: "3", nama: "Ir. Andi Prasetyo, M.T", nip: "198003152006041003", masaKerja: 20, tanggalKenaikan: "15 Mei 2026" },
+  { id: "4", nama: "Drs. Heru Widodo, M.Hum", nip: "198609202010091001", masaKerja: 16, tanggalKenaikan: "20 Juni 2026" },
+];
+
+// Data Pegawai untuk Tabel
+const tablePegawaiData: PegawaiData[] = [
+  { id: "1", nip: "196801051994031002", nama: "Dr. Bambang Sutrisno, M.Si", unitKerja: "Sekretariat Utama", statusUpdate: "Sudah Update", masaKerja: 32, nilaiTunjangan: 4850000, avatarColor: "#4318FF" },
+  { id: "2", nip: "197205122002122001", nama: "Dra. Siti Maemunah, M.A", unitKerja: "Deputi Pembinaan Kearsipan", statusUpdate: "Sudah Update", masaKerja: 24, nilaiTunjangan: 4650000, avatarColor: "#05cd99" },
+  { id: "3", nip: "198003152006041003", nama: "Ir. Andi Prasetyo, M.T", unitKerja: "Deputi Konservasi Arsip", statusUpdate: "Belum Update", masaKerja: 20, nilaiTunjangan: 4350000, avatarColor: "#FFB547" },
+  { id: "4", nip: "198609202010091001", nama: "Drs. Heru Widodo, M.Hum", unitKerja: "Deputi Informasi & Akses", statusUpdate: "Sudah Update", masaKerja: 16, nilaiTunjangan: 4150000, avatarColor: "#9747FF" },
+  { id: "5", nip: "198905182011012002", nama: "Sri Rahayu, S.Sos, M.Si", unitKerja: "Deputi Pengembangan Arsip", statusUpdate: "Belum Update", masaKerja: 15, nilaiTunjangan: 3950000, avatarColor: "#FF6B6B" },
+  { id: "6", nip: "199002252012041001", nama: "Agus Salim, S.Kom, M.T.I", unitKerja: "Pusat Arsip Swasta", statusUpdate: "Sudah Update", masaKerja: 14, nilaiTunjangan: 3850000, avatarColor: "#4ECDC4" },
+  { id: "7", nip: "199108152013091002", nama: "Dwi Handayani, S.H, M.H", unitKerja: "Bagian Hukum", statusUpdate: "Belum Update", masaKerja: 13, nilaiTunjangan: 3750000, avatarColor: "#FFD93D" },
+  { id: "8", nip: "199204182015062001", nama: "Rina Kusumawati, S.Sos", unitKerja: "Bagian Kepegawaian", statusUpdate: "Sudah Update", masaKerja: 11, nilaiTunjangan: 3550000, avatarColor: "#6BCB77" },
+  { id: "9", nip: "199306222017031001", nama: "Muhammad Faisal, S.IP", unitKerja: "Inspektorat", statusUpdate: "Sudah Update", masaKerja: 9, nilaiTunjangan: 3350000, avatarColor: "#FF8C42" },
+  { id: "10", nip: "199508102019042002", nama: "Laila Nurjanah, S.Psi", unitKerja: "Sekretariat Utama", statusUpdate: "Belum Update", masaKerja: 7, nilaiTunjangan: 3150000, avatarColor: "#4318FF" },
 ];
 
 export const DashboardAdmin: React.FC = () => {
-  
-  
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<UserData[]>(tableData);
+  const [data, setData] = useState<PegawaiData[]>(tablePegawaiData);
 
-  
-  const columns: ColumnsType<UserData> = [
+  // Format Rupiah
+  const formatRupiah = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  // Hitung persentase update
+  const persenUpdate = ((dashboardStats.pegawaiSudahUpdate / dashboardStats.totalPegawai) * 100).toFixed(1);
+
+  const columns: ColumnsType<PegawaiData> = [
     {
-      title: "NAME",
-      dataIndex: "name",
-      key: "name",
+      title: "NIP",
+      dataIndex: "nip",
+      key: "nip",
+      render: (text) => <Text strong>{text}</Text>,
+    },
+    {
+      title: "NAMA PEGAWAI",
+      dataIndex: "nama",
+      key: "nama",
       render: (text, record) => (
         <div className="user-name-wrapper">
           <Avatar 
@@ -83,51 +145,53 @@ export const DashboardAdmin: React.FC = () => {
       ),
     },
     {
-      title: "EMAIL",
-      dataIndex: "email",
-      key: "email",
+      title: "UNIT KERJA",
+      dataIndex: "unitKerja",
+      key: "unitKerja",
       render: (text) => <Text type="secondary">{text}</Text>,
     },
     {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
+      title: "STATUS UPDATE",
+      dataIndex: "statusUpdate",
+      key: "statusUpdate",
       render: (status) => (
-        <span className={`status-badge ${status === 'Active' ? 'status-active' : 'status-inactive'}`}>
+        <span className={`status-badge ${status === 'Sudah Update' ? 'status-active' : 'status-inactive'}`}>
           {status}
         </span>
       ),
     },
     {
-      title: "JOINED",
-      dataIndex: "joined",
-      key: "joined",
-      render: (text) => <Text type="secondary">{text}</Text>,
+      title: "MASA KERJA",
+      dataIndex: "masaKerja",
+      key: "masaKerja",
+      render: (tahun) => <Text type="secondary">{tahun} tahun</Text>,
+    },
+    {
+      title: "TUNJANGAN",
+      dataIndex: "nilaiTunjangan",
+      key: "nilaiTunjangan",
+      render: (nilai) => <Text strong style={{ color: '#05cd99' }}>{formatRupiah(nilai)}</Text>,
     },
     {
       title: "ACTIONS",
       key: "action",
       render: () => (
-        <Button type="link" style={{ fontWeight: 600 }}>View</Button>
+        <Button type="link" style={{ fontWeight: 600 }}>Detail</Button>
       ),
     },
   ];
 
   return (
     <div className="dashboard-container">
-      
       {/* --- BAGIAN 1: STATS CARDS --- */}
       <Row gutter={[24, 24]}>
-        {/* Card 1: Total Users */}
+        {/* Card 1: Total Pegawai ANRI */}
         <Col xs={24} sm={12} lg={6}>
           <Card bordered={false} bodyStyle={{ padding: '20px' }} style={{ borderRadius: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
               <div>
-                <p className="stat-label">Total Users</p>
-                <h3 className="stat-value">2,543</h3>
-                <div className="stat-trend trend-up">
-                  <ArrowUpOutlined /> <span>+12.5%</span>
-                </div>
+                <p className="stat-label">Total Pegawai ANRI</p>
+                <h3 className="stat-value">{dashboardStats.totalPegawai.toLocaleString('id-ID')}</h3>
               </div>
               <div className="stat-card-icon" style={{ background: '#F4F7FE', color: '#4318FF' }}>
                 <UserOutlined />
@@ -136,52 +200,28 @@ export const DashboardAdmin: React.FC = () => {
           </Card>
         </Col>
 
-        {/* Card 2: Active Sessions */}
+        {/* Card 2: Pegawai Sudah Update */}
         <Col xs={24} sm={12} lg={6}>
           <Card bordered={false} bodyStyle={{ padding: '20px' }} style={{ borderRadius: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
               <div>
-                <p className="stat-label">Active Sessions</p>
-                <h3 className="stat-value">847</h3>
-                <div className="stat-trend trend-up">
-                  <ArrowUpOutlined /> <span>+8.2%</span>
-                </div>
+                <p className="stat-label">Sudah Update Tunjangan PAS</p>
+                <h3 className="stat-value">{dashboardStats.pegawaiSudahUpdate.toLocaleString('id-ID')}</h3>
               </div>
-              <div className="stat-card-icon" style={{ background: '#F4F7FE', color: '#05cd99' }}>
+              <div className="stat-card-icon" style={{ background: '#E8FFF3', color: '#05cd99' }}>
                 <RiseOutlined />
               </div>
             </div>
           </Card>
         </Col>
 
-        {/* Card 3: Monthly Revenue */}
+        {/* Card 3: Pegawai Belum Update */}
         <Col xs={24} sm={12} lg={6}>
           <Card bordered={false} bodyStyle={{ padding: '20px' }} style={{ borderRadius: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
               <div>
-                <p className="stat-label">Monthly Revenue</p>
-                <h3 className="stat-value">$45,231</h3>
-                <div className="stat-trend trend-up">
-                  <ArrowUpOutlined /> <span>+23.1%</span>
-                </div>
-              </div>
-              <div className="stat-card-icon" style={{ background: '#F4F7FE', color: '#9747FF' }}>
-                <DollarOutlined />
-              </div>
-            </div>
-          </Card>
-        </Col>
-
-        {/* Card 4: Conversion Rate */}
-        <Col xs={24} sm={12} lg={6}>
-          <Card bordered={false} bodyStyle={{ padding: '20px' }} style={{ borderRadius: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-              <div>
-                <p className="stat-label">Conversion Rate</p>
-                <h3 className="stat-value">3.24%</h3>
-                <div className="stat-trend trend-down">
-                  <ArrowDownOutlined /> <span>-2.4%</span>
-                </div>
+                <p className="stat-label">Belum Update Tunjangan PAS</p>
+                <h3 className="stat-value">{dashboardStats.pegawaiBelumUpdate.toLocaleString('id-ID')}</h3>
               </div>
               <div className="stat-card-icon" style={{ background: '#FFF7E6', color: '#FFB547' }}>
                 <BarChartOutlined />
@@ -189,53 +229,118 @@ export const DashboardAdmin: React.FC = () => {
             </div>
           </Card>
         </Col>
+
+        {/* Card 4: Total Nilai Tunjangan */}
+        <Col xs={24} sm={12} lg={6}>
+          <Card bordered={false} bodyStyle={{ padding: '20px' }} style={{ borderRadius: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+              <div>
+                <p className="stat-label">Total Tunjangan PAS</p>
+                <h3 className="stat-value" style={{ fontSize: '20px' }}>{formatRupiah(dashboardStats.totalNilaiTunjangan)}</h3>
+              </div>
+              <div className="stat-card-icon" style={{ background: '#F4F0FF', color: '#9747FF' }}>
+                <DollarOutlined />
+              </div>
+            </div>
+          </Card>
+        </Col>
       </Row>
 
-      {/* --- BAGIAN 2: CHART & QUICK STATS --- */}
+      {/* --- BAGIAN 2: CHART & REMINDER --- */}
       <Row gutter={[24, 24]} style={{ marginTop: '24px' }}>
         
-        {/* Left Side: Revenue Analytics (Visual CSS Chart) */}
+        {/* Left Side: Grafik Pegawai per Unit Kerja (Column Chart) */}
         <Col xs={24} lg={16}>
           <Card 
             bordered={false} 
             className="chart-card" 
             style={{ borderRadius: '16px' }}
-            title={<Title level={4} style={{ margin: 0, color: '#2b3674' }}>Revenue Analytics</Title>}
-            extra={<Button type="link">View Details</Button>}
+            title={<Title level={4} style={{ margin: 0, color: '#2b3674' }}>Jumlah Pegawai per Unit Kerja</Title>}
+            extra={<Button type="link">Lihat Detail</Button>}
           >
-            {/* Visualisasi Chart sederhana menggunakan CSS Flexbox */}
-            <div className="bar-chart-container">
-              {chartData.map((height, index) => (
-                <div 
-                  key={index} 
-                  className="chart-bar" 
-                  style={{ height: `${height}%` }} 
-                />
-              ))}
+            {/* Column Chart menggunakan CSS */}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'flex-end', 
+              justifyContent: 'space-between',
+              gap: '12px',
+              height: '280px',
+              padding: '20px 10px 10px',
+            }}>
+              {unitKerjaData.map((item, index) => {
+                const maxValue = Math.max(...unitKerjaData.map(d => d.jumlahPegawai));
+                const heightPercentage = (item.jumlahPegawai / maxValue) * 100;
+                
+                return (
+                  <div key={index} style={{ 
+                    flex: 1, 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'flex-end',
+                    height: '100%',
+                  }}>
+                    <div style={{ 
+                      fontSize: '13px', 
+                      fontWeight: 700, 
+                      color: '#2b3674',
+                      marginBottom: '8px',
+                    }}>
+                      {item.jumlahPegawai}
+                    </div>
+                    <div 
+                      style={{ 
+                        height: `${heightPercentage}%`,
+                        backgroundColor: item.color,
+                        width: '100%',
+                        minWidth: '35px',
+                        maxWidth: '60px',
+                        borderRadius: '8px 8px 0 0',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                      }} 
+                    />
+                    <div style={{ 
+                      fontSize: '10px', 
+                      color: '#a3aed0', 
+                      textAlign: 'center', 
+                      maxWidth: '70px', 
+                      lineHeight: '1.3',
+                      marginTop: '8px',
+                      fontWeight: 500,
+                    }}>
+                      {item.unit}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </Card>
         </Col>
 
-        {/* Right Side: Quick Stats (Blue Card) */}
+        {/* Right Side: Reminder Kenaikan Tunjangan */}
         <Col xs={24} lg={8}>
           <div className="quick-stats-card p-4" style={{ padding: '24px' }}>
-            <Title level={4} style={{ color: 'white', marginTop: 0 }}>Quick Stats</Title>
+            <Title level={4} style={{ color: 'white', marginTop: 0 }}>Reminder Kenaikan Tunjangan</Title>
+            <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px' }}>Masa kerja kelipatan 4 tahun</Text>
             
-            <div style={{ marginTop: '32px' }}>
-              <div className="quick-stat-item">
-                <div className="quick-stat-label">Daily Users</div>
-                <div className="quick-stat-value">1,234</div>
-              </div>
-              
-              <div className="quick-stat-item">
-                <div className="quick-stat-label">Avg Duration</div>
-                <div className="quick-stat-value">8m 42s</div>
-              </div>
-              
-              <div className="quick-stat-item">
-                <div className="quick-stat-label">Bounce Rate</div>
-                <div className="quick-stat-value">42.3%</div>
-              </div>
+            <div style={{ marginTop: '24px' }}>
+              {reminderKenaikan.map((item) => (
+                <div key={item.id} className="quick-stat-item" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px', marginBottom: '12px' }}>
+                  <div className="quick-stat-label" style={{ fontSize: '13px', fontWeight: 600 }}>{item.nama}</div>
+                  <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '11px', marginTop: '4px' }}>
+                    NIP: {item.nip}
+                  </div>
+                  <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '12px', marginTop: '6px' }}>
+                    <span style={{ background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '4px', marginRight: '8px' }}>
+                      {item.masaKerja} tahun
+                    </span>
+                    <span style={{ fontSize: '11px' }}>
+                      📅 {item.tanggalKenaikan}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </Col>
@@ -246,8 +351,8 @@ export const DashboardAdmin: React.FC = () => {
         <Col span={24}>
           <Card bordered={false} style={{ borderRadius: '16px' }}>
             <div className="table-header">
-              <Title level={4} style={{ margin: 0, color: '#2b3674' }}>Recent Users</Title>
-              <Button icon={<FilterOutlined />}>Status</Button>
+              <Title level={4} style={{ margin: 0, color: '#2b3674' }}>Data Pegawai Tunjangan PAS</Title>
+              <Button icon={<FilterOutlined />}>Status Update</Button>
             </div>
             
             <Table 
@@ -256,12 +361,11 @@ export const DashboardAdmin: React.FC = () => {
               rowKey="id"
               loading={loading}
               pagination={{
-                pageSize: 5,
+                pageSize: 8,
                 position: ['bottomRight'],
                 showSizeChanger: false,
-                
-                total: 500, 
-                showTotal: (total, range) => `Menampilkan ${range[0]} - ${range[1]} dari ${total} data`,
+                total: dashboardStats.totalPegawai,
+                showTotal: (total, range) => `Menampilkan ${range[0]} - ${range[1]} dari ${total} pegawai`,
                 className: "custom-pagination"
               }}
             />

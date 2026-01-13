@@ -1,15 +1,11 @@
 .login-layout {
   min-height: 100vh;
-  background: linear-gradient(135deg, #00C9E8 0%, #0096C9 100%);
-}
-
-
-.login-layout {
-  min-height: 100vh;
-  background-color: #ffffff;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  background: linear-gradient(135deg, #00C9E8 0%, #0096C9 100%);
+  padding: 20px;
 }
 
 .login-card {

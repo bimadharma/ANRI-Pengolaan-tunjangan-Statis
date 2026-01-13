@@ -73,10 +73,8 @@ const Login: React.FC = () => {
       <Content style={{ padding: "20px" }}>
         <Card className="login-card" bordered={false}>
           
-          {/* Bagian Header & Logo */}
           <div className="login-header">
             <div className="logo-container">
-              {/* Pastikan file ANRI.png ada di folder public */}
               <img src="/ANRI.png" alt="Logo ANRI" className="app-logo" />
             </div>
             <Title level={3} style={{ color: "#0050b3", marginBottom: 8 }}>
@@ -87,7 +85,6 @@ const Login: React.FC = () => {
             </Text>
           </div>
 
-          {/* Form Login */}
           <Form
             layout="vertical"
             size="large"

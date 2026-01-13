@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Table, Button, Space, Tooltip, Avatar, Input } from "antd";
-import { TeamOutlined, LineChartOutlined, PlusOutlined, SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, UserOutlined } from "@ant-design/icons";
+import { Table, Button, Space, Tooltip, Input, Tag, Drawer, Descriptions } from "antd";
+import { FileTextOutlined, LineChartOutlined, SearchOutlined, EyeOutlined, CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 
 import { CreateLogPembayaran } from "./create";
 import "../../../styles/LogPembayaran.css";
@@ -8,28 +8,134 @@ import "../../../styles/LogPembayaran.css";
 
 interface ILogData {
   id: number;
-  nama: string;
-  posisi: string;
-  unit: string; 
+  tanggalProses: string;
+  namaPegawai: string;
+  nip: string;
+  nomorSPM: string;
   nominal: number;
+  status: "Berhasil" | "Gagal";
+  keterangan: string;
 }
 
 const DUMMY_DATA: ILogData[] = [
-  { id: 1, nama: "Ahmad Fauzi", posisi: "Product Manager", unit: "Product Team", nominal: 12000000 },
-  { id: 2, nama: "Budi Santoso", posisi: "Senior Developer", unit: "Engineering", nominal: 8000000 },
-  { id: 3, nama: "Sinta Dewi", posisi: "UI/UX Designer", unit: "Design Team", nominal: 7500000 },
-  { id: 4, nama: "Rina Wijaya", posisi: "QA Engineer", unit: "Engineering", nominal: 6500000 },
+  { 
+    id: 1, 
+    tanggalProses: "10 Januari 2026, 09:15:23", 
+    namaPegawai: "Dr. Bambang Sutrisno, M.Si", 
+    nip: "196801051994031002",
+    nomorSPM: "SPM-2026/01/0001",
+    nominal: 5500000, 
+    status: "Berhasil",
+    keterangan: "Pembayaran berhasil diproses melalui Bank BNI"
+  },
+  { 
+    id: 2, 
+    tanggalProses: "10 Januari 2026, 09:18:45", 
+    namaPegawai: "Dra. Siti Maemunah, M.A", 
+    nip: "197205122002122001",
+    nomorSPM: "SPM-2026/01/0002",
+    nominal: 4500000, 
+    status: "Berhasil",
+    keterangan: "Transfer berhasil ke rekening BRI"
+  },
+  { 
+    id: 3, 
+    tanggalProses: "10 Januari 2026, 09:22:10", 
+    namaPegawai: "Ir. Andi Prasetyo, M.T", 
+    nip: "198003152006041003",
+    nomorSPM: "SPM-2026/01/0003",
+    nominal: 3500000, 
+    status: "Gagal",
+    keterangan: "Gagal validasi - Nomor rekening tidak valid"
+  },
+  { 
+    id: 4, 
+    tanggalProses: "10 Januari 2026, 10:05:32", 
+    namaPegawai: "Drs. Heru Widodo, M.Hum", 
+    nip: "198609202010091001",
+    nomorSPM: "SPM-2026/01/0004",
+    nominal: 3000000, 
+    status: "Berhasil",
+    keterangan: "Pembayaran berhasil diproses"
+  },
+  { 
+    id: 5, 
+    tanggalProses: "10 Januari 2026, 10:12:55", 
+    namaPegawai: "Sri Rahayu, S.Sos, M.Si", 
+    nip: "198905182011012002",
+    nomorSPM: "SPM-2026/01/0005",
+    nominal: 2500000, 
+    status: "Berhasil",
+    keterangan: "Transfer ke Bank Mandiri berhasil"
+  },
+  { 
+    id: 6, 
+    tanggalProses: "10 Januari 2026, 10:18:20", 
+    namaPegawai: "Agus Salim, S.Kom, M.T.I", 
+    nip: "199002252012041001",
+    nomorSPM: "SPM-2026/01/0006",
+    nominal: 3850000, 
+    status: "Gagal",
+    keterangan: "Timeout - Koneksi ke bank terputus"
+  },
+  { 
+    id: 7, 
+    tanggalProses: "10 Januari 2026, 11:05:45", 
+    namaPegawai: "Dwi Handayani, S.H, M.H", 
+    nip: "199108152013091002",
+    nomorSPM: "SPM-2026/01/0007",
+    nominal: 3750000, 
+    status: "Berhasil",
+    keterangan: "Pembayaran berhasil diproses via Bank BTN"
+  },
+  { 
+    id: 8, 
+    tanggalProses: "10 Januari 2026, 11:15:10", 
+    namaPegawai: "Rina Kusumawati, S.Sos", 
+    nip: "199204182015062001",
+    nomorSPM: "SPM-2026/01/0008",
+    nominal: 3550000, 
+    status: "Berhasil",
+    keterangan: "Transfer ke BCA berhasil"
+  },
+  { 
+    id: 9, 
+    tanggalProses: "11 Januari 2026, 08:30:15", 
+    namaPegawai: "Muhammad Faisal, S.IP", 
+    nip: "199306222017031001",
+    nomorSPM: "SPM-2026/01/0009",
+    nominal: 3350000, 
+    status: "Berhasil",
+    keterangan: "Pembayaran berhasil diproses"
+  },
+  { 
+    id: 10, 
+    tanggalProses: "11 Januari 2026, 08:45:30", 
+    namaPegawai: "Laila Nurjanah, S.Psi", 
+    nip: "199508102019042002",
+    nomorSPM: "SPM-2026/01/0010",
+    nominal: 3150000, 
+    status: "Gagal",
+    keterangan: "Gagal - Saldo tidak mencukupi di rekening bendahara"
+  },
 ];
 
 export const LogPembayaranList: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<ILogData | null>(null);
 
-  
   const formatRupiah = (val: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(val);
 
-  
-  const totalPegawai = DUMMY_DATA.length;
-  const totalNominal = DUMMY_DATA.reduce((acc, curr) => acc + curr.nominal, 0);
+  const handleViewDetail = (record: ILogData) => {
+    setSelectedRecord(record);
+    setDetailDrawerOpen(true);
+  };
+
+  const totalLog = DUMMY_DATA.length;
+  const totalBerhasil = DUMMY_DATA.filter(item => item.status === "Berhasil").length;
+  const totalGagal = DUMMY_DATA.filter(item => item.status === "Gagal").length;
+  const totalNominalBerhasil = DUMMY_DATA.filter(item => item.status === "Berhasil").reduce((acc, curr) => acc + curr.nominal, 0);
 
   return (
     <div className="log-container">
@@ -37,113 +143,216 @@ export const LogPembayaranList: React.FC = () => {
       <div className="log-header">
         <h1 className="log-title">
           <div style={{ background: "#3b82f6", borderRadius: 8, padding: 6, display: "flex" }}>
-            <TeamOutlined style={{ color: "white", fontSize: 20 }} />
+            <FileTextOutlined style={{ color: "white", fontSize: 20 }} />
           </div>
           Log Pembayaran
         </h1>
-        <p className="log-subtitle">Kelola Log Pembayaran Pegawai</p>
+        <p className="log-subtitle">Histori Proses Pembayaran Tunjangan PAS</p>
       </div>
 
-      {/* Layout Grid: Kiri Tabel, Kanan Sidebar */}
-      <div className="log-layout">
-        {/* --- KOLOM KIRI: TABEL UTAMA --- */}
-        <div className="left-content">
-          {/* Search Bar (Optional, visual only sesuai gambar) */}
-          <Input
-            prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
-            placeholder="Cari data..."
-            style={{
-              marginBottom: 20,
-              borderRadius: 8,
-              padding: "10px 12px",
-              border: "1px solid #e5e7eb",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-            }}
-          />
+      {/* Statistik Cards di atas */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px", marginBottom: "24px" }}>
+        {/* Card 1: Total Log */}
+        <div className="stat-card-side">
+          <div className="stat-content">
+            <label>Total Log</label>
+            <h2>{totalLog}</h2>
+            <span style={{ fontSize: 10, color: "#9ca3af" }}>Total transaksi</span>
+          </div>
+          <div className="stat-icon bg-blue-light">
+            <FileTextOutlined />
+          </div>
+        </div>
 
-          <div className="table-card-log">
-            <Table dataSource={DUMMY_DATA} rowKey="id" pagination={{ pageSize: 5 }}>
+        {/* Card 2: Berhasil */}
+        <div className="stat-card-side">
+          <div className="stat-content">
+            <label>Berhasil</label>
+            <h2 style={{ color: "#059669" }}>{totalBerhasil}</h2>
+            <span style={{ fontSize: 10, color: "#9ca3af" }}>Pembayaran sukses</span>
+          </div>
+          <div className="stat-icon bg-green-light">
+            <CheckCircleOutlined />
+          </div>
+        </div>
+
+        {/* Card 3: Gagal */}
+        <div className="stat-card-side">
+          <div className="stat-content">
+            <label>Gagal</label>
+            <h2 style={{ color: "#dc2626" }}>{totalGagal}</h2>
+            <span style={{ fontSize: 10, color: "#9ca3af" }}>Pembayaran gagal</span>
+          </div>
+          <div className="stat-icon" style={{ background: "#fee2e2", color: "#dc2626" }}>
+            <CloseCircleOutlined />
+          </div>
+        </div>
+
+        {/* Card 4: Total Nominal Berhasil */}
+        <div className="stat-card-side">
+          <div className="stat-content">
+            <label>Total Dibayarkan</label>
+            <h2 className="green" style={{ fontSize: "16px" }}>{formatRupiah(totalNominalBerhasil)}</h2>
+            <span style={{ fontSize: 10, color: "#9ca3af" }}>Nominal berhasil</span>
+          </div>
+          <div className="stat-icon bg-green-light">
+            <LineChartOutlined />
+          </div>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <Input
+        prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
+        placeholder="Cari data..."
+        style={{
+          marginBottom: 20,
+          borderRadius: 8,
+          padding: "10px 12px",
+          border: "1px solid #e5e7eb",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+        }}
+      />
+
+      {/* Tabel dengan scroll horizontal */}
+      <div className="table-card-log">
+        <Table 
+          dataSource={DUMMY_DATA} 
+          rowKey="id" 
+          pagination={{ pageSize: 10, showSizeChanger: true }} 
+          scroll={{ x: 1400 }}
+        >
               <Table.Column
-                title="Nama"
-                dataIndex="nama"
-                sorter={(a: ILogData, b: ILogData) => a.nama.localeCompare(b.nama)}
+                title="Tanggal Proses"
+                dataIndex="tanggalProses"
+                width={180}
+                sorter={(a: ILogData, b: ILogData) => new Date(a.tanggalProses).getTime() - new Date(b.tanggalProses).getTime()}
                 render={(text) => (
-                  <div className="user-info">
-                    <Avatar className="user-avatar" icon={<UserOutlined />}>
-                      {text.charAt(0)}
-                    </Avatar>
-                    <span className="user-name">{text}</span>
+                  <div style={{ fontSize: "12px" }}>
+                    <div style={{ fontWeight: "500", color: "#1f2937" }}>{text.split(", ")[0]}</div>
+                    <div style={{ color: "#6b7280" }}>{text.split(", ")[1]}</div>
                   </div>
                 )}
               />
 
-              <Table.Column title="Posisi" dataIndex="posisi" sorter={(a: ILogData, b: ILogData) => a.posisi.localeCompare(b.posisi)} render={(text) => <span className="position-badge">{text}</span>} />
+              <Table.Column
+                title="Nama Pegawai"
+                dataIndex="namaPegawai"
+                width={200}
+                sorter={(a: ILogData, b: ILogData) => a.namaPegawai.localeCompare(b.namaPegawai)}
+                render={(text) => <strong>{text}</strong>}
+              />
 
-              <Table.Column title="Unit" dataIndex="unit" sorter={(a: ILogData, b: ILogData) => a.unit.localeCompare(b.unit)} render={(text) => <span style={{ color: "#6b7280" }}>{text}</span>} />
+              <Table.Column 
+                title="NIP" 
+                dataIndex="nip" 
+                width={160}
+              />
 
-              <Table.Column title="Nominal" dataIndex="nominal" sorter={(a: ILogData, b: ILogData) => a.nominal - b.nominal} render={(val) => <span style={{ color: "#059669", fontWeight: "bold" }}>{formatRupiah(val)}</span>} />
+              <Table.Column 
+                title="Nomor SPM" 
+                dataIndex="nomorSPM" 
+                width={160}
+                render={(text) => <span style={{ fontFamily: "monospace", fontSize: "12px" }}>{text}</span>}
+              />
+
+              <Table.Column 
+                title="Nominal" 
+                dataIndex="nominal" 
+                width={150}
+                sorter={(a: ILogData, b: ILogData) => a.nominal - b.nominal} 
+                render={(val) => <span style={{ color: "#059669", fontWeight: "bold" }}>{formatRupiah(val)}</span>}
+              />
+
+              <Table.Column 
+                title="Status" 
+                dataIndex="status" 
+                width={120}
+                filters={[
+                  { text: "Berhasil", value: "Berhasil" },
+                  { text: "Gagal", value: "Gagal" },
+                ]}
+                onFilter={(value, record: ILogData) => record.status === value}
+                render={(val) => (
+                  <Tag 
+                    icon={val === "Berhasil" ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+                    color={val === "Berhasil" ? "success" : "error"}
+                  >
+                    {val}
+                  </Tag>
+                )}
+              />
+
+              <Table.Column 
+                title="Keterangan" 
+                dataIndex="keterangan" 
+                width={250}
+                ellipsis
+                render={(text) => (
+                  <Tooltip title={text}>
+                    <span style={{ color: "#6b7280", fontSize: "12px" }}>{text}</span>
+                  </Tooltip>
+                )}
+              />
 
               <Table.Column
                 title="Aksi"
                 key="action"
                 align="center"
-                render={() => (
-                  <Space size={8} className="action-btn-group">
-                    <Tooltip title="View">
-                      <Button icon={<EyeOutlined />} className="action-btn action-view" />
-                    </Tooltip>
-
-                    <Tooltip title="Edit">
-                      <Button icon={<EditOutlined />} className="action-btn action-edit" />
-                    </Tooltip>
-
-                    <Tooltip title="Delete">
-                      <Button icon={<DeleteOutlined />} className="action-btn action-delete" />
-                    </Tooltip>
-                  </Space>
+                width={80}
+                fixed="right"
+                render={(_, record: ILogData) => (
+                  <Tooltip title="Detail">
+                    <Button 
+                      icon={<EyeOutlined />} 
+                      className="action-btn action-view" 
+                      onClick={() => handleViewDetail(record)}
+                    />
+                  </Tooltip>
                 )}
               />
             </Table>
           </div>
-        </div>
 
-        {/* --- KOLOM KANAN: SIDEBAR STATISTIK & BUTTON --- */}
-        <div className="sidebar-wrapper">
-          {/* Card 1: Total Pegawai */}
-          <div className="stat-card-side">
-            <div className="stat-content">
-              <label>Total Pegawai</label>
-              <h2>{totalPegawai}</h2>
-            </div>
-            <div className="stat-icon bg-blue-light">
-              <TeamOutlined />
-            </div>
-          </div>
-
-          {/* Card 2: Total Nominal */}
-          <div className="stat-card-side">
-            <div className="stat-content">
-              <label>Total Nominal</label>
-              <h2 className="green">{formatRupiah(totalNominal)}</h2>
-              <span style={{ fontSize: 10, color: "#9ca3af" }}>Akumulasi gaji pegawai</span>
-            </div>
-            <div className="stat-icon bg-green-light">
-              <LineChartOutlined />
-            </div>
-          </div>
-
-          {/* Button Create Besar */}
-          <div className="btn-create-gradient" onClick={() => setIsCreateModalOpen(true)}>
-            <div>
-              <div className="btn-label">Tambah Pegawai</div>
-              <div className="btn-action-text">Klik di sini</div>
-            </div>
-            <div className="btn-icon-box">
-              <PlusOutlined />
-            </div>
-          </div>
-        </div>
-      </div>
+      <Drawer
+        title={<span style={{ fontSize: "18px", fontWeight: "bold" }}>Detail Log Pembayaran</span>}
+        placement="right"
+        width={600}
+        onClose={() => setDetailDrawerOpen(false)}
+        open={detailDrawerOpen}
+      >
+        {selectedRecord && (
+          <Descriptions bordered column={1} size="middle">
+            <Descriptions.Item label="Tanggal Proses">
+              <strong>{selectedRecord.tanggalProses}</strong>
+            </Descriptions.Item>
+            <Descriptions.Item label="Nama Pegawai">
+              <strong>{selectedRecord.namaPegawai}</strong>
+            </Descriptions.Item>
+            <Descriptions.Item label="NIP">{selectedRecord.nip}</Descriptions.Item>
+            <Descriptions.Item label="Nomor SPM">
+              <span style={{ fontFamily: "monospace" }}>{selectedRecord.nomorSPM}</span>
+            </Descriptions.Item>
+            <Descriptions.Item label="Nominal">
+              <span style={{ fontSize: "20px", fontWeight: "bold", color: "#059669" }}>
+                {formatRupiah(selectedRecord.nominal)}
+              </span>
+            </Descriptions.Item>
+            <Descriptions.Item label="Status">
+              <Tag 
+                icon={selectedRecord.status === "Berhasil" ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+                color={selectedRecord.status === "Berhasil" ? "success" : "error"}
+                style={{ fontSize: "14px", padding: "4px 12px" }}
+              >
+                {selectedRecord.status}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Keterangan">
+              <span style={{ color: "#6b7280" }}>{selectedRecord.keterangan}</span>
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Drawer>
 
       {/* Modal Create */}
       <CreateLogPembayaran open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />

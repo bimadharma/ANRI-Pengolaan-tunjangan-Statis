@@ -25,7 +25,7 @@ export const Navbar = () => {
           color: "#0096C9",
         }}
       >
-        E-Sitara
+        Sitara
       </div>
       <Space>
         <Button

@@ -16,7 +16,7 @@ export const AppTitle: React.FC<AppTitleProps> = ({ collapsed }) => {
     >
       {/* LOGO */}
       <img
-        src="public/ANRI.png"   
+        src="ANRI.png"   
         alt="Logo"
         style={{
           width: 32,
@@ -34,7 +34,7 @@ export const AppTitle: React.FC<AppTitleProps> = ({ collapsed }) => {
             whiteSpace: "nowrap",
           }}
         >
-          E-SITARA
+          SITARA
         </Typography.Text>
       )}
     </div>

@@ -4,7 +4,6 @@ import {
     IdcardOutlined, 
     BankOutlined, 
     EnvironmentOutlined,
-    SettingFilled,
     EditOutlined
 } from "@ant-design/icons";
 
@@ -17,14 +16,19 @@ const CURRENT_USER = {
     nama: "John Doe",
     jabatan: "Senior Frontend Developer",
     unit: "IT",
-    lokasi: "Jakarta, Indonesia"
+    lokasi: "Jakarta, Indonesia",
+    role: "user"
 };
 
 export const UserProfile: React.FC = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     
-    
     const [userData, setUserData] = useState(CURRENT_USER);
+    const [role, setRole] = useState<string>(CURRENT_USER.role);
+
+    const handleEditClose = () => {
+        setIsEditModalOpen(false);
+    };
 
     return (
         <div className="profile-container">
@@ -101,13 +105,33 @@ export const UserProfile: React.FC = () => {
                         </div>
                     </div>
 
+                    {/* Role */}
+                    <div className="info-group">
+                        <div className="info-label">
+                            <UserOutlined /> Role
+                        </div>
+                        <div className="info-value-box">
+                            <span style={{ 
+                                display: 'inline-block',
+                                background: role === 'admin' ? '#fee2e2' : '#dcfce7',
+                                color: role === 'admin' ? '#dc2626' : '#16a34a',
+                                padding: '6px 12px',
+                                borderRadius: 6,
+                                fontWeight: 600,
+                                textTransform: 'capitalize'
+                            }}>
+                                {role}
+                            </span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
             {/* Modal Edit */}
             <EditProfile 
                 open={isEditModalOpen} 
-                onClose={() => setIsEditModalOpen(false)}
+                onClose={handleEditClose}
                 initialData={userData}
             />
         </div>
