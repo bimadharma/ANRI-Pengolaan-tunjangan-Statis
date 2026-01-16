@@ -7,14 +7,6 @@ import { CreateForm } from "./create";
 import "../../../styles/ketentuan.css";
 
 
-interface FaktorRisikoData {
-  key: string;
-  kodeRisiko: string;
-  kategoriRisiko: string;
-  deskripsi: string;
-  nilaiFaktor: number;
-  status: "Aktif" | "Tidak Aktif";
-}
 
 interface FaktorTanggungJawabData {
   key: string;
@@ -112,28 +104,10 @@ const dummyJabatan: JabatanData[] = [
 
 export const KetentuanList: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"ketentuan" | "unitKerja" | "jabatan">("ketentuan");
-  const [subTab, setSubTab] = useState<string>("faktorRisiko");
+  const [subTab, setSubTab] = useState<string>("faktorTanggungJawab");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [api, contextHolder] = notification.useNotification();
-
-  
-  const columnsFaktorRisiko: ColumnsType<FaktorRisikoData> = [
-    { title: "Kode Risiko", dataIndex: "kodeRisiko", key: "kodeRisiko", render: (text) => <Tag color="blue">{text}</Tag> },
-    { title: "Kategori Risiko", dataIndex: "kategoriRisiko", key: "kategoriRisiko", render: (text) => <strong>{text}</strong> },
-    { title: "Deskripsi", dataIndex: "deskripsi", key: "deskripsi" },
-    { title: "Nilai Faktor", dataIndex: "nilaiFaktor", key: "nilaiFaktor", render: (value) => <Tag color="orange">{value}</Tag> },
-    { title: "Status", dataIndex: "status", key: "status", render: (status) => <Tag color={status === "Aktif" ? "green" : "red"}>{status}</Tag> },
-    {
-      title: "AKSI", key: "action", align: "center",
-      render: () => (
-        <Space size={8} className="action-btn-group">
-          <Tooltip title="Edit"><Button icon={<EditOutlined />} className="action-btn action-edit" /></Tooltip>
-          <Tooltip title="Hapus"><Button icon={<DeleteOutlined />} className="action-btn action-delete" /></Tooltip>
-        </Space>
-      ),
-    },
-  ];
 
   const columnsFaktorTanggungJawab: ColumnsType<FaktorTanggungJawabData> = [
     { title: "Kode Faktor", dataIndex: "kodeFaktor", key: "kodeFaktor", render: (text) => <Tag color="purple">{text}</Tag> },
@@ -167,7 +141,7 @@ export const KetentuanList: React.FC = () => {
   ];
 
   const columnsMappingTunjangan: ColumnsType<MappingTunjanganData> = [
-    { title: "Total Nilai", dataIndex: "totalNilai", key: "totalNilai", render: (value) => <Tag color="geekblue">{value}</Tag> },
+    { title: "Total Nilai", dataIndex: "totalNilai", key: "totalNilai", render: (value) => <Tag color="#00509d">{value}</Tag> },
     { title: "Tingkat Risiko", dataIndex: "tingkatRisiko", key: "tingkatRisiko", render: (text) => <strong>{text}</strong> },
     { title: "Besar Tunjangan", dataIndex: "besarTunjangan", key: "besarTunjangan", render: (value) => <span style={{ color: "#389e0d", fontWeight: "bold" }}>Rp {value.toLocaleString("id-ID")}</span> },
     {
@@ -182,7 +156,7 @@ export const KetentuanList: React.FC = () => {
   ];
 
   const columnsMetadataKetentuan: ColumnsType<MetadataKetentuanData> = [
-    { title: "Tahun Berlaku", dataIndex: "tahunBerlaku", key: "tahunBerlaku", render: (text) => <Tag color="blue">{text}</Tag> },
+    { title: "Tahun Berlaku", dataIndex: "tahunBerlaku", key: "tahunBerlaku", render: (text) => <Tag color="#00509d">{text}</Tag> },
     { title: "Nomor Regulasi", dataIndex: "nomorRegulasi", key: "nomorRegulasi", render: (text) => <strong>{text}</strong> },
     { title: "Tanggal Berlaku", dataIndex: "tanggalBerlaku", key: "tanggalBerlaku" },
     { title: "Status", dataIndex: "statusKetentuan", key: "statusKetentuan", render: (status) => <Tag color={status === "Aktif" ? "green" : "red"}>{status}</Tag> },
@@ -199,7 +173,7 @@ export const KetentuanList: React.FC = () => {
 
   
   const columnsUnitKerja: ColumnsType<UnitKerjaData> = [
-    { title: "Kode Unit", dataIndex: "kodeUnit", key: "kodeUnit", render: (text) => <Tag color="blue">{text}</Tag> },
+    { title: "Kode Unit", dataIndex: "kodeUnit", key: "kodeUnit", render: (text) => <Tag color="#00509d">{text}</Tag> },
     { title: "Nama Unit Kerja", dataIndex: "namaUnit", key: "namaUnit", render: (text) => <strong>{text}</strong> },
     { title: "Level Organisasi", dataIndex: "levelOrganisasi", key: "levelOrganisasi", render: (text) => <Tag color="purple">{text}</Tag> },
     { title: "Unit Induk", dataIndex: "unitInduk", key: "unitInduk" },
@@ -217,7 +191,7 @@ export const KetentuanList: React.FC = () => {
 
   
   const columnsJabatan: ColumnsType<JabatanData> = [
-    { title: "Kode Jabatan", dataIndex: "kodeJabatan", key: "kodeJabatan", render: (text) => <Tag color="blue">{text}</Tag> },
+    { title: "Kode Jabatan", dataIndex: "kodeJabatan", key: "kodeJabatan", render: (text) => <Tag color="#00509d">{text}</Tag> },
     { title: "Nama Jabatan", dataIndex: "namaJabatan", key: "namaJabatan", render: (text) => <strong>{text}</strong> },
     { title: "Jenis Jabatan", dataIndex: "jenisJabatan", key: "jenisJabatan", render: (text) => <Tag color={text === "Struktural" ? "gold" : "cyan"}>{text}</Tag> },
     { title: "Golongan Minimal", dataIndex: "golonganMinimal", key: "golonganMinimal" },
@@ -263,7 +237,7 @@ export const KetentuanList: React.FC = () => {
     const tabItems: Array<{ key: string; label: string; columns: ColumnsType<any>; data: any[] }> = [
       { key: "faktorTanggungJawab", label: "Faktor Tanggung Jawab", columns: columnsFaktorTanggungJawab, data: dummyFaktorTanggungJawab },
       { key: "faktorLamaKerja", label: "Faktor Lama Kerja", columns: columnsFaktorLamaKerja, data: dummyFaktorLamaKerja },
-      { key: "mappingTunjangan", label: "Mapping Tunjangan", columns: columnsMappingTunjangan, data: dummyMappingTunjangan },
+      { key: "mappingTunjangan", label: "Mapping Nilai Tunjangan", columns: columnsMappingTunjangan, data: dummyMappingTunjangan },
       { key: "metadata", label: "Metadata Ketentuan", columns: columnsMetadataKetentuan, data: dummyMetadataKetentuan },
     ];
 
@@ -288,7 +262,7 @@ export const KetentuanList: React.FC = () => {
       <div className="page-header">
         <div className="page-title-wrapper">
         <div className="page-title">
-          <div style={{ background: "#1677ff", borderRadius: 8, padding: 8, display: "flex" }}>
+          <div style={{ background: "#00509d", borderRadius: 8, padding: 8, display: "flex" }}>
             <LineChartOutlined style={{ color: "white", fontSize: 20 }} />
           </div>
           Data Ketentuan
@@ -315,7 +289,7 @@ export const KetentuanList: React.FC = () => {
           <div style={{ width: "300px" }}>
             <div style={{ color: "#bfbfbf", fontStyle: "italic", display: "none" }}>Cari data...</div>
           </div>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)} style={{ borderRadius: "6px", height: "40px", padding: "0 20px" }}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)} style={{ background: "#00509d", borderRadius: "6px", height: "40px", padding: "0 20px" }}>
             Tambah Data
           </Button>
         </div>

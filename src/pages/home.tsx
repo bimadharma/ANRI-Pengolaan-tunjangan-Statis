@@ -1,6 +1,16 @@
 import React from "react";
 import { Layout, Row, Col, Card, Typography } from "antd";
-import { DatabaseOutlined, SafetyOutlined, ThunderboltOutlined, EyeOutlined, CloudSyncOutlined, BarChartOutlined, FolderOpenOutlined, SettingOutlined, MoneyCollectOutlined } from "@ant-design/icons";
+import {
+  DatabaseOutlined,
+  SafetyOutlined,
+  ThunderboltOutlined,
+  EyeOutlined,
+  CloudSyncOutlined,
+  BarChartOutlined,
+  FolderOpenOutlined,
+  SettingOutlined,
+  MoneyCollectOutlined,
+} from "@ant-design/icons";
 import { Navbar } from "../components/Navbar";
 import "../styles/home.css";
 
@@ -9,57 +19,73 @@ const { Title, Paragraph } = Typography;
 
 const benefits = [
   {
-    title: "Pengajuan Digital",
-    desc: "Pengisian dan pengajuan tunjangan dilakukan secara online dan terstruktur.",
+    title: "Monitoring Terpadu",
+    desc: "Dashboard SITARA menyajikan ringkasan data tunjangan, progres pembaruan, serta kondisi terkini pengelolaan Tunjangan Arsip Statis.",
     icon: <BarChartOutlined />,
   },
   {
-    title: "Transparansi Proses",
-    desc: "Pegawai dapat memantau status pengajuan tunjangan secara real-time.",
+    title: "Transparansi Data",
+    desc: "Seluruh proses penghitungan dan pembayaran tunjangan tercatat dan dapat ditelusuri secara sistematis.",
     icon: <EyeOutlined />,
   },
   {
     title: "Data Terpusat",
-    desc: "Seluruh data tunjangan dan arsip statis tersimpan aman dan terintegrasi.",
+    desc: "Data pegawai, ketentuan, hasil perhitungan, dan riwayat pembayaran tersimpan dalam satu sistem terintegrasi.",
     icon: <DatabaseOutlined />,
   },
   {
-    title: "Keamanan Sistem",
-    desc: "Pengelolaan hak akses dan audit aktivitas pengguna.",
+    title: "Keamanan & Hak Akses",
+    desc: "Pengelolaan peran pengguna dan pembatasan akses memastikan keamanan data dan kewenangan penggunaan sistem.",
     icon: <SafetyOutlined />,
   },
   {
-    title: "Akses Fleksibel",
-    desc: "Sistem berbasis cloud yang dapat diakses sesuai kewenangan.",
+    title: "Efisiensi Proses",
+    desc: "Penghitungan Tunjangan Arsip Statis dilakukan secara otomatis berdasarkan ketentuan yang berlaku.",
     icon: <CloudSyncOutlined />,
   },
   {
-    title: "Kinerja Andal",
-    desc: "Mendukung operasional tunjangan secara stabil dan berkelanjutan.",
+    title: "Keandalan Sistem",
+    desc: "SITARA mendukung operasional pengelolaan tunjangan secara stabil, terdokumentasi, dan berkelanjutan.",
     icon: <ThunderboltOutlined />,
   },
 ];
 
 const services = [
   {
-    title: "Manajemen Tunjangan",
-    icon: <MoneyCollectOutlined />,
-    items: ["Pengisian data tunjangan pegawai", "Pengajuan tunjangan arsip statis", "Cetak dokumen dan surat tunjangan"],
-  },
-  {
-    title: "Pengelolaan Arsip Statis",
-    icon: <FolderOpenOutlined />,
-    items: ["Pendataan arsip statis pegawai", "Integrasi dengan dokumen tunjangan", "Penyimpanan arsip digital"],
-  },
-  {
-    title: "Pelaporan & Monitoring",
+    title: "Dashboard & Monitoring",
     icon: <BarChartOutlined />,
-    items: ["Rekap pengajuan tunjangan", "Laporan periodik", "Export dokumen resmi"],
+    items: [
+      "Ringkasan kondisi Tunjangan Arsip Statis",
+      "Grafik sebaran pegawai per unit kerja",
+      "Pengingat kenaikan tunjangan berdasarkan masa kerja",
+    ],
   },
   {
-    title: "Administrasi Sistem",
+    title: "Ketentuan & Master Data",
+    icon: <FolderOpenOutlined />,
+    items: [
+      "Pengelolaan ketentuan penghitungan tunjangan",
+      "Master unit kerja dan struktur organisasi",
+      "Master jabatan dan faktor tanggung jawab",
+    ],
+  },
+  {
+    title: "Penghitungan Tunjangan (Data Tupas)",
+    icon: <MoneyCollectOutlined />,
+    items: [
+      "Pengelolaan data pegawai penerima tunjangan",
+      "Perhitungan otomatis nilai faktor dan tunjangan",
+      "Perbandingan tunjangan lama dan tunjangan baru",
+    ],
+  },
+  {
+    title: "Pembayaran & Riwayat",
     icon: <SettingOutlined />,
-    items: ["Manajemen pengguna dan role", "Validasi dan verifikasi data", "Log aktivitas sistem"],
+    items: [
+      "Data tunjangan siap dibayarkan",
+      "Log pembayaran dan audit trail",
+      "Riwayat SK dan pembayaran Tunjangan Arsip Statis",
+    ],
   },
 ];
 
@@ -69,6 +95,7 @@ const Home: React.FC = () => {
       <Navbar />
 
       <Content>
+        {/* HERO SECTION */}
         <section className="home-hero">
           <Row justify="center">
             <Col xs={24} md={18} lg={14}>
@@ -76,17 +103,18 @@ const Home: React.FC = () => {
                 <Title className="hero-title">SITARA</Title>
 
                 <Paragraph className="hero-desc">
-                  <strong>Sistem Tunjangan & Arsip Statis ANRI</strong> adalah aplikasi digital yang dirancang untuk mendukung pengelolaan tunjangan pegawai di lingkungan Arsip Nasional Republik Indonesia.
+                  <strong>Sistem Informasi Tunjangan Arsip Statis</strong> adalah aplikasi yang dirancang untuk mendukung pengelolaan, penghitungan, dan monitoring Tunjangan Pengelolaan Arsip Statis secara terintegrasi.
                 </Paragraph>
 
                 <Paragraph className="hero-desc">
-                  Melalui SITARA, pegawai dapat <b>mengisi</b>, <b>mengajukan</b>,<b> memantau</b>, dan <b>mencetak</b> tunjangan pengelolaan arsip statis secara lebih cepat, transparan, dan terdokumentasi.
+                  SITARA membantu administrator dan pengelola dalam <b>menetapkan ketentuan</b>, <b>menghitung tunjangan</b>, <b>memantau pembayaran</b>, serta <b>menyimpan riwayat tunjangan</b> secara akurat dan terdokumentasi.
                 </Paragraph>
               </div>
             </Col>
           </Row>
         </section>
 
+        {/* BENEFITS */}
         <section className="home-section">
           <Title level={2} className="section-title">
             Manfaat SITARA
@@ -105,6 +133,7 @@ const Home: React.FC = () => {
           </Row>
         </section>
 
+        {/* SERVICES */}
         <section className="home-section alt">
           <Title level={2} className="section-title">
             Layanan Utama

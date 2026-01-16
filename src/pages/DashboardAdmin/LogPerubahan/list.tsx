@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Table, Button, Space, Tooltip, Input, Tag, Drawer, Descriptions } from "antd";
-import { FileTextOutlined, LineChartOutlined, SearchOutlined, EyeOutlined, CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { FileTextOutlined, LineChartOutlined, SearchOutlined, EyeOutlined, CheckCircleOutlined, CloseCircleOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
 
-import { CreateLogPembayaran } from "./create";
-import "../../../styles/LogPembayaran.css";
+import { CreateLogPerubahan } from "./create";
+import { VerifikasiModal } from "./verifikasi";
+import "../../../styles/LogPerubahan.css";
 
 
 interface ILogData {
@@ -26,7 +27,7 @@ const DUMMY_DATA: ILogData[] = [
     nomorSPM: "SPM-2026/01/0001",
     nominal: 5500000, 
     status: "Berhasil",
-    keterangan: "Pembayaran berhasil diproses melalui Bank BNI"
+    keterangan: "berhasil dibayar"
   },
   { 
     id: 2, 
@@ -36,7 +37,7 @@ const DUMMY_DATA: ILogData[] = [
     nomorSPM: "SPM-2026/01/0002",
     nominal: 4500000, 
     status: "Berhasil",
-    keterangan: "Transfer berhasil ke rekening BRI"
+    keterangan: "berhasil dibayar"
   },
   { 
     id: 3, 
@@ -46,7 +47,7 @@ const DUMMY_DATA: ILogData[] = [
     nomorSPM: "SPM-2026/01/0003",
     nominal: 3500000, 
     status: "Gagal",
-    keterangan: "Gagal validasi - Nomor rekening tidak valid"
+    keterangan: "Gagal dibayar"
   },
   { 
     id: 4, 
@@ -56,7 +57,7 @@ const DUMMY_DATA: ILogData[] = [
     nomorSPM: "SPM-2026/01/0004",
     nominal: 3000000, 
     status: "Berhasil",
-    keterangan: "Pembayaran berhasil diproses"
+    keterangan: "berhasil dibayar"
   },
   { 
     id: 5, 
@@ -66,7 +67,7 @@ const DUMMY_DATA: ILogData[] = [
     nomorSPM: "SPM-2026/01/0005",
     nominal: 2500000, 
     status: "Berhasil",
-    keterangan: "Transfer ke Bank Mandiri berhasil"
+    keterangan: "berhasil dibayar"
   },
   { 
     id: 6, 
@@ -76,7 +77,7 @@ const DUMMY_DATA: ILogData[] = [
     nomorSPM: "SPM-2026/01/0006",
     nominal: 3850000, 
     status: "Gagal",
-    keterangan: "Timeout - Koneksi ke bank terputus"
+    keterangan: "Gagal dibayar"
   },
   { 
     id: 7, 
@@ -86,7 +87,7 @@ const DUMMY_DATA: ILogData[] = [
     nomorSPM: "SPM-2026/01/0007",
     nominal: 3750000, 
     status: "Berhasil",
-    keterangan: "Pembayaran berhasil diproses via Bank BTN"
+    keterangan: "berhasil dibayar"
   },
   { 
     id: 8, 
@@ -96,7 +97,7 @@ const DUMMY_DATA: ILogData[] = [
     nomorSPM: "SPM-2026/01/0008",
     nominal: 3550000, 
     status: "Berhasil",
-    keterangan: "Transfer ke BCA berhasil"
+    keterangan: "berhasil dibayar"
   },
   { 
     id: 9, 
@@ -106,7 +107,7 @@ const DUMMY_DATA: ILogData[] = [
     nomorSPM: "SPM-2026/01/0009",
     nominal: 3350000, 
     status: "Berhasil",
-    keterangan: "Pembayaran berhasil diproses"
+    keterangan: "berhasil dibayar"
   },
   { 
     id: 10, 
@@ -116,20 +117,27 @@ const DUMMY_DATA: ILogData[] = [
     nomorSPM: "SPM-2026/01/0010",
     nominal: 3150000, 
     status: "Gagal",
-    keterangan: "Gagal - Saldo tidak mencukupi di rekening bendahara"
+    keterangan: "Gagal dibayar"
   },
 ];
 
-export const LogPembayaranList: React.FC = () => {
+export const LogPerubahanList: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<ILogData | null>(null);
+  const [verifikasiModalOpen, setVerifikasiModalOpen] = useState(false);
+  const [verifikasiRecord, setVerifikasiRecord] = useState<ILogData | null>(null);
 
   const formatRupiah = (val: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(val);
 
   const handleViewDetail = (record: ILogData) => {
     setSelectedRecord(record);
     setDetailDrawerOpen(true);
+  };
+
+  const handleVerifikasi = (record: ILogData) => {
+    setVerifikasiRecord(record);
+    setVerifikasiModalOpen(true);
   };
 
   const totalLog = DUMMY_DATA.length;
@@ -139,15 +147,14 @@ export const LogPembayaranList: React.FC = () => {
 
   return (
     <div className="log-container">
-      {/* Header Judul */}
       <div className="log-header">
         <h1 className="log-title">
-          <div style={{ background: "#3b82f6", borderRadius: 8, padding: 6, display: "flex" }}>
+          <div style={{ background: "#00509d", borderRadius: 8, padding: 8, display: "flex", marginRight: 8 }}>
             <FileTextOutlined style={{ color: "white", fontSize: 20 }} />
           </div>
-          Log Pembayaran
+          Log Perubahan
         </h1>
-        <p className="log-subtitle">Histori Proses Pembayaran Tunjangan PAS</p>
+        <p className="log-subtitle">Histori Proses Perubahan Tunjangan PAS</p>
       </div>
 
       {/* Statistik Cards di atas */}
@@ -169,7 +176,7 @@ export const LogPembayaranList: React.FC = () => {
           <div className="stat-content">
             <label>Berhasil</label>
             <h2 style={{ color: "#059669" }}>{totalBerhasil}</h2>
-            <span style={{ fontSize: 10, color: "#9ca3af" }}>Pembayaran sukses</span>
+            <span style={{ fontSize: 10, color: "#9ca3af" }}>Perubahan sukses</span>
           </div>
           <div className="stat-icon bg-green-light">
             <CheckCircleOutlined />
@@ -181,7 +188,7 @@ export const LogPembayaranList: React.FC = () => {
           <div className="stat-content">
             <label>Gagal</label>
             <h2 style={{ color: "#dc2626" }}>{totalGagal}</h2>
-            <span style={{ fontSize: 10, color: "#9ca3af" }}>Pembayaran gagal</span>
+            <span style={{ fontSize: 10, color: "#9ca3af" }}>Perubahan gagal</span>
           </div>
           <div className="stat-icon" style={{ background: "#fee2e2", color: "#dc2626" }}>
             <CloseCircleOutlined />
@@ -299,23 +306,39 @@ export const LogPembayaranList: React.FC = () => {
                 title="Aksi"
                 key="action"
                 align="center"
-                width={80}
+                width={120}
                 fixed="right"
                 render={(_, record: ILogData) => (
-                  <Tooltip title="Detail">
-                    <Button 
-                      icon={<EyeOutlined />} 
-                      className="action-btn action-view" 
-                      onClick={() => handleViewDetail(record)}
-                    />
-                  </Tooltip>
+                  <Space size="small">
+                    <Tooltip title="Detail">
+                      <Button 
+                        icon={<EyeOutlined />} 
+                        className="action-btn action-view" 
+                        onClick={() => handleViewDetail(record)}
+                      />
+                    </Tooltip>
+                    <Tooltip title={record.status === "Berhasil" ? "Verifikasi & Upload SK" : "Hanya tersedia untuk status Berhasil"}>
+                      <Button 
+                        icon={<SafetyCertificateOutlined />} 
+                        className="action-btn"
+                        disabled={record.status !== "Berhasil"}
+                        style={{ 
+                          background: record.status === "Berhasil" ? "#52c41a" : "#f5f5f5", 
+                          borderColor: record.status === "Berhasil" ? "#52c41a" : "#d9d9d9",
+                          color: record.status === "Berhasil" ? "white" : "#bfbfbf",
+                          cursor: record.status === "Berhasil" ? "pointer" : "not-allowed"
+                        }}
+                        onClick={() => record.status === "Berhasil" && handleVerifikasi(record)}
+                      />
+                    </Tooltip>
+                  </Space>
                 )}
               />
             </Table>
           </div>
 
       <Drawer
-        title={<span style={{ fontSize: "18px", fontWeight: "bold" }}>Detail Log Pembayaran</span>}
+        title={<span style={{ fontSize: "18px", fontWeight: "bold" }}>Detail Log Perubahan</span>}
         placement="right"
         width={600}
         onClose={() => setDetailDrawerOpen(false)}
@@ -353,9 +376,15 @@ export const LogPembayaranList: React.FC = () => {
           </Descriptions>
         )}
       </Drawer>
-
-      {/* Modal Create */}
-      <CreateLogPembayaran open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      
+      <CreateLogPerubahan open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      
+      {/* Modal Verifikasi */}
+      <VerifikasiModal 
+        open={verifikasiModalOpen} 
+        onClose={() => setVerifikasiModalOpen(false)}
+        record={verifikasiRecord}
+      />
     </div>
   );
 };

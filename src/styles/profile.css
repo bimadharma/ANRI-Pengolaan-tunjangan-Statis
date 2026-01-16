@@ -42,7 +42,7 @@
 
 .profile-banner {
     height: 160px;
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    background:#00509d;
     position: relative;
 }
 
@@ -65,7 +65,7 @@
     height: 120px;
     border-radius: 50%;
     border: 5px solid white;
-    background-color: #4f46e5;
+    background-color: #00509d;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -76,7 +76,7 @@
 
 
 .btn-edit-profile {
-    background-color: #4338ca;
+    background-color: #00509d;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -91,7 +91,7 @@
 }
 
 .btn-edit-profile:hover {
-    background-color: #3730a3;
+    background-color: #0768c2;
 }
 
 

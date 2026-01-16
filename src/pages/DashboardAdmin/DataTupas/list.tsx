@@ -214,7 +214,8 @@ export const TupasList: React.FC = () => {
       {/* Header Title */}
       <div className="tupas-header">
         <h1 className="tupas-title">
-          <SafetyCertificateFilled style={{ color: "#1677ff" }} />
+          <div style={{ background: "#00509d", borderRadius: 8, padding: 8, display: "flex" }}>
+            <SafetyCertificateFilled style={{ color: "white" }} /></div>
           Data Tunjangan PAS
         </h1>
         <p className="tupas-subtitle">Kelola riwayat tunjangan pegawai</p>
@@ -280,7 +281,7 @@ export const TupasList: React.FC = () => {
             title="Unit Kerja"
             width={180}
             fixed="left"
-            render={(value) => <Tag color="blue">{value}</Tag>}
+            render={(value) => <Tag color="#00509d">{value}</Tag>}
           />
           <Table.Column
             dataIndex="nama"
@@ -324,7 +325,7 @@ export const TupasList: React.FC = () => {
             title="Tingkat Risiko" 
             width={140}
             render={(value) => {
-              const color = value === "Sangat Tinggi" ? "red" : value === "Tinggi" ? "orange" : value === "Sedang" ? "blue" : "green";
+              const color = value === "Sangat Tinggi" ? "red" : value === "Tinggi" ? "orange" : value === "Sedang" ? "#00509d" : "green";
               return <Tag color={color}>{value}</Tag>;
             }}
           />
@@ -402,14 +403,14 @@ export const TupasList: React.FC = () => {
             <Descriptions title="Data Penghitungan Tunjangan PAS" bordered column={2} size="small">
               
               <Descriptions.Item label="Faktor Tanggung Jawab (Lama)" span={1}>
-                <Tag color="blue">{selectedRecord.faktorTanggungJawabLama}</Tag>
+                <Tag color="#00509d">{selectedRecord.faktorTanggungJawabLama}</Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Faktor Tanggung Jawab (Baru)" span={1}>
                 <Tag color="green">{selectedRecord.faktorTanggungJawabBaru}</Tag>
               </Descriptions.Item>
               
               <Descriptions.Item label="Faktor Lama Kerja (Lama)" span={1}>
-                <Tag color="blue">{selectedRecord.faktorLamaKerjaLama}</Tag>
+                <Tag color="#00509d">{selectedRecord.faktorLamaKerjaLama}</Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Faktor Lama Kerja (Baru)" span={1}>
                 <Tag color="green">{selectedRecord.faktorLamaKerjaBaru}</Tag>
@@ -427,7 +428,7 @@ export const TupasList: React.FC = () => {
               </Descriptions.Item>
               
               <Descriptions.Item label="Tingkat Risiko" span={2}>
-                <Tag color={selectedRecord.tingkatRisiko === "Sangat Tinggi" ? "red" : selectedRecord.tingkatRisiko === "Tinggi" ? "orange" : "blue"}>
+                <Tag color={selectedRecord.tingkatRisiko === "Sangat Tinggi" ? "red" : selectedRecord.tingkatRisiko === "Tinggi" ? "orange" : "#00509d"}>
                   {selectedRecord.tingkatRisiko}
                 </Tag>
               </Descriptions.Item>

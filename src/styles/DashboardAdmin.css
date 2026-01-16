@@ -61,7 +61,7 @@
 .chart-bar {
   flex: 1;
   border-radius: 8px;
-  background: linear-gradient(180deg, #6AD2FF 0%, #4318FF 100%);
+  background: linear-gradient(180deg, #6AD2FF 0%, #00509d 100%);
   opacity: 0.8;
   transition: all 0.3s;
   position: relative;
@@ -74,7 +74,7 @@
 
 
 .quick-stats-card {
-  background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+  background: #00509d;
   border: none;
   color: white;
   height: 100%;
@@ -140,10 +140,18 @@
 }
 
 .ant-pagination-item-active {
-  background-color: #4318FF !important;
-  border-color: #4318FF !important;
+  background-color: #00509d !important;
+  border-color: #00509d !important;
 }
 
 .ant-pagination-item-active a {
   color: white !important;
+}
+
+.ant-btn-link {
+  color: #00509d !important;
+}
+
+.ant-btn-link:hover {
+  color: #003f73 !important;
 }

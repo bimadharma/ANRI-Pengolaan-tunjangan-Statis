@@ -22,7 +22,7 @@ export const Navbar = () => {
         style={{
           fontSize: 20,
           fontWeight: "bold",
-          color: "#0096C9",
+          color: "#00509d",
         }}
       >
         Sitara
@@ -33,7 +33,7 @@ export const Navbar = () => {
           icon={<LoginOutlined />}
           onClick={() => navigate("/login")}
           style={{
-            backgroundColor: "#0096C9",
+            backgroundColor: "#00509d",
             borderRadius: 10,
             height: 44,
             padding: "0 20px",

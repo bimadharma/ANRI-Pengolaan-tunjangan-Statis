@@ -8,8 +8,10 @@ import {
   Tag, 
   Avatar, 
   Button, 
-  Space 
+  Space,
+  Pagination 
 } from "antd";
+import { unitKerjaData } from "../../data/unitKerjaData";
 import { 
   UserOutlined, 
   RiseOutlined, 
@@ -36,12 +38,6 @@ interface DashboardStats {
   totalNilaiTunjangan: number;
 }
 
-interface UnitKerjaData {
-  unit: string;
-  jumlahPegawai: number;
-  color: string;
-}
-
 interface PegawaiData {
   id: string;
   nip: string;
@@ -63,24 +59,11 @@ interface ReminderKenaikan {
 
 // Data Statistik Dashboard
 const dashboardStats: DashboardStats = {
-  totalPegawai: 487,
+  totalPegawai: 782,
   pegawaiSudahUpdate: 356,
   pegawaiBelumUpdate: 131,
-  totalNilaiTunjangan: 1845600000, // dalam Rupiah
+  totalNilaiTunjangan: 250000000, // dalam Rupiah
 };
-
-// Data Unit Kerja untuk Column Chart (Struktur Organisasi ANRI Sebenarnya)
-const unitKerjaData: UnitKerjaData[] = [
-  { unit: "Sekretariat Utama", jumlahPegawai: 89, color: "#4318FF" },
-  { unit: "Deputi Pembinaan Kearsipan", jumlahPegawai: 72, color: "#05cd99" },
-  { unit: "Deputi Konservasi Arsip", jumlahPegawai: 68, color: "#FFB547" },
-  { unit: "Deputi Informasi & Akses", jumlahPegawai: 65, color: "#9747FF" },
-  { unit: "Deputi Pengembangan Arsip", jumlahPegawai: 58, color: "#FF6B6B" },
-  { unit: "Inspektorat", jumlahPegawai: 34, color: "#4ECDC4" },
-  { unit: "Pusat Arsip Swasta", jumlahPegawai: 45, color: "#FFD93D" },
-  { unit: "Bagian Hukum", jumlahPegawai: 28, color: "#6BCB77" },
-  { unit: "Bagian Kepegawaian", jumlahPegawai: 28, color: "#FF8C42" },
-];
 
 // Reminder Kenaikan Tunjangan (Masa Kerja Kelipatan 4 Tahun)
 const reminderKenaikan: ReminderKenaikan[] = [
@@ -92,7 +75,7 @@ const reminderKenaikan: ReminderKenaikan[] = [
 
 // Data Pegawai untuk Tabel
 const tablePegawaiData: PegawaiData[] = [
-  { id: "1", nip: "196801051994031002", nama: "Dr. Bambang Sutrisno, M.Si", unitKerja: "Sekretariat Utama", statusUpdate: "Sudah Update", masaKerja: 32, nilaiTunjangan: 4850000, avatarColor: "#4318FF" },
+  { id: "1", nip: "196801051994031002", nama: "Dr. Bambang Sutrisno, M.Si", unitKerja: "Sekretariat Utama", statusUpdate: "Sudah Update", masaKerja: 32, nilaiTunjangan: 4850000, avatarColor: "#00509d" },
   { id: "2", nip: "197205122002122001", nama: "Dra. Siti Maemunah, M.A", unitKerja: "Deputi Pembinaan Kearsipan", statusUpdate: "Sudah Update", masaKerja: 24, nilaiTunjangan: 4650000, avatarColor: "#05cd99" },
   { id: "3", nip: "198003152006041003", nama: "Ir. Andi Prasetyo, M.T", unitKerja: "Deputi Konservasi Arsip", statusUpdate: "Belum Update", masaKerja: 20, nilaiTunjangan: 4350000, avatarColor: "#FFB547" },
   { id: "4", nip: "198609202010091001", nama: "Drs. Heru Widodo, M.Hum", unitKerja: "Deputi Informasi & Akses", statusUpdate: "Sudah Update", masaKerja: 16, nilaiTunjangan: 4150000, avatarColor: "#9747FF" },
@@ -101,12 +84,14 @@ const tablePegawaiData: PegawaiData[] = [
   { id: "7", nip: "199108152013091002", nama: "Dwi Handayani, S.H, M.H", unitKerja: "Bagian Hukum", statusUpdate: "Belum Update", masaKerja: 13, nilaiTunjangan: 3750000, avatarColor: "#FFD93D" },
   { id: "8", nip: "199204182015062001", nama: "Rina Kusumawati, S.Sos", unitKerja: "Bagian Kepegawaian", statusUpdate: "Sudah Update", masaKerja: 11, nilaiTunjangan: 3550000, avatarColor: "#6BCB77" },
   { id: "9", nip: "199306222017031001", nama: "Muhammad Faisal, S.IP", unitKerja: "Inspektorat", statusUpdate: "Sudah Update", masaKerja: 9, nilaiTunjangan: 3350000, avatarColor: "#FF8C42" },
-  { id: "10", nip: "199508102019042002", nama: "Laila Nurjanah, S.Psi", unitKerja: "Sekretariat Utama", statusUpdate: "Belum Update", masaKerja: 7, nilaiTunjangan: 3150000, avatarColor: "#4318FF" },
+  { id: "10", nip: "199508102019042002", nama: "Laila Nurjanah, S.Psi", unitKerja: "Sekretariat Utama", statusUpdate: "Belum Update", masaKerja: 7, nilaiTunjangan: 3150000, avatarColor: "#00509d" },
 ];
 
 export const DashboardAdmin: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<PegawaiData[]>(tablePegawaiData);
+  const [chartPage, setChartPage] = useState(1);
+  const unitsPerPage = 10;
 
   // Format Rupiah
   const formatRupiah = (amount: number) => {
@@ -120,6 +105,16 @@ export const DashboardAdmin: React.FC = () => {
 
   // Hitung persentase update
   const persenUpdate = ((dashboardStats.pegawaiSudahUpdate / dashboardStats.totalPegawai) * 100).toFixed(1);
+
+  // Pagination untuk chart
+  const totalChartPages = Math.ceil(unitKerjaData.length / unitsPerPage);
+  const startIndex = (chartPage - 1) * unitsPerPage;
+  const endIndex = startIndex + unitsPerPage;
+  const currentUnits = unitKerjaData.slice(startIndex, endIndex);
+
+  const handleChartPageChange = (page: number) => {
+    setChartPage(page);
+  };
 
   const columns: ColumnsType<PegawaiData> = [
     {
@@ -176,7 +171,7 @@ export const DashboardAdmin: React.FC = () => {
       title: "ACTIONS",
       key: "action",
       render: () => (
-        <Button type="link" style={{ fontWeight: 600 }}>Detail</Button>
+        <Button type="link" style={{ fontWeight: 600, color: '#00509d' }}>Detail</Button>
       ),
     },
   ];
@@ -193,7 +188,7 @@ export const DashboardAdmin: React.FC = () => {
                 <p className="stat-label">Total Pegawai ANRI</p>
                 <h3 className="stat-value">{dashboardStats.totalPegawai.toLocaleString('id-ID')}</h3>
               </div>
-              <div className="stat-card-icon" style={{ background: '#F4F7FE', color: '#4318FF' }}>
+              <div className="stat-card-icon" style={{ background: '#E8F4FF', color: '#00509d' }}>
                 <UserOutlined />
               </div>
             </div>
@@ -256,32 +251,38 @@ export const DashboardAdmin: React.FC = () => {
             className="chart-card" 
             style={{ borderRadius: '16px' }}
             title={<Title level={4} style={{ margin: 0, color: '#2b3674' }}>Jumlah Pegawai per Unit Kerja</Title>}
-            extra={<Button type="link">Lihat Detail</Button>}
+            // extra={<Button type="link">Lihat Detail</Button>}
           >
             {/* Column Chart menggunakan CSS */}
             <div style={{ 
               display: 'flex', 
               alignItems: 'flex-end', 
               justifyContent: 'space-between',
-              gap: '12px',
-              height: '280px',
-              padding: '20px 10px 10px',
+              gap: '10px',
+              height: '250px',
+              padding: '20px 5px 10px',
             }}>
-              {unitKerjaData.map((item, index) => {
-                const maxValue = Math.max(...unitKerjaData.map(d => d.jumlahPegawai));
+              {currentUnits.map((item, index) => {
+                const maxValue = Math.max(...currentUnits.map(d => d.jumlahPegawai));
                 const heightPercentage = (item.jumlahPegawai / maxValue) * 100;
                 
                 return (
-                  <div key={index} style={{ 
-                    flex: 1, 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center', 
-                    justifyContent: 'flex-end',
-                    height: '100%',
-                  }}>
+                  <div 
+                    key={index} 
+                    title={item.unit} 
+                    style={{ 
+                      flex: 1, 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center', 
+                      justifyContent: 'flex-end',
+                      height: '100%',
+                      minWidth: '50px',
+                      cursor: 'pointer',
+                    }}
+                  >
                     <div style={{ 
-                      fontSize: '13px', 
+                      fontSize: '14px', 
                       fontWeight: 700, 
                       color: '#2b3674',
                       marginBottom: '8px',
@@ -294,7 +295,7 @@ export const DashboardAdmin: React.FC = () => {
                         backgroundColor: item.color,
                         width: '100%',
                         minWidth: '35px',
-                        maxWidth: '60px',
+                        maxWidth: '55px',
                         borderRadius: '8px 8px 0 0',
                         transition: 'all 0.3s ease',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -304,16 +305,45 @@ export const DashboardAdmin: React.FC = () => {
                       fontSize: '10px', 
                       color: '#a3aed0', 
                       textAlign: 'center', 
-                      maxWidth: '70px', 
+                      width: '100%',
+                      maxWidth: '80px',
                       lineHeight: '1.3',
-                      marginTop: '8px',
-                      fontWeight: 500,
+                      marginTop: '10px',
+                      fontWeight: 600,
+                      height: '42px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      wordBreak: 'break-word',
                     }}>
                       {item.unit}
                     </div>
                   </div>
                 );
               })}
+            </div>
+            
+            {/* Spacer untuk memberi ruang antara chart dan pagination */}
+            <div style={{ height: '20px' }} />
+            
+            {/* Pagination untuk Chart */}
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              marginTop: '20px',
+              paddingBottom: '10px'
+            }}>
+              <Pagination 
+                current={chartPage}
+                total={unitKerjaData.length}
+                pageSize={unitsPerPage}
+                onChange={handleChartPageChange}
+                showSizeChanger={false}
+                size="small"
+                showTotal={(total, range) => `${range[0]}-${range[1]} dari ${total} unit`}
+              />
             </div>
           </Card>
         </Col>
@@ -322,7 +352,6 @@ export const DashboardAdmin: React.FC = () => {
         <Col xs={24} lg={8}>
           <div className="quick-stats-card p-4" style={{ padding: '24px' }}>
             <Title level={4} style={{ color: 'white', marginTop: 0 }}>Reminder Kenaikan Tunjangan</Title>
-            <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px' }}>Masa kerja kelipatan 4 tahun</Text>
             
             <div style={{ marginTop: '24px' }}>
               {reminderKenaikan.map((item) => (

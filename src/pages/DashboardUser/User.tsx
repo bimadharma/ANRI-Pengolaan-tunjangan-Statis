@@ -55,7 +55,7 @@ export const DashboardUser: React.FC = () => {
               dataIndex="name"
               render={(text) => (
                 <Space>
-                  <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#1890ff' }} />
+                  <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#00509d' }} />
                   {text}
                 </Space>
               )}

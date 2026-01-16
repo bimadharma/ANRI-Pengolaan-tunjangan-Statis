@@ -129,12 +129,12 @@
     font-size: 20px;
 }
 
-.bg-blue-light { background: #e0e7ff; color: #4338ca; }
+.bg-blue-light { background: #e0e7ff; color: #00509d; }
 .bg-green-light { background: #d1fae5; color: #059669; }
 
 
 .btn-create-gradient {
-    background: linear-gradient(135deg, #3b82f6 0%, #4338ca 100%);
+    background: #00509d;
     border-radius: 16px;
     padding: 20px;
     color: white;

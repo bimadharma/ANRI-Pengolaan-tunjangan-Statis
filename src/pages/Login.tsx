@@ -78,10 +78,10 @@ const Login: React.FC = () => {
               <img src="/ANRI.png" alt="Logo ANRI" className="app-logo" />
             </div>
             <Title level={3} style={{ color: "#0050b3", marginBottom: 8 }}>
-              Sistem Informasi <span style={{ color: "#0096C9" }}>SITARA</span>
+            <span style={{ color: "#00509d", fontSize: "36px", fontWeight:"bold" }}>SITARA</span>
             </Title>
-            <Text type="secondary">
-              Masuk untuk mengelola arsip dan data pegawai
+            <Text type="secondary">  
+             Sistem Tunjangan Arsip Statis
             </Text>
           </div>
 
@@ -97,7 +97,7 @@ const Login: React.FC = () => {
               className="custom-input"
             >
               <Input
-                prefix={<UserOutlined style={{ color: "#0096C9" }} />}
+                prefix={<UserOutlined style={{ color: "#00509d" }} />}
                 placeholder="Email atau Username"
               />
             </Form.Item>
@@ -108,7 +108,7 @@ const Login: React.FC = () => {
               className="custom-input"
             >
               <Input.Password
-                prefix={<LockOutlined style={{ color: "#0096C9" }} />}
+                prefix={<LockOutlined style={{ color: "#00509d" }} />}
                 placeholder="Password"
               />
             </Form.Item>

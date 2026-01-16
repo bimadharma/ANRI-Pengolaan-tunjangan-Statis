@@ -2,12 +2,9 @@ import React, { useState } from "react";
 import { Table, Button, Space, Tooltip, Input, Tag, Drawer, Descriptions, Avatar } from "antd";
 import { 
     HistoryOutlined,
-    BankOutlined, 
-    PlusOutlined, 
+    BankOutlined,
     SearchOutlined,
-    EyeOutlined, 
-    EditOutlined, 
-    DeleteOutlined,
+    EyeOutlined,
     FilePdfOutlined,
     CheckCircleOutlined,
     TeamOutlined,
@@ -15,7 +12,6 @@ import {
     CloseCircleOutlined
 } from "@ant-design/icons";
 
-import { CreateRiwayatTupas } from "./create";
 import "../../../styles/riwayatTupas.css";
 
 
@@ -30,7 +26,7 @@ interface IRiwayatData {
     tmt: string;
     nominal: number;
     statusSK: "Aktif" | "Tidak Aktif" | "Revisi";
-    fileSK: string; // URL dummy untuk PDF
+    fileSK: string; 
 }
 
 const DUMMY_DATA: IRiwayatData[] = [
@@ -128,7 +124,6 @@ const DUMMY_DATA: IRiwayatData[] = [
 ];
 
 export const RiwayatTupasList: React.FC = () => {
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<IRiwayatData | null>(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     
@@ -171,10 +166,9 @@ export const RiwayatTupasList: React.FC = () => {
 
     return (
         <div className="rt-container">
-            {/* Header */}
             <div className="rt-header">
-                <div style={{ background: '#e0e7ff', padding: 8, borderRadius: 8, color: '#4338ca' }}>
-                    <HistoryOutlined style={{ fontSize: 24 }} />
+                <div style={{ background: '#00509d', borderRadius: 8, padding: 8, display: 'flex', marginRight: 8 }}>
+                    <HistoryOutlined style={{ fontSize: 24, color: "white" }} />
                 </div>
                 <div>
                     <h1 className="rt-title">Riwayat Tupas</h1>
@@ -182,7 +176,6 @@ export const RiwayatTupasList: React.FC = () => {
                 </div>
             </div>
 
-            {/* Stats Grid */}
             <div className="rt-stats-grid">
                 {/* Card 1: Total SK */}
                 <div className="rt-stat-card">
@@ -225,20 +218,6 @@ export const RiwayatTupasList: React.FC = () => {
                     </div>
                     <div className="rt-stat-icon" style={{ background: '#fee2e2', color: '#dc2626' }}>
                         <CloseCircleOutlined />
-                    </div>
-                </div>
-
-                {/* Button Create Besar */}
-                <div 
-                    className="rt-btn-create" 
-                    onClick={() => setIsCreateModalOpen(true)}
-                >
-                    <div className="rt-btn-text">
-                        <span>Tambah Riwayat SK</span>
-                        <h3>Klik untuk menambah</h3>
-                    </div>
-                    <div className="rt-btn-icon">
-                        <PlusOutlined />
                     </div>
                 </div>
             </div>
@@ -363,7 +342,7 @@ export const RiwayatTupasList: React.FC = () => {
 
                     <Table.Column 
                         title="Aksi"
-                        width={200}
+                        width={120}
                         fixed="right"
                         render={(_, record: IRiwayatData) => (
                             <Space>
@@ -383,22 +362,6 @@ export const RiwayatTupasList: React.FC = () => {
                                         size="small" 
                                         style={{ background: '#fee2e2', color: '#dc2626', border: 'none' }}
                                         onClick={() => window.open(record.fileSK, '_blank')}
-                                    />
-                                </Tooltip>
-                                <Tooltip title="Edit">
-                                    <Button 
-                                        shape="circle" 
-                                        icon={<EditOutlined />} 
-                                        size="small" 
-                                        style={{ background: '#fef3c7', color: '#d97706', border: 'none' }} 
-                                    />
-                                </Tooltip>
-                                <Tooltip title="Delete">
-                                    <Button 
-                                        shape="circle" 
-                                        icon={<DeleteOutlined />} 
-                                        size="small" 
-                                        style={{ background: '#fee2e2', color: '#ef4444', border: 'none' }} 
                                     />
                                 </Tooltip>
                             </Space>
@@ -479,12 +442,6 @@ export const RiwayatTupasList: React.FC = () => {
                     </Descriptions>
                 )}
             </Drawer>
-
-            {/* Modal Create */}
-            <CreateRiwayatTupas 
-                open={isCreateModalOpen} 
-                onClose={() => setIsCreateModalOpen(false)} 
-            />
         </div>
     );
 };

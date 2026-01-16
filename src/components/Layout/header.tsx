@@ -44,7 +44,7 @@ export const ThemedHeader: React.FC<RefineThemedLayoutHeaderProps> = () => {
               size={40}
               src={user?.avatar}
               icon={!user?.avatar && <UserOutlined />}
-              style={{ background: "linear-gradient(135deg, #00C9E8 0%, #0096C9 100%)" }}
+               style={{ background: "linear-gradient(135deg, #002347 0%, #00509d 100%)" }}
             />
             <div>
               <Typography.Text strong>
@@ -114,7 +114,7 @@ export const ThemedHeader: React.FC<RefineThemedLayoutHeaderProps> = () => {
             src={user?.avatar}
             icon={!user?.avatar && <UserOutlined />}
             size={isMobile ? 32 : 35}
-            style={{ background: "linear-gradient(135deg, #00C9E8 0%, #0096C9 100%)" }}
+            style={{ background: "linear-gradient(135deg, #002347 0%, #00509d 100%)" }}
           />
 
           {/* Nama hanya muncul di desktop */}

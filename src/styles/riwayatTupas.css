@@ -74,7 +74,7 @@
 
 
 .rt-btn-create {
-    background: linear-gradient(135deg, #3b82f6 0%, #4338ca 100%);
+    background: #00509d;
     border-radius: 16px;
     padding: 0 24px;
     display: flex;
@@ -154,7 +154,7 @@
 
 .rt-unit-badge {
     background: #e0e7ff;
-    color: #4338ca;
+    color: #00509d;
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 12px;

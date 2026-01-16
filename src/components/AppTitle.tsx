@@ -19,8 +19,8 @@ export const AppTitle: React.FC<AppTitleProps> = ({ collapsed }) => {
         src="ANRI.png"   
         alt="Logo"
         style={{
-          width: 32,
-          height: 32,
+          width: 45,
+          height: 45,
           objectFit: "contain",
         }}
       />
@@ -28,10 +28,11 @@ export const AppTitle: React.FC<AppTitleProps> = ({ collapsed }) => {
       {/* TEXT */}
       {!collapsed && (
         <Typography.Text
-          strong
           style={{
-            fontSize: 16,
+            fontSize: 18,
+            fontWeight: 700,
             whiteSpace: "nowrap",
+            color: "#0096C9",
           }}
         >
           SITARA

@@ -32,7 +32,7 @@ import Home from "./pages/home";
 import { KetentuanList } from "./pages/DashboardAdmin/Ketentuan/list";
 import { TupasList } from "./pages/DashboardAdmin/DataTupas/list";
 import { PembayaranList } from "./pages/DashboardAdmin/DataPembayaran/list";
-import { LogPembayaranList } from "./pages/DashboardAdmin/LogPembayaran/list";
+import { LogPerubahanList } from "./pages/DashboardAdmin/LogPerubahan/list";
 import { RiwayatTupasList } from "./pages/DashboardAdmin/RiwayatTupas/list";
 import { UserProfile } from "./pages/DashboardAdmin/Profile/list";
 
@@ -88,7 +88,13 @@ const RoleProtected = ({ allowedRoles }: { allowedRoles: string[] }) => {
 
 export default function App() {
   return (
-    <ConfigProvider>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: "#00509d",
+        },
+      }}
+    >
       <AntdApp>
         <RefineKbarProvider>
           <Refine
@@ -119,9 +125,9 @@ export default function App() {
                 meta: { label: "Data Pembayaran", icon: <WalletOutlined />, roles: ["admin"] },
               },
               {
-                name: "log_pembayaran",
-                list: "/log-pembayaran",
-                meta: { label: "Log Pembayaran", icon: <BarsOutlined />, roles: ["admin"] },
+                name: "log_perubahan",
+                list: "/log-perubahan",
+                meta: { label: "Log Perubahan", icon: <BarsOutlined />, roles: ["admin"] },
               },
               {
                 name: "riwayat_pembayaran",
@@ -174,7 +180,7 @@ export default function App() {
                     <Route path="/ketentuan" element={<KetentuanList />} />
                     <Route path="/data-tupas" element={<TupasList />} />
                     <Route path="/data-pembayaran" element={<PembayaranList />} />
-                    <Route path="/log-pembayaran" element={<LogPembayaranList />} />
+                    <Route path="/log-perubahan" element={<LogPerubahanList />} />
                     <Route path="/riwayat-pembayaran" element={<RiwayatTupasList />} />
                     <Route path="/settings" element={<UserProfile />} />
                 </Route>

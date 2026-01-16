@@ -13,11 +13,11 @@ import "../../../styles/profile.css";
 
 const CURRENT_USER = {
     id: 1,
-    nama: "John Doe",
-    jabatan: "Senior Frontend Developer",
-    unit: "IT",
+    nama: "Admin KU",
+    jabatan: "Analisis SDM",
+    unit: "Kepegawaian",
     lokasi: "Jakarta, Indonesia",
-    role: "user"
+    role: "admin"
 };
 
 export const UserProfile: React.FC = () => {

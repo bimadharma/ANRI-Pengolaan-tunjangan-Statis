@@ -8,10 +8,10 @@ interface CreateLogProps {
     onClose: () => void;
 }
 
-export const CreateLogPembayaran: React.FC<CreateLogProps> = ({ open, onClose }) => {
+export const CreateLogPerubahan: React.FC<CreateLogProps> = ({ open, onClose }) => {
     const { formProps, formLoading } = useForm({
         action: "create",
-        resource: "log-pembayaran", 
+        resource: "log-perubahan", 
         redirect: false,
         onMutationSuccess: () => {
             onClose();

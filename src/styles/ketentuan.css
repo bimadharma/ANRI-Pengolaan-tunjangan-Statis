@@ -20,15 +20,15 @@
 }
 
 .tab-pill:hover {
-    border-color: #1677ff;
-    color: #1677ff;
+    border-color: #00509d;
+    color: #00509d;
 }
 
 .tab-pill.active {
-    background-color: #1677ff;
+    background-color: #00509d;
     color: white;
-    border-color: #1677ff;
-    box-shadow: 0 2px 5px rgba(22, 119, 255, 0.2);
+    border-color: #00509d;
+    box-shadow: 0 2px 5px rgba(0, 80, 157, 0.2);
 }
 
 .page-header {
@@ -82,12 +82,12 @@
 }
 
 .action-view {
-    background: #e6f4ff;
-    color: #1677ff;
+    background: #e8f2fc;
+    color: #00509d;
 }
 
 .action-view:hover {
-    background: #1677ff;
+    background: #00509d;
     color: #ffffff;
 }
 

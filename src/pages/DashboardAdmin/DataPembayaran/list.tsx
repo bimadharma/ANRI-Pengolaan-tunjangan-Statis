@@ -23,7 +23,7 @@ interface IPaymentDetail {
   tanggalSK: string;
   tmtBerlaku: string;
   besarTunjangan: number;
-  statusPembayaran: "Siap Bayar" | "Tertunda";
+  statusPembayaran: "Sudah dibayar" | "Belum dibayar";
 }
 
 
@@ -43,7 +43,7 @@ const DUMMY_DETAILS: IPaymentDetail[] = [
     tanggalSK: "02 Januari 2026",
     tmtBerlaku: "01 Januari 2026",
     besarTunjangan: 5500000, 
-    statusPembayaran: "Siap Bayar" 
+    statusPembayaran: "Sudah dibayar" 
   },
   { 
     id: "102", 
@@ -54,7 +54,7 @@ const DUMMY_DETAILS: IPaymentDetail[] = [
     tanggalSK: "02 Januari 2026",
     tmtBerlaku: "01 Januari 2026",
     besarTunjangan: 4500000, 
-    statusPembayaran: "Siap Bayar" 
+    statusPembayaran: "Sudah dibayar" 
   },
   { 
     id: "103", 
@@ -65,7 +65,7 @@ const DUMMY_DETAILS: IPaymentDetail[] = [
     tanggalSK: "03 Januari 2026",
     tmtBerlaku: "01 Januari 2026",
     besarTunjangan: 3500000, 
-    statusPembayaran: "Tertunda" 
+    statusPembayaran: "Belum dibayar" 
   },
   { 
     id: "104", 
@@ -76,7 +76,7 @@ const DUMMY_DETAILS: IPaymentDetail[] = [
     tanggalSK: "03 Januari 2026",
     tmtBerlaku: "01 Januari 2026",
     besarTunjangan: 3000000, 
-    statusPembayaran: "Siap Bayar" 
+    statusPembayaran: "Sudah dibayar" 
   },
   { 
     id: "105", 
@@ -87,7 +87,7 @@ const DUMMY_DETAILS: IPaymentDetail[] = [
     tanggalSK: "04 Januari 2026",
     tmtBerlaku: "01 Januari 2026",
     besarTunjangan: 2500000, 
-    statusPembayaran: "Siap Bayar" 
+    statusPembayaran: "Sudah dibayar" 
   },
   { 
     id: "106", 
@@ -98,7 +98,7 @@ const DUMMY_DETAILS: IPaymentDetail[] = [
     tanggalSK: "04 Januari 2026",
     tmtBerlaku: "01 Januari 2026",
     besarTunjangan: 3850000, 
-    statusPembayaran: "Tertunda" 
+    statusPembayaran: "Belum dibayar" 
   },
   { 
     id: "107", 
@@ -109,7 +109,7 @@ const DUMMY_DETAILS: IPaymentDetail[] = [
     tanggalSK: "05 Januari 2026",
     tmtBerlaku: "01 Januari 2026",
     besarTunjangan: 3750000, 
-    statusPembayaran: "Siap Bayar" 
+    statusPembayaran: "Sudah dibayar" 
   },
 ];
 
@@ -133,11 +133,14 @@ export const PembayaranList: React.FC = () => {
       <div className="page-header">
         <div className="page-title-wrapper">
         <h1 className="page-title">
-          <CalendarOutlined style={{ color: "#1677ff" }} /> Data Pembayaran
+          <div style={{ background: "#00509d", borderRadius: 8, padding: 8, display: "flex" }}>
+            <CalendarOutlined style={{ color: "white" }} />
+          </div>
+          Data Pembayaran
         </h1>
         <p className="pembayaran-subtitle">Kelola riwayat tunjangan pegawai</p>
         </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsPeriodModalOpen(true)} style={{ background: "#4338ca" }}>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsPeriodModalOpen(true)} style={{ background: "#00509d" }}>
           Buat Periode Baru
         </Button>
       </div>
@@ -202,7 +205,7 @@ export const PembayaranList: React.FC = () => {
             <WalletOutlined />
             Detail {selectedPeriod.month} {selectedPeriod.year}
           </h1>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsCreateModalOpen(true)} style={{ background: "#4338ca" }}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsCreateModalOpen(true)} style={{ background: "#00509d" }}>
             Tambah Data
           </Button>
         </div>
@@ -226,7 +229,7 @@ export const PembayaranList: React.FC = () => {
               title="Unit Kerja" 
               dataIndex="unitKerja" 
               width={180}
-              render={(value) => <Tag color="blue">{value}</Tag>}
+              render={(value) => <Tag color="#00509d">{value}</Tag>}
             />
             <Table.Column 
               title="Nomor SK Tunjangan PAS" 
@@ -256,7 +259,7 @@ export const PembayaranList: React.FC = () => {
               dataIndex="statusPembayaran" 
               width={140}
               render={(val) => (
-                <Tag color={val === "Siap Bayar" ? "green" : "orange"}>
+                <Tag color={val === "Sudah dibayar" ? "green" : "orange"}>
                   {val}
                 </Tag>
               )} 
@@ -305,7 +308,7 @@ export const PembayaranList: React.FC = () => {
               </Descriptions.Item>
               <Descriptions.Item label="NIP">{selectedRecord.nip}</Descriptions.Item>
               <Descriptions.Item label="Unit Kerja">
-                <Tag color="blue">{selectedRecord.unitKerja}</Tag>
+                <Tag color="#00509d">{selectedRecord.unitKerja}</Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Nomor SK Tunjangan PAS">
                 <span style={{ fontFamily: "monospace" }}>{selectedRecord.nomorSK}</span>
@@ -318,7 +321,7 @@ export const PembayaranList: React.FC = () => {
                 </span>
               </Descriptions.Item>
               <Descriptions.Item label="Status Pembayaran">
-                <Tag color={selectedRecord.statusPembayaran === "Siap Bayar" ? "green" : "orange"} style={{ fontSize: "14px", padding: "4px 12px" }}>
+                <Tag color={selectedRecord.statusPembayaran === "Sudah dibayar" ? "green" : "orange"} style={{ fontSize: "14px", padding: "4px 12px" }}>
                   {selectedRecord.statusPembayaran}
                 </Tag>
               </Descriptions.Item>

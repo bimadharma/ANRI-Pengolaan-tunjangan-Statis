@@ -51,7 +51,7 @@
 .stat-value {
     font-size: 28px;
     font-weight: 700;
-    color: #4338ca;
+    color: #00509d;
 }
 
 .stat-value.green {
@@ -80,7 +80,7 @@
 
 
 .add-data-card {
-    background: linear-gradient(135deg, #3b82f6 0%, #4338ca 100%);
+    background: #00509d;
     border-radius: 16px;
     padding: 20px;
     display: flex;
@@ -144,13 +144,13 @@
     background: transparent;
 }
 
-.btn-view { background-color: #e0e7ff; color: #4338ca; }
+.btn-view { background-color: #e0e7ff; color: #00509d; }
 .btn-edit { background-color: #fef3c7; color: #d97706; }
 .btn-delete { background-color: #fee2e2; color: #dc2626; }
 
 
 .modal-header-custom {
-    background: linear-gradient(135deg, #3b82f6 0%, #4338ca 100%);
+    background: #00509d;
     padding: 16px 24px;
     border-radius: 12px 12px 0 0;
     display: flex;
